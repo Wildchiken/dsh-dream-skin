@@ -2,6 +2,46 @@
 
 记录 `dsh-dream-skin` 的可观变更。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。从 `8.28.0` 起，版本号启用**日期式规则**：`M.D.X`（月.日.当日第几个版本），例如 8 月 28 日首个版本 `8.28.0`，当日再发 `8.28.1`，次日则为 `8.29.0`，以取代旧的 `0.4.x` 语义化版本（日期按维护者本地时区 UTC+8 计）。
 
+## [11.1.1] - 2026-11-01
+
+> **用户实测报的 bug：选了「固定图片」之后拖「壁纸模糊度」滑杆，画面完全不动。** 查清了：不是 11.1.0 的回归，是 10.21.1 起低功耗模式按设计摘掉壁纸模糊，**但滑杆自己没说**——它照写存储值、渲染层拒绝应用，正是本仓库反复声明的那条不变式（issue #55「有反馈、无效果」）在这条路上的漏洞。本版补上那句说明，8 种语言，并配 2 条用例（含变异腿）。质量审计：**229 项质量门全过**（217 调色 + 12 工艺），全套 `npm test` 716→**718**。
+
+### 一、这台机器上到底发生了什么（证据链，不是推断）
+
+1. 渲染层：`lib/client.js:8877` 是 `const blur = readPerformanceMode() ? 0 : readWallpaperBlur();`，随后 `filter = blur > 0 ? blur(Npx) : "none"`。**低功耗生效时，模糊恒为 0。** 这一行 10.31.0 里就在（当时 7950 行），所以与 11.1.0 的设置页重构无关。
+2. 生效条件：`readPerformanceMode()` 三态——存了 `1`/`0` 按用户钉的，**没存就跟随 `prefers-reduced-transparency`**。报告这台机器的状态文件里**没有** `dsh-dream-skin:performance` 键 ⇒ 自动态。
+3. 系统侧：注册表 `HKCU\...\Themes\Personalize\EnableTransparency = 0`（Windows 的「透明度效果」是关的）。
+4. 引擎侧实测（不是查文档）：同族 Chromium 里 `matchMedia('(prefers-reduced-transparency: reduce)').matches === **true**`（顺带 `prefers-reduced-motion: reduce` 也是 true，`forced-colors` 为 false）。
+5. 三条对上 ⇒ 这台机器一直在低功耗模式里，壁纸模糊被强制 0，而滑杆拖起来有反馈、数值在变、也写进了库——用户看到的就是"完全没反应"。
+
+### 二、改了什么
+
+- **给「壁纸模糊度」这一行加说明**：`note: performance ? t("background.blurSuppressed") : null`，走的是 11.1.0 刚由 PR #132 引入的 `Slider#note` 通道，与弹窗滑杆那句「已到可读性下限」同一个形状。zh 文案「低功耗模式下不生效」，8 种语言各一条新键 `background.blurSuppressed`。
+- **值仍然可拖**（不卸载、不禁用）：低功耗一关，用户原来调的半径立刻生效。这里和 W7a 那条"门关着就把滑杆卸载"有意不同——低功耗是一个会来回的模式，不是这个控件不存在。
+- **新用例 2 条**（`tests/client.settings_ui.test.cjs` 70→72）：一条覆盖**两种触发形态**（用户显式钉住 `performance=1` / 自动跟随系统 reduce），并断言邻居「壁纸能见度」在低功耗下**不该**喊（它照样生效）；一条变异腿把 `note` 摘成 `null` ⇒ 点名翻红。
+
+### 三、诚实边界
+
+- **同类还有一处没修**：`fit === "blur"`（填充方式「模糊填充」）的渗色层同样被低功耗摘掉（`lib/client.js:8904`），所以那一档在低功耗下与「完整显示」看不出区别。chip 组没有 `note` 通道，要动 `FillBlock`，本版不扩范围——已记为本地待办。
+- **说明是文字，不是开关**：用户要真的看到模糊，仍需在「玻璃效果」区把低功耗关掉（或把系统「透明度效果」打开）。本次没改自动策略的判定，因为 #110 的 GPU 代价是真的。
+- 新用例仍是**渲染级**（fixture 无 React 协调器），它钉的是"这一行有没有那句话"，不证明像素。
+- `lib/client.js` 580,314 → **581,474 B**，天花板 576 KiB（589,824 B）不变，余量 9,510 → **8,350 B**。
+
+### 四、这一轮本机环境变了，红在哪里必须写清
+
+发这一版之前，我把桌面壳（DeepSeek Harness 0.2.1-rc.5）启动了一次做实测。它把**全局** `@deepseek-ai/dsh` 从 `0.2.0-rc.1` 换成了 **`0.2.1-rc.3`**（`AppData/Roaming/npm/node_modules/@deepseek-ai/dsh/package.json` 的 mtime `2026-11-01 21:02:35`）。于是本机 `npm test` 有 4 条按设计翻红，全部是"对着冻结的宿主快照比对现装宿主"的门：
+
+- `host.slots` `#90`：`shell.bottom: registrant count moved — re-run npm run host:census`；
+- `hashes` `#94`：现装宿主丢了登记表认识的 11 个包（`dsh-client-store` / `-ui-primitives` / `-ui-slots` / `dsh-hook-protocol` / `dsh-hooks-*` / `dsh-webhook*` 等）；
+- `host.preflight` 两条：宿主自己的 `evaluatePluginCompatibility()` 与冻结判定表在 5 个版本上不一致，门直接把那句"before trusting any table printed here"打了出来。
+
+另有 `Roadmap M` 的三条浏览器门从"具名跳过"变成真跑并超时（这台机器的可检测浏览器状态也变了），以及 `client.smoke` 的 folder-rotation 一条在并发全套里偶发、单跑 187/187 通过。
+
+**归属是实测过的，不是推断**：我在 `HEAD`（不含本版改动）的干净 worktree 上跑了同一批文件，同样翻红 ⇒ 这 4 条与 11.1.1 的代码无关。本版自己的门全绿：`docs.numbers` / `docs.reference_counts` / `package.runtime_size` / `compositor_budget` / `client.settings_ui`(72) / `repo.hygiene` 合计 104/104；CI（ubuntu，无宿主安装，那些门按设计 skip）另算。
+
+**欠账**：宿主的冻结登记表与兼容判定表要照 `npm run host:census` 与 `tests/fixtures/host_compat_verdicts.json` 的生成说明对 `0.2.1-rc.3` 重取一遍——那是一轮独立的活，不塞进这个 bugfix 版里。
+
+
 ## [11.1.0] - 2026-11-01
 
 > **采纳 @JularDepick 的 PR #132：设置页从一条扁平长栏重做成四个分区（主题与配色 / 玻璃效果 / 背景与壁纸 / 导入与导出），8 个滑杆收敛到一套 `Range`，并第一次把整节渲染进测试（70 条用例，其中 25 条变异腿）。** 质量审计：**229 项质量门全过**（217 调色 + 12 工艺），全套 `npm test` 646→**716**（714 pass / 0 fail / 2 条按预期跳过：Windows chmod；本机宿主 `0.2.0-rc.1` 早于 `data-composer-overlay` 锚点）。

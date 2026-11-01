@@ -2562,4 +2562,52 @@ test('mutation: invoking a hook-owning helper inline reddens the hook-ownership 
 	clean.setState(ADV, { kind: 'url', url: 'https://example.com/w.jpg' });
 	assert.equal(rowOwnedHookCells(broken).length, rowOwnedHookCells(clean).length + 1,
 		'mutation expected: the inlined horizontal slider adds its cell to the row, so the list length tracks what the form mounts');
+});// ---------------------------------------------------------------------------
+// 12. the wallpaper blur slider when low power refuses to apply it
+// ---------------------------------------------------------------------------
+
+/**
+ * Low-power mode drops the wallpaper layer's `filter: blur()` entirely (issue #110), so while it is
+ * in effect this slider writes a value the renderer will not apply — the 「有反馈、无效果」 shape
+ * issue #55 was filed about, and the reason the row has to say so out loud. `controls()` hands back
+ * the INPUT and the note is a sibling of the track inside the tagged row (the helper `sliderRow`
+ * above walks up to it), so these cases read the ROW'S TEXT rather than a prop the input never had.
+ */
+const GLASS_PERFORMANCE_ON = { ...GATES_OPEN_SEED, 'dsh-dream-skin:performance': '1' };
+const glassRowText = (page, labelKey) => {
+	const control = controls(page.renderRow('dream-skin-glass')).find((c) => c.type === 'range' && c.label === labelKey);
+	assert.ok(control, 'the glass row must carry a ' + labelKey + ' slider');
+	return textOf([sliderRow(control.node)]);
+};
+
+test('the wallpaper blur row states when low power will not apply it, in both of its forms', () => {
+	// Control: a panel with nothing suppressing blur carries no warning.
+	const plain = buildSettingsPage({ seed: GATES_OPEN_SEED });
+	assert.equal(glassRowText(plain, 'background.blur').includes('background.blurSuppressed'), false,
+		'no low power: the row stays clean');
+
+	// ① Pinned on by the user through the switch.
+	const pinned = buildSettingsPage({ seed: GLASS_PERFORMANCE_ON });
+	assert.equal(glassRowText(pinned, 'background.blur').includes('background.blurSuppressed'), true,
+		'pinned low power: the row says the value will not apply');
+
+	// ② Automatic, following the OS — the shape the reporting machine was actually in (Windows
+	// transparency effects off ⇒ prefers-reduced-transparency: reduce, measured on that machine).
+	const auto = buildSettingsPage({ seed: GATES_OPEN_SEED, matchMedia: (q) => q.includes('reduced-transparency') });
+	assert.equal(glassRowText(auto, 'background.blur').includes('background.blurSuppressed'), true,
+		'automatic low power counts too: the renderer cannot tell the two apart, so neither may the panel');
+
+	// Only the blur is suppressed — the neighbouring wallpaper slider still does what it says.
+	assert.equal(glassRowText(pinned, 'background.opacity').includes('background.blurSuppressed'), false,
+		'壁纸能见度 still applies under low power, so it must not shout');
+});
+
+test('mutation: unhooking the blur suppression note reddens the low-power case', () => {
+	const anchor = 'note: performance ? t("background.blurSuppressed") : null,';
+	assert.equal(countOf(CODE, anchor), 1, 'exactly one blur-suppression note in the bundle');
+	const mutated = CODE.replace(anchor, 'note: null,');
+	assert.notEqual(mutated, CODE, 'the mutation has to change the bundle');
+	const page = buildSettingsPage({ code: mutated, seed: GLASS_PERFORMANCE_ON });
+	assert.equal(glassRowText(page, 'background.blur').includes('background.blurSuppressed'), false,
+		'mutation expected: the slider is back to dragging with no answer, which is the reported bug');
 });
