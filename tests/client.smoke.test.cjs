@@ -1287,7 +1287,10 @@ test('all locale dictionaries are complete and keep placeholders', () => {
 		{ prefix: 'material.', ids: ['frosted', 'liquid'] },
 		{ prefix: 'material.', ids: ['frosted', 'liquid'], suffix: '.desc' },
 		// FOLDER_ERROR_KEYS maps each host error code to one of these (the code picks the key at run time).
-		{ prefix: 'bg2.rotationFolder', ids: ['Unset', 'NotAbsolute', 'Missing', 'NotDirectory', 'Unreadable', 'HostDown'] }
+		{ prefix: 'bg2.rotationFolder', ids: ['Unset', 'NotAbsolute', 'Missing', 'NotDirectory', 'Unreadable', 'HostDown'] },
+		// m06450: openFolderPicker reports a host with no chooser by STORING this key — the row renders
+		// every hint through t(formHint) — so it is reached at run time and never as a literal t("…").
+		{ prefix: 'bg2.dir', ids: ['Unsupported'] }
 	];
 	const reachable = (key) => {
 		if (literalUses.has(key)) return true;
@@ -8250,6 +8253,22 @@ test('folder rotation: switching source, long names, clearing the wallpaper and 
 	for (let i = 0; i < 5; i++) { const b = r.url(); await r.adv.rotateNow(); await until(() => r.url() !== b, 'next image'); seen.add(folderName(r.url())); }
 	assert.ok(!seen.has(long), 'the over-long name never becomes a link');
 	assert.deepEqual([...seen].sort(), ['a.png', 'b.png'], 'the rest rotate');
+	// m02127 (user): deleting the folder deletes the SETTING, not the background form. The form is
+	// DERIVED from `rotation.on` (wallpaperFormOf), so switching that off here dropped the row back
+	// to 固定图片 · 图片链接 the moment the last folder went — the one screen the user needs in
+	// order to point the slideshow at the next folder.
+	const showing = r.url();
+	r.adv.clearRotationFolder();
+	assert.equal(r.h.localStorage.getItem(FOLDER_KEY), null, 'the folder setting goes away');
+	assert.equal(r.cfg().on, 1, 'the form the user picked survives the folder being deleted');
+	const alertsBefore = r.alerts.length;
+	await r.adv.rotateNow();
+	assert.equal(r.url(), showing, '切换到下一张 has nothing to advance to, so the picture stays');
+	assert.deepEqual(r.alerts.slice(alertsBefore), ['bg2.rotationFolderUnset'], 'and it says why instead of doing nothing');
+	assert.deepEqual(await r.adv.setRotation(true), { ok: false, reason: 'bg2.rotationFolderUnset' }, 're-arming is refused for the same reason');
+	assert.equal(r.cfg().on, 1, 'a refusal is not a quiet off: the form stays on 图片轮播');
+	// Restore the precondition the rest of the case needs: the folder is saved again.
+	r.h.localStorage.setItem(FOLDER_KEY, host.photos);
 	// Clearing the wallpaper: schedule off, phase reset, folder and list kept (T3).
 	r.adv.clearAll();
 	assert.equal(r.cfg().on, 0);

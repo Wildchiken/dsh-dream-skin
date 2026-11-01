@@ -373,15 +373,21 @@ test('the refresh box belongs to 固定图片 and the slideshow box to 图片轮
 	assert.ok(textOf(row).includes('bg2.rotationList'), 'and the list box itself stays: that is where the second link comes from');
 	assert.ok(chipByText(row, 'bg2.rotationSequential'), 'nor do the order chips disappear while the pool is short');
 
-	// The folder source swaps the link box for the path box the host checks, and reports its count.
+	// The folder source swaps the link box for the PICKED path (W12: a dialog, never a typed
+	// box) and reports the host's count.
 	pool.setState(ADV, { rotation: Object.assign({}, ROTATION, { on: true, source: 'folder', folder: '~/Pictures/Walls', folderCount: 7 }) });
 	row = pool.renderRow(ADV);
 	assert.equal(findOne(row, (node) => node.tag === 'textarea'), null, 'folder source → no link list');
-	const folderBox = findOne(row, (node) => node.tag === 'input' && node.props.type === 'text');
-	assert.ok(folderBox, 'folder source → the path box is there');
-	assert.equal(folderBox.props.defaultValue, '~/Pictures/Walls', 'the box prints the saved path as its default, keyed by it so a later answer replaces it');
-	assert.ok(folderBox.props.placeholder, 'and names a shape to type');
-	assert.ok(textOf(row).includes('bg2.rotationFolderSave'), 'the one action is 保存文件夹');
+	assert.equal(findOne(row, (node) => node.tag === 'input' && (node.props.type === 'text' || node.props.type === undefined)), null,
+		'folder source → no path box either: the folder is picked, not typed');
+	const pathLine = findOne(row, (node) => node.props.title === '~/Pictures/Walls');
+	assert.ok(pathLine, 'folder source → the picked path is listed');
+	assert.equal(textOf([pathLine]), '~/Pictures/Walls', 'the list prints the saved path as text, never as an editable value');
+	assert.ok(chipByText(row, 'bg2.folderAdd'), 'and the one entry that adds a folder is the picker button');
+	assert.ok(!textOf(row).includes('bg2.pathEmpty'), 'the empty line is gone once a folder is in the list');
+	assert.ok(chipByText(row, 'bg2.pathRemove'), 'whose row can only be deleted');
+	assert.equal(findAll(row, (node) => node.props && node.props.role === 'group').length, 0,
+		'and no panel is mounted beside it: the folder dialog belongs to the operating system (m06450)');
 	assert.ok(textOf(row).includes('bg2.rotationFolderCount'), 'the count line comes from the store, not from a default');
 	assert.deepEqual(pressedChips(row).filter(([key]) => key.startsWith('bg2.rotation')),
 		[['bg2.rotationSourceLinks', false], ['bg2.rotationSourceFolder', true],
@@ -2610,4 +2616,194 @@ test('mutation: unhooking the blur suppression note reddens the low-power case',
 	const page = buildSettingsPage({ code: mutated, seed: GLASS_PERFORMANCE_ON });
 	assert.equal(glassRowText(page, 'background.blur').includes('background.blurSuppressed'), false,
 		'mutation expected: the slider is back to dragging with no answer, which is the reported bug');
+});
+// ---------------------------------------------------------------------------
+// The folder comes from the OPERATING SYSTEM's chooser (m06450)
+// ---------------------------------------------------------------------------
+
+test('the folder branch borrows DSH\'s own chooser and raises none of its own', () => {
+	// The plugin used to ask its host half for a Windows/WSL folder dialog. That window opened
+	// BEHIND the browser (measured 2026-10-29), so the button read as dead while the request sat
+	// open for its ten-minute budget. The row now calls the service the host itself uses for
+	// 新增工作空间 — one owner for the dialog, and no second one of ours to fall back to.
+	assert.equal(CODE.indexOf('async function pickFolderFromHost('), -1, 'the plugin raises no folder dialog of its own');
+	assert.equal(CODE.indexOf('"folder-pick"'), -1, 'and asks its host half for none either');
+	const start = CODE.indexOf('pickFolder: async () => {');
+	assert.ok(start > -1, 'the row still owns the pickFolder action');
+	const body = CODE.slice(start, start + 800);
+	assert.ok(body.indexOf('uiWorkspaceService()') > -1, 'the dialog comes from the workspace service');
+	assert.ok(body.indexOf('service.pickDirectory()') > -1, 'through pickDirectory(), the same call the host makes');
+	assert.equal(body.indexOf('fetch('), -1, 'no plugin-side request stands in for it');
+});
+
+test('the folder branch asks the OS chooser once and hands its answer to the row', async () => {
+	const page = buildSettingsPage({});
+	page.setState(ADV, {
+		kind: 'url',
+		url: null,
+		rotation: { on: true, mode: 'sequential', minutes: 30, urls: [], source: 'folder', folder: '', folderCount: null, folderError: null }
+	});
+	const asked = [];
+	const bag = page.actionsOf(ADV);
+	bag.pickFolder = () => { asked.push('opened'); return Promise.resolve({ path: '/home/me/Pics' }); };
+	bag.setRotationFolder = (path) => { asked.push(path); return Promise.resolve({ files: ['a.jpg', 'b.jpg'] }); };
+	page.clearHookCalls();
+	chipByText(page.renderRow(ADV), 'bg2.folderAdd').props.onClick();
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.deepEqual(asked, ['opened', '/home/me/Pics'],
+		'the click opens the system dialog and hands the picked folder straight to the row action — one dialog, one answer');
+});
+
+/** The folder branch's stored state — the starting point of every folder case below. */
+const folderBranch = () => ({
+	kind: 'url',
+	url: null,
+	rotation: { on: true, mode: 'sequential', minutes: 30, urls: [], source: 'folder', folder: '', folderCount: null, folderError: null }
+});
+
+/** The row's own last hook cell: where the typed path keeps its draft (declared last on purpose). */
+const folderDraftKey = (page) => rowOwnedHookCells(page).pop();
+
+test('a host with no chooser says so AND opens the typed path in its place', async () => {
+	const page = buildSettingsPage({});
+	page.setState(ADV, folderBranch());
+	page.actionsOf(ADV).pickFolder = () => Promise.resolve({ unavailable: true });
+	page.clearHookCalls();
+	chipByText(page.renderRow(ADV), 'bg2.folderAdd').props.onClick();
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.deepEqual(page.hookCalls.map((call) => call.value), [null, 'bg2.dirUnsupported', ''],
+		'the cleared line, the reason, then an EMPTY draft: the same single answer, spoken instead of clicked');
+
+	// A host whose service throws is the same answer as one that reports nothing.
+	const silent = buildSettingsPage({});
+	silent.setState(ADV, folderBranch());
+	silent.actionsOf(ADV).pickFolder = () => Promise.reject(new Error('no chooser'));
+	silent.clearHookCalls();
+	chipByText(silent.renderRow(ADV), 'bg2.folderAdd').props.onClick();
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.deepEqual(silent.hookCalls.map((call) => call.value), [null, 'bg2.dirUnsupported', ''],
+		'a throwing service opens the same typed path, never a swallowed click');
+
+	// The box is a cell of the row like every other one: pinned, it renders the field and its button.
+	const draftKey = folderDraftKey(buildSettingsPage({}));
+	assert.equal(draftKey.indexOf(ADV_HOOK_OWNER + '#'), 0, 'the draft is the row\'s own cell, got ' + draftKey);
+	const typed = buildSettingsPage({ hookInitials: { [draftKey]: '/home/me/Pics' } });
+	typed.setState(ADV, folderBranch());
+	const typedRow = typed.renderRow(ADV);
+	const field = findOne(typedRow, (node) => node.tag === 'input' && node.props.type === 'text' && node.props.value === '/home/me/Pics');
+	assert.ok(field, 'the typed path is a real text box holding the draft');
+	assert.equal(field.props.placeholder, 'bg2.rotationFolderPlaceholder', 'with the example path as its placeholder');
+	assert.ok(chipByText(typedRow, 'bg2.rotationFolderConfirm'), 'and the button that commits it');
+});
+
+test('the typed path is checked by the HOST: a refused folder keeps the box, an accepted one closes it', async () => {
+	const draftKey = folderDraftKey(buildSettingsPage({}));
+	const page = buildSettingsPage({ hookInitials: { [draftKey]: '/nope' } });
+	page.setState(ADV, folderBranch());
+	const asked = [];
+	page.actionsOf(ADV).setRotationFolder = (path) => { asked.push(path); return Promise.resolve({ error: 'folder-missing' }); };
+	page.clearHookCalls();
+	chipByText(page.renderRow(ADV), 'bg2.rotationFolderConfirm').props.onClick();
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.deepEqual(asked, ['/nope'], 'the confirm hands the typed path to the very action the dialog feeds');
+	assert.deepEqual(page.hookCalls.map((call) => call.value), ['bg2.rotationFolderMissing'],
+		'the reason the host gave lands on the row; the draft is NOT cleared, so the path can be corrected');
+
+	// Accepted: the entry above lists the folder now, so the box goes away — and the rotation
+	// arms exactly as it would after the dialog picked the same folder.
+	const armed = [];
+	page.actionsOf(ADV).setRotationFolder = (path) => { asked.push(path); return Promise.resolve({ files: ['a.jpg', 'b.jpg'] }); };
+	page.actionsOf(ADV).setRotation = (on) => { armed.push(on); return Promise.resolve({ ok: true }); };
+	page.clearHookCalls();
+	chipByText(page.renderRow(ADV), 'bg2.rotationFolderConfirm').props.onClick();
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.deepEqual(page.hookCalls.map((call) => call.value), [null, null],
+		'an accepted folder drops the box and the reason it was opened for');
+	assert.deepEqual(armed, [true], 'and the pool the user just typed is the one the rotation is armed on');
+
+	// An empty box writes nothing: it asks for the path the host would have refused anyway.
+	const empty = buildSettingsPage({ hookInitials: { [draftKey]: '   ' } });
+	empty.setState(ADV, folderBranch());
+	const written = [];
+	empty.actionsOf(ADV).setRotationFolder = (path) => { written.push(path); return Promise.resolve({ files: [] }); };
+	empty.clearHookCalls();
+	chipByText(empty.renderRow(ADV), 'bg2.rotationFolderConfirm').props.onClick();
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.deepEqual(written, [], 'an empty box asks for a path instead of writing one');
+	assert.deepEqual(empty.hookCalls.map((call) => call.value), ['bg2.rotationFolderUnset'], 'and says which answer is missing');
+
+	// Enter is the same commit as the button, and it does not also submit a form.
+	const enter = buildSettingsPage({ hookInitials: { [draftKey]: '/home/me/Pics' } });
+	enter.setState(ADV, folderBranch());
+	const typedIn = [];
+	enter.actionsOf(ADV).setRotationFolder = (path) => { typedIn.push(path); return Promise.resolve({ files: ['a.jpg', 'b.jpg'] }); };
+	enter.clearHookCalls();
+	const field = findOne(enter.renderRow(ADV), (node) => node.tag === 'input' && node.props.type === 'text');
+	let prevented = 0;
+	field.props.onKeyDown({ key: 'Enter', preventDefault: () => { prevented += 1; } });
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.deepEqual(typedIn, ['/home/me/Pics'], 'Enter commits the box exactly like the button does');
+	assert.equal(prevented, 1, 'and the form does not also submit');
+});
+
+test('mutation: a refusal that says nothing reddens the no-chooser case', async () => {
+	const anchor = 'setFormHint("bg2.dirUnsupported");';
+	assert.equal(countOf(CODE, anchor), 1, 'one refusal helper, and both ways in (no function, refused answer) call it');
+	const mutated = CODE.split(anchor).join('setFormHint(null);');
+	assert.notEqual(mutated, CODE, 'mutation ㉖ has to change the bundle');
+	const page = buildSettingsPage({ code: mutated });
+	page.setState(ADV, folderBranch());
+	page.actionsOf(ADV).pickFolder = () => Promise.resolve({ unavailable: true });
+	page.clearHookCalls();
+	chipByText(page.renderRow(ADV), 'bg2.folderAdd').props.onClick();
+	await new Promise((resolve) => setImmediate(resolve));
+	assert.deepEqual(page.hookCalls.map((call) => call.value), [null, null, ''],
+		'mutation expected: the row clears the line and then says nothing, while still opening a box it cannot explain');
+});
+
+
+// ---------------------------------------------------------------------------
+// A refusal that arrives asynchronously has to land on the row (audit P1)
+// ---------------------------------------------------------------------------
+
+test('an ASYNCHRONOUS refusal lands on the row, not only in a dismissed alert', async () => {
+	const page = buildSettingsPage({});
+	page.setState(ADV, {
+		kind: 'url',
+		url: 'https://example.com/w.jpg',
+		rotation: { on: false, mode: 'sequential', minutes: 30, urls: [], source: 'folder', folder: '/home/me/Pics', folderCount: 4, folderError: null }
+	});
+	const bag = page.actionsOf(ADV);
+	const asked = [];
+	// The folder pool is read asynchronously, so the verdict arrives after the click.
+	bag.setRotation = (on) => { asked.push(on); return Promise.resolve({ ok: false, reason: 'bg2.rotationFolderHostDown' }); };
+	page.clearHookCalls();
+	pickFormWith(page, 'rotation');
+	assert.deepEqual(page.hookCalls.map((call) => call.value), [null, 'rotation'],
+		'the cleared line and the picked form land at once — the host has not answered yet');
+	assert.deepEqual(asked, [true], 'the click did ask for the rotation');
+	await Promise.resolve();
+	await Promise.resolve();
+	assert.deepEqual(page.hookCalls.map((call) => call.value), [null, 'rotation', 'bg2.rotationFolderHostDown'],
+		'and the refusal that came back is printed where the other warnings live');
+});
+
+test('mutation: swallowing the late refusal reddens the asynchronous case', async () => {
+	const tick = () => new Promise((resolve) => setImmediate(resolve));
+	const reportAnchor = 'if (answer && answer.ok === false) setFormHint(answer.reason || null);';
+	assert.equal(countOf(CODE, reportAnchor), 1, 'the late-refusal reporter must occur exactly once');
+	const silent = CODE.replace(reportAnchor, 'if (answer && answer.ok === false) setFormHint(null);');
+	assert.notEqual(silent, CODE, 'mutation ㉘ has to change the bundle');
+	const page = buildSettingsPage({ code: silent });
+	page.setState(ADV, {
+		kind: 'url',
+		url: 'https://example.com/w.jpg',
+		rotation: { on: false, mode: 'sequential', minutes: 30, urls: [], source: 'folder', folder: '/home/me/Pics', folderCount: 4, folderError: null }
+	});
+	page.actionsOf(ADV).setRotation = () => Promise.resolve({ ok: false, reason: 'bg2.rotationFolderHostDown' });
+	page.clearHookCalls();
+	pickFormWith(page, 'rotation');
+	await tick();
+	assert.deepEqual(page.hookCalls.map((call) => call.value), [null, 'rotation', null],
+		'mutation expected: the refused click leaves only the alert, and the row pretends the rotation armed');
 });

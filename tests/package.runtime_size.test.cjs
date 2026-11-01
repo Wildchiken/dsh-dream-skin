@@ -53,7 +53,12 @@ const BUDGETS = [
 	// compact tier's restacking rows) took the bundle from 526 KB to 567 KB. The step is the same
 	// 32 KiB one as the three raises above; the file stays unminified because it is the audit
 	// surface. 567 KB used, the rest is headroom.
-	{ rel: 'lib/client.js', ceiling: 576 * 1024, reason: 'browser half; one combo-served file by host design' },
+	// 576 -> 592 KiB on purpose: the folder picker (W12). The design asks for a dialog, not a typed
+	// path, and the host's native chooser does not exist on a headless box — so the panel that walks
+	// the browse capability is part of the browser half now, together with the path list and, in each
+	// of the 8 dictionaries, 11 new keys and one rewritten statement. Half a step, chosen because
+	// this change is smaller than the one above it. 580 KB used, the rest is headroom.
+	{ rel: 'lib/client.js', ceiling: 592 * 1024, reason: 'browser half; one combo-served file by host design' },
 	{ rel: 'lib/index.js', ceiling: 40 * 1024, reason: 'host half' }
 ];
 

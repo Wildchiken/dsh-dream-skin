@@ -699,29 +699,40 @@ test('the folder controls show for the folder source only, explain each failure 
 		setRotationFolder: (v) => calls.push(['setRotationFolder', v]),
 		setRotationMode: (v) => calls.push(['setRotationMode', v]),
 		setRotationMinutes: (v) => calls.push(['setRotationMinutes', v]),
-		rotateNow: () => calls.push(['rotateNow'])
+		rotateNow: () => calls.push(['rotateNow']),
+		// W12: the folder comes from the host's dialog, and the only operation on a saved path is
+		// deleting it. Both are actions now — there is no draft to save any more.
+		pickFolder: () => { calls.push(['pickFolder']); return Promise.resolve({ unavailable: true }); },
+		clearRotationFolder: () => calls.push(['clearRotationFolder'])
 	};
 	const rot = (over) => ({ on: true, mode: 'sequential', minutes: 30, urls: [], source: 'folder', folder: '/Users/me/Pictures', folderCount: 12, folderError: null, ...over });
 	const state = (over) => ({ kind: 'url', url: null, gradient: null, history: [], rotation: rot(over) });
 	const find = (seen, pred) => seen.find(pred);
 	const buttonWith = (seen, text) => find(seen, (n) => n.type === 'button' && (n.props.children === text || (Array.isArray(n.props.children) && n.props.children[0] === text)));
 
-	// Sample 1: the folder source shows the path box, its hint, the count, and the shared controls.
+	// Sample 1: the folder source prints the picked folder as a list row, its count, and the shared
+	// controls. Nothing here is typed: the path arrives from the host's dialog.
 	let seen = render(h, nodes, 'dream-skin-wallpaper-advanced', state({}), { ...props, t: (k, p) => (p ? `${k}:${p.n}` : k) });
-	for (const key of ['bg2.rotationSourceLinks', 'bg2.rotationSourceFolder', 'bg2.rotationFolderHint', 'bg2.rotationFolderSave', 'bg2.rotationFolderCount:12', 'bg2.rotationNow', 'bg2.rotationMinutes']) {
+	for (const key of ['bg2.rotationSourceLinks', 'bg2.rotationSourceFolder', 'bg2.rotationFolderHint', 'bg2.pathList', 'bg2.pathFolder', 'bg2.pathRemove', 'bg2.folderAdd', 'bg2.rotationFolderCount:12', 'bg2.rotationNow', 'bg2.rotationMinutes']) {
 		assert.ok(hasText(seen, key), `${key} is on the page`);
 	}
+	assert.equal(hasText(seen, 'bg2.pathEmpty'), false, 'a saved folder is not the empty list');
 	assert.equal(hasText(seen, 'bg2.rotationList'), false, 'the link list is not shown for the folder source');
 	assert.equal(find(seen, (n) => n.type === 'textarea'), undefined, 'and neither is its text box');
-	const box = find(seen, (n) => n.type === 'input' && n.props.type === 'text');
-	assert.equal(box.props.defaultValue, '/Users/me/Pictures', 'the path box holds the saved folder, keyed by it');
+	// No path box at all, in either shape: a hand-typed path is exactly what W12 removed.
+	assert.equal(find(seen, (n) => n.type === 'input' && (n.props.type === 'text' || n.props.type === undefined)), undefined, 'the dialog owns the choice, so there is nothing to type');
+	const pathLine = find(seen, (n) => n.props && n.props.title === '/Users/me/Pictures');
+	assert.ok(pathLine, 'the saved folder is printed');
+	assert.equal(pathLine.props.children, '/Users/me/Pictures', 'and the row carries the whole path');
+	assert.equal(find(seen, (n) => n.props && n.props.role === 'group'), undefined, 'no hand-built panel is mounted beside the button: the dialog belongs to the operating system (m06450)');
 	const pressed = find(seen, (n) => n.type === 'button' && n.props['aria-pressed'] === true && n.props.children && n.props.children[0] === 'bg2.rotationSourceFolder');
 	assert.ok(pressed, 'the stored source is the pressed one');
-	buttonWith(seen, 'bg2.rotationFolderSave').props.onClick();
+	buttonWith(seen, 'bg2.folderAdd').props.onClick();
+	buttonWith(seen, 'bg2.pathRemove').props.onClick();
 	buttonWith(seen, 'bg2.rotationSourceLinks').props.onClick();
 	buttonWith(seen, 'bg2.rotationNow').props.onClick();
-	assert.deepEqual(calls.map((c) => c[0]), ['setRotationFolder', 'setRotationSource', 'rotateNow'], 'one action per control');
-	assert.deepEqual(calls[1], ['setRotationSource', 'links'], 'the source button passes its source');
+	assert.deepEqual(calls.map((c) => c[0]), ['pickFolder', 'clearRotationFolder', 'setRotationSource', 'rotateNow'], 'one action per control');
+	assert.deepEqual(calls[2], ['setRotationSource', 'links'], 'the source button passes its source');
 
 	// Each failure code is explained with its own string, and an unknown one falls back to the host-down text.
 	const codes = { 'folder-unset': 'bg2.rotationFolderUnset', 'folder-not-absolute': 'bg2.rotationFolderNotAbsolute', 'folder-missing': 'bg2.rotationFolderMissing', 'folder-not-directory': 'bg2.rotationFolderNotDirectory', 'folder-unreadable': 'bg2.rotationFolderUnreadable', 'host-unreachable': 'bg2.rotationFolderHostDown', 'something-new': 'bg2.rotationFolderHostDown' };
@@ -735,7 +746,8 @@ test('the folder controls show for the folder source only, explain each failure 
 	assert.equal(find(seen, (n) => n.type === 'input' && n.props.type === 'text'), undefined, 'links source: no path box');
 	seen = render(h, nodes, 'dream-skin-wallpaper-advanced', state({ folder: '', folderCount: null }), props);
 	assert.ok(hasText(seen, 'bg2.rotationNow'), '轮播设置 keeps 切换到下一张 even before a folder is saved — settings-theme-ui.md line 61 puts it in the group, not behind a count');
-	assert.ok(hasText(seen, 'bg2.rotationFolderSave'), 'and the box that fixes it survives the empty state — the branch is not a dead end');
+	assert.ok(hasText(seen, 'bg2.pathEmpty'), 'no folder yet reads as an empty list, not as a blank panel');
+	assert.ok(hasText(seen, 'bg2.folderAdd'), 'and the control that fixes it survives the empty state — the branch is not a dead end');
 	seen = render(h, nodes, 'dream-skin-wallpaper-advanced', { ...state({}), kind: 'gradient' }, props);
 	assert.equal(hasText(seen, 'bg2.rotationSourceFolder'), false, 'other wallpaper kinds show no source switch');
 });
