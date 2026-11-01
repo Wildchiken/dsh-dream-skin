@@ -2,6 +2,52 @@
 
 记录 `dsh-dream-skin` 的可观变更。格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/)。从 `8.28.0` 起，版本号启用**日期式规则**：`M.D.X`（月.日.当日第几个版本），例如 8 月 28 日首个版本 `8.28.0`，当日再发 `8.28.1`，次日则为 `8.29.0`，以取代旧的 `0.4.x` 语义化版本（日期按维护者本地时区 UTC+8 计）。
 
+## [11.2.0] - 2026-11-02
+
+> **两条一起发：#130 插件管理页的透明覆盖按报告者的诊断重做（我 10.30.1 那版是错的），以及采纳 @JularDepick 的 PR #133——壁纸轮播的文件夹来源改走宿主自己的目录选择器。** 质量审计：**229 项质量门全过**（217 调色 + 12 工艺），全套 `npm test` 718→**728**。
+
+### 一、#130：报告者是对的，我那一版错在三处
+
+@zyyk78 在 11-01 回填两条：「似乎还是不正确，其引用了弹窗的透明度参数而且没有做到全覆盖」，并给出逐条对照官方 `@deepseek-ai/dsh-client-ui-plugin-manager@0.2.1-rc.5` 产物的分析。核完成立：
+
+1. **串了语义**：10.30.1 我把 `data-plugin-group / -item-detail / -detail / -rows` 塞进**弹窗玻璃规则**，于是插件页的填充完全由「弹窗不透明度」滑杆决定（默认 94% 近不透明），跟壁纸/页面洗色无关——一个页面跟着弹窗滑杆走，语义就不对。
+2. **锚点选错了**：那四个锚点在官方 CSS 里**只有布局、不画背景**；真正上色的是哈希类，各自读 `background: var(--dsw-alias-bg-layer-N)`（guide=layer-1，registry / registryToggle=layer-2，registryCustomField / attemptBadge / approvalList code / `[type=text]`=layer-3）。我刷在了不该出现的面上了。
+3. **漏了整块**：注册表面板是 `createPortal` 挂到 `body` 的（根节点 `[data-install-registry]`），不在页面根子树里 ⇒ 从头到尾没被碰到；「发现」页签又是另一个包 `dsh-client-ui-plugin-market` 渲染的。
+4. **底层事实**：官方插件页 `.V7pFBG_page` **自己不画页面底色**，而自动化任务页 `.olCj9W_page` 有 `background:var(--dsw-alias-bg-base)`——这才是"整页一层洗色"与"插件页打补丁"的差别来源。
+
+**新实现**：新增自有变量 `--dsh-dream-skin-page-fill`，**与画布 wash 同一个源**（同一个 `canvasAlpha`，含自动弱化的 45% 上限），在 `[data-plugin-panel]` 与 `[data-install-registry]` **两个根**上把 `--dsw-alias-bg-layer-1/2/3` 重定义为 `color-mix(自身色相, 该权重, transparent)`——一条规则覆盖现在与将来所有用这三个 token 上色的面，且保留各皮肤自己的色相、只动 alpha。**原色快照放在 `html[wash]` 上**：在同一元素上用 `var()` 重定义自己属于自定义属性环，浏览器会整条作废（这是刻意的坑位，测试里有一条专门把它挪回面板上制造环并翻红）。退役那四个锚点，壁纸撤下时随整层覆盖一起收回，不留残值。
+
+**门也跟着改了**：`tests/client.plugin_page.test.cjs` 3→6 条——原门把"四个选择器在弹窗玻璃规则里"当成契约，那正是错的契约。新门含 5 组变异腿：删任一 token 腿 / 去掉 portal 根 / 权重改回弹窗滑杆 / 把快照挪到面板上（制造环）/ 把退役锚点塞回弹窗规则，各自点名翻红。
+
+### 二、PR #133：轮播文件夹走宿主自己的目录选择器（@JularDepick）
+
+这就是我在 #131 要求拆出去的"文件夹选择器"那半，独立成 PR 后好审得多（+615/-55、5 文件、一笔提交）。
+
+- **能力探测在前**：`ctx.get("uiWorkspace")`（按 cordis 契约，不走 `inject`），`typeof service.pickDirectory !== "function"` 视为不支持 ⇒ 直接落手输分支，不弹空对话框、不静默吞掉点击。**宿主产物实测**：本机全局宿主 `0.2.1-rc.5` 的 `dsh-client-ui-workspace/lib/types/client/navigation.d.ts` 声明 `pickDirectory(): Promise<string | null>` ⇒ 返回 `null` 是"取消"，与"不可用"分开处理。
+- **状态机**：`folderDraft` 持待提交路径；`openFolderPicker` / `openTypedFallback` 决定入口；`commitFolder` / `commitTypedFolder` 提交前统一过校验；`armRotationIfUsable` 只在池里真有可用目录时才启用轮播；`removeFolder` 按路径移除并回写。
+- **拒绝分四类各一句**：非绝对路径 / 不存在 / 不是目录 / 不可读；宿主不可达或超时另算一类，**不做静默降级写入**（避免"看起来加上了、其实轮播读不到"）。
+- **路径表**取代原来那串 chip（类型 / 名称 / 可读路径 / 移除），空池与宿主不支持各有一句文案。11 个新键 × 8 语言，`bg2.rotationFolderHint` 改写。
+- **7 条用例**（含 2 条变异腿：拒绝不语、吞掉迟到拒绝）。
+- **体积天花板 576 → 592 KiB** 是他抬的（16 KiB 一档），理由写在 `tests/package.runtime_size.test.cjs` 注释里。
+
+### 三、我这一轮自己验证了什么
+
+- 两个来源都**先合再跑**：`fix/plugin-page-wash-130`（parent `de3f88e`）与 PR #133（head `7080f0c`）合进 11.1.1 后的 main 均**无冲突**，合并树全套 **728 条**（718 + #130 的 3 + #133 的 7）。
+- 语义面逐条核过合并结果：11.1.1 的 blur note 在场（`note: performance ? t("background.blurSuppressed")` 计数 1）、`ctx.get("uiWorkspace")` 在场、两侧用例都在 `client.settings_ui.test.cjs` 里。
+- 代价面：`backdrop-filter` 声明数**没涨**（`compositor_budget` + `craft.quality` + `client.plugin_page` 合计 36/36 绿），新增的是 `color-mix` 与三条 token 重定义，不是新的模糊层。
+- 外部前提实测而非采信描述：`pickDirectory` 确实存在于本机宿主产物（含 `Promise<string|null>` 签名）。
+- `lib/client.js` 581,474 → **597,829 B**，天花板 592 KiB（606,208 B），余量 **8,379 B（1.4%）**。
+
+### 四、诚实边界
+
+- **#130 的像素表现仍无活页目视**：证据是宿主 CSS 逐条对照 + 静态门。报告者自己也在回填里写明"未做活页目视，需要在重启后的实机上确认像素表现"。本版把它合进主干是为了让验证有靶子，不是宣布已验证。
+- **本机有 7 条门因环境而红**（不是代码）：今晚全局宿主被桌面壳从 `0.2.0-rc.1` 升到 `0.2.1-rc.3`、我又按用户要求升到 `0.2.1-rc.5`，于是"对着冻结宿主快照比对现装宿主"的门（`host.slots #90`、`hashes #94`、`host.preflight` 两条）与需要真浏览器/真宿主的 `Roadmap M` 三条、`issue #102`/`issue #105` 活体门一起翻红。归属办法与上一版相同：在不含本次合并的提交上复跑，同样红。**登记表与兼容判定表对 rc.5 重取，是这一轮之后要做的独立活。**
+- **余量只剩 8,379 B**：连续两个功能各自抬一档（544→576→592 KiB），下一次加东西前应该先量或者先瘦身，而不是再抬一档。
+- **`--dsh-dream-skin-page-fill` 的默认权重是 92%**：宿主没有 wash 时这条规则不激活（全部挂在 `html[wash]` 下），所以无壁纸的用户看到的就是宿主原样——这点由门钉住（去掉壁纸标记必须翻红）。
+- 文件夹选择器**只走宿主服务**，插件自己不起文件系统对话框、不解析相对路径、不接受 URL；删除只作用于池内条目，不碰磁盘。
+
+
+
 ## [11.1.1] - 2026-11-01
 
 > **用户实测报的 bug：选了「固定图片」之后拖「壁纸模糊度」滑杆，画面完全不动。** 查清了：不是 11.1.0 的回归，是 10.21.1 起低功耗模式按设计摘掉壁纸模糊，**但滑杆自己没说**——它照写存储值、渲染层拒绝应用，正是本仓库反复声明的那条不变式（issue #55「有反馈、无效果」）在这条路上的漏洞。本版补上那句说明，8 种语言，并配 2 条用例（含变异腿）。质量审计：**229 项质量门全过**（217 调色 + 12 工艺），全套 `npm test` 716→**718**。
