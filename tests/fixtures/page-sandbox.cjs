@@ -105,7 +105,7 @@ function walkNodes(node, out) {
  *                        "no preference", which is what every case that predates the responsive
  *                        tiers expects
  */
-function buildSandbox({ failWrite = null, seed = {}, code = null, storeMissing = false, matchMedia = null } = {}) {
+function buildSandbox({ failWrite = null, seed = {}, code = null, storeMissing = false, matchMedia = null, hostState = null }) {
 	const body = makeEl('body');
 	const head = makeEl('head');
 	const documentElement = makeEl('html');
@@ -195,7 +195,7 @@ function buildSandbox({ failWrite = null, seed = {}, code = null, storeMissing =
 		// dropped on the floor here.
 		sent.urls.push(url);
 		const bodyObj = JSON.parse(init.body);
-		if (bodyObj.method === 'get') return { ok: true, status: 200, json: async () => ({ ok: true, value: {} }) };
+		if (bodyObj.method === 'get') return { ok: true, status: 200, json: async () => ({ ok: true, value: hostState === null ? {} : hostState }) };
 		if (bodyObj.method === 'set') {
 			sent.sets.push(bodyObj.patch);
 			return { ok: true, status: 200, json: async () => ({ ok: true }) };
@@ -274,6 +274,8 @@ function buildSandbox({ failWrite = null, seed = {}, code = null, storeMissing =
 	vm.runInContext((code || CODE) + '\nwindow.__LOADED__=1;', context);
 	return {
 		factory, localStorage, sent, refused, head, body, documentElement,
+		/** The durable host map this page was answered with (`hostState`), or null for an empty one. */
+		hostState,
 		window: sandbox.window,
 		/**
 		 * Every factory the page has been handed, oldest first. Evaluating the bundle a SECOND time
@@ -362,6 +364,12 @@ function makeApplyContext(h) {
 					const bag = {};
 					if (storeSpec && typeof storeSpec.actions.sync === 'function') {
 						const state = storeSpec.init();
+						// The live draft object, kept by row id: a test can then read what a
+						// row would render AFTER some bulk action rewrote storage, instead of
+						// only asserting that storage changed. (Factory reset needs exactly
+						// this — a repaint that leaves a row's store on the old value is a
+						// page that disagrees with itself.)
+						(ctx.storeStates || (ctx.storeStates = {}))[desc.id] = state;
 						bag.sync = (...args) => storeSpec.actions.sync(state, ...args);
 					}
 					const ra = desc.inject(bag);

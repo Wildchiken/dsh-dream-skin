@@ -2414,6 +2414,101 @@ test('w7a: the four import/export entries live in the zone above the library, an
 	confirm.props.onClick();
 	assert.deepEqual(armedCalls, ['surprise'], 'the second press rolls exactly once');
 });
+
+/** The eight dictionaries, in the order the bundle declares them. */
+const DICT_ORDER = ['zh', 'en', 'ja', 'ko', 'es', 'fr', 'de', 'ru'];
+
+/**
+ * The `packs.reset` value of one dictionary, read by position. The render fixture binds
+ * the translator as identity, so wording can only be checked against the source — and
+ * positionally, because a test that re-types a Chinese string drifts from it exactly the
+ * way the three copies of the nav label did.
+ */
+function resetLabel(source, lang) {
+	const lines = source.split('\n').filter((l) => /^\t{3}"packs\.reset": /.test(l));
+	assert.equal(lines.length, DICT_ORDER.length, 'one "packs.reset" line per dictionary');
+	const m = lines[DICT_ORDER.indexOf(lang)].match(/: "((?:[^"\\]|\\.)*)"/);
+	assert.ok(m, `no packs.reset value for ${lang}`);
+	return m[1];
+}
+
+test('w1: 恢复出厂 sits below the library, discloses its scope before the first press, and asks twice', () => {
+	const page = buildSettingsPage({});
+	page.setState('dream-skin-packs', { ids: ['pack-a'], names: { 'pack-a': 'Pack A' }, active: 'abyss' });
+	const calls = [];
+	page.actionsOf('dream-skin-packs').resetFactory = () => { calls.push('reset'); };
+	const row = page.renderRow('dream-skin-packs');
+
+	const press = buttonByKey(row, 'packs.reset');
+	assert.ok(press, 'the entry is on the page at all');
+	// The label itself carries what is kept — a destructive entry whose reach has to be
+	// guessed is an entry that gets pressed wrong, and this row has no other disclosure.
+	// The render fixture binds the translator as identity, so the WORDING is read out of
+	// the dictionaries rather than out of the tree (which is also the only way to check
+	// all eight languages at once).
+	const missing = DICT_ORDER.filter((lang) => !/保留|keeps|残ります|유지|conserva|garde|erhalten|сохранено/.test(resetLabel(CODE, lang)));
+	assert.deepEqual(missing, [], `every dictionary must say what a reset keeps, in its own language: ${JSON.stringify(missing)}`);
+
+	// It sits BELOW the library grid: the grid is theme selection, this is the page's
+	// one undo-everything action and must not read as another entry of the library row.
+	const group = row[0];
+	const resetAt = group.children.indexOf(press.parent);
+	const gridAt = group.children.findIndex((child) => findAll([child], (node) => node.props.role === 'group').length > 0);
+	assert.ok(resetAt !== -1, 'the reset row is a direct child of the zone block');
+	assert.ok(gridAt === -1 || resetAt > gridAt, 'and it prints after the library, not among its entries');
+
+	// First press arms, writes nothing.
+	page.clearHookCalls();
+	press.props.onClick();
+	assert.deepEqual(calls, [], 'one press does not reach the write path: this one rewrites every setting at once');
+	assert.deepEqual(page.hookCalls.map((c) => [c.hook, c.value]), [['PacksRow#3', true]],
+		'the press asks for the armed state, on the packs row\'s own cell');
+
+	const armed = buildSettingsPage({ hookInitials: { 'PacksRow#3': true } });
+	armed.setState('dream-skin-packs', { ids: ['pack-a'], names: { 'pack-a': 'Pack A' }, active: 'abyss' });
+	const armedCalls = [];
+	armed.actionsOf('dream-skin-packs').resetFactory = () => { armedCalls.push('reset'); };
+	const armedRow = armed.renderRow('dream-skin-packs');
+	const confirm = buttonByKey(armedRow, 'packs.resetArmed');
+	assert.ok(confirm, 'armed: the button stops promising 恢复出厂设置 and names the commitment');
+	assert.equal(confirm.props.style.color, 'var(--dsw-alias-state-error-primary)',
+		'and it is dressed as the entry that cannot be undone — the same treatment 随机换一个 gets');
+	const cancel = buttonByKey(armedRow, 'packs.resetCancel');
+	assert.ok(cancel, 'a cancel entry sits beside it, so the armed state can be left without pressing the dangerous one again');
+	confirm.props.onClick();
+	assert.deepEqual(armedCalls, ['reset'], 'the second press resets exactly once');
+
+	// And the way out actually leaves the armed state instead of firing on the next press.
+	const cancelPage = buildSettingsPage({ hookInitials: { 'PacksRow#3': true } });
+	cancelPage.setState('dream-skin-packs', { ids: ['pack-a'], names: { 'pack-a': 'Pack A' }, active: 'abyss' });
+	const cancelCalls = [];
+	cancelPage.actionsOf('dream-skin-packs').resetFactory = () => { cancelCalls.push('reset'); };
+	const cancelRow = cancelPage.renderRow('dream-skin-packs');
+	cancelPage.clearHookCalls();
+	buttonByKey(cancelRow, 'packs.resetCancel').props.onClick();
+	assert.deepEqual(cancelCalls, [], '取消 resets nothing, it just leaves');
+	assert.deepEqual(cancelPage.hookCalls.map((c) => [c.hook, c.value]), [['PacksRow#3', false]],
+		'and it puts the row back to its disarmed label');
+});
+
+test('mutation: a first press that reaches the write path reddens the twice-access case', () => {
+	// The guard is the early return. Take IT out — matched structurally, not by tab count,
+	// so reformatting the bundle cannot turn this leg into a no-op that reports success —
+	// and one press fires. That is the assertion the case above leans on.
+	assert.equal(countOf(CODE, 'if (!resetArmed) {'), 1, 'the reset guard is exactly one early return');
+	const disarmed = CODE.replace(/if \(!resetArmed\) \{\s*setResetArmed\(true\);\s*return;\s*\}\n/, '');
+	assert.notEqual(disarmed, CODE, 'the mutation has to change the bundle');
+	assert.equal(countOf(disarmed, 'if (!resetArmed) {'), 0, 'and it has to remove the guard, not miss it');
+	const page = buildSettingsPage({ code: disarmed });
+	page.setState('dream-skin-packs', { ids: [], names: {}, active: null });
+	const calls = [];
+	page.actionsOf('dream-skin-packs').resetFactory = () => { calls.push('reset'); };
+	const row = page.renderRow('dream-skin-packs');
+	assert.ok(buttonByKey(row, 'packs.reset'), 'control: the entry is still there, still labelled the same');
+	buttonByKey(row, 'packs.reset').props.onClick();
+	assert.deepEqual(calls, ['reset'],
+		'mutation expected: with the guard gone, one press fires — this is the assertion the case above depends on');
+});
 test('mutation: deleting 恢复主题色 reddens the accent case', () => {
 	const anchor = 'children: t("accent.clear")';
 	assert.equal(countOf(CODE, anchor), 1, 'the way back must print its own key exactly once: ' + JSON.stringify(anchor));
