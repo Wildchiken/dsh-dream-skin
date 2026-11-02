@@ -1564,12 +1564,16 @@ test('w6a: the background form is DERIVED — four forms out of the same three s
 	assert.deepEqual(formTableProblems(page), [],
 		'every state reads as the form it IS: solid and gradient split the gradient kind, the rotation switch makes the fourth');
 
-	// The claim behind the whole derivation: NOTHING was added to the store to
-	// carry it. The field set is the one W1 recorded, read through the fixture.
+	// The claim behind the whole derivation: no field was added to carry a FORM.
+	// The one field that has since been added is `performance`, and it is not a derived
+	// value — it is the low-power switch's own state, which the 「模糊填充」 chip needs in
+	// order to say "selecting this does nothing right now" (issue #55's 「有反馈、无效果」).
+	// Reading it from storage inside the render is what W7a/W12 forbid, so it arrives as
+	// state through the same revision-gated sync as everything else.
 	assert.deepEqual(Object.keys(page.stateOf(ADV)).sort(), [
-		'autodim', 'fit', 'gradient', 'hasImage', 'kind', 'posX', 'posY',
+		'autodim', 'fit', 'gradient', 'hasImage', 'kind', 'performance', 'posX', 'posY',
 		'refreshHours', 'refreshOn', 'revision', 'rotation', 'url', 'zoom'
-	], 'the advanced row store gained no field: the form is computed from kind + gradient + rotation.on');
+	], 'the advanced row store carries exactly the shipped fields: the form is computed, and `performance` is the one added state field with a reason');
 });
 
 test('w6a: picking a form writes exactly the state that form IS, and the selector reads it back', () => {
@@ -2806,4 +2810,44 @@ test('mutation: swallowing the late refusal reddens the asynchronous case', asyn
 	await tick();
 	assert.deepEqual(page.hookCalls.map((call) => call.value), [null, 'rotation', null],
 		'mutation expected: the refused click leaves only the alert, and the row pretends the rotation armed');
+});
+
+// ---------------------------------------------------------------------------
+// 13. 「模糊填充」 under low power (the sibling of the wallpaper-blur note)
+// ---------------------------------------------------------------------------
+
+/**
+ * Issue #110's low-power mode drops the 「模糊填充」 bleed layer (`fit === "blur" && !tile &&
+ * !readPerformanceMode()`), so the chip can be selected with nothing on screen to show for it.
+ * Same invariant as the wallpaper-blur row above: a control that still answers the click while
+ * it cannot apply anything is issue #55's 「有反馈、无效果」. The row says it, from STATE — the
+ * alternative is a storage read inside the render, which W7a/W12 exist to forbid.
+ */
+const FILL_BLUR_LOWPOWER = 'note: fit === "blur" && performance ? t("background.blurSuppressed") : null';
+
+test('「模糊填充」 says low power drops it, and stays quiet when it is not the reason', () => {
+	const washed = buildSettingsPage({});
+	washed.setState(ADV, { kind: 'image', hasImage: true, fit: 'blur', performance: true });
+	assert.ok(textOf(washed.renderRow(ADV)).includes('background.blurSuppressed'),
+		'blur fill under low power must say the bleed layer is not being drawn');
+
+	const noLowPower = buildSettingsPage({});
+	noLowPower.setState(ADV, { kind: 'image', hasImage: true, fit: 'blur', performance: false });
+	assert.equal(textOf(noLowPower.renderRow(ADV)).includes('background.blurSuppressed'), false,
+		'without low power the chip does what it says — no note');
+
+	const otherFill = buildSettingsPage({});
+	otherFill.setState(ADV, { kind: 'image', hasImage: true, fit: 'cover', performance: true });
+	assert.equal(textOf(otherFill.renderRow(ADV)).includes('background.blurSuppressed'), false,
+		'裁剪填充 still fills under low power, so the note belongs to the blur chip only');
+});
+
+test('mutation: silencing the fill note reddens the low-power case', () => {
+	assert.equal(countOf(CODE, FILL_BLUR_LOWPOWER), 2, 'both picture forms carry the note from ONE expression each (固定图片 and 图片轮播)');
+	const mutated = CODE.split(FILL_BLUR_LOWPOWER).join('note: null');
+	assert.notEqual(mutated, CODE, 'the mutation has to change the bundle');
+	const page = buildSettingsPage({ code: mutated });
+	page.setState(ADV, { kind: 'image', hasImage: true, fit: 'blur', performance: true });
+	assert.equal(textOf(page.renderRow(ADV)).includes('background.blurSuppressed'), false,
+		'mutation expected: the chip is silent again while doing nothing, which is the reported bug');
 });

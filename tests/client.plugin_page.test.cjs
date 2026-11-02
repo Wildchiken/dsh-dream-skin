@@ -93,6 +93,19 @@ function pluginPageProblems(text) {
 		if (tokens.includes('MODAL_FILL_VAR')) {
 			problems.push('the page fill reads the POPUP slider again — issue #130 says a page follows 壁纸透明度');
 		}
+		// Scope boundary, measured rather than assumed: the 「发现」 tab is a different package
+		// (`dsh-client-ui-plugin-market`), and on 0.2.1-rc.5 it paints NO page-level surface —
+		// `dq5LxG_section` is layout, and its only backgrounds are a hover state
+		// (`--dsw-alias-interactive-bg-hover`), an inline-code chip
+		// (`--dsw-alias-bg-module-platform`) and a loading shimmer (`--dsw-alias-bg-skeleton`).
+		// Those carry meaning; washing them would make a hover tint see through the wallpaper.
+		// So the override set is closed: exactly the three layer tokens, nothing else.
+		const assigned = [...tokens.matchAll(/--dsw-alias-[a-z0-9-]+(?=:)/g)].map((m) => m[0]);
+		for (const tok of new Set(assigned)) {
+			if (!LAYER_TOKENS.includes(tok)) {
+				problems.push(`the page-root override reaches ${tok}, which is not a page canvas — semantic/state colours stay unwashed`);
+			}
+		}
 	}
 
 	const rootClear = ruleBlock(text, ROOT_CLEAR_SELECTOR);
@@ -168,4 +181,20 @@ test('mutation: an ungated, deleted, or unpublished wash reddens', () => {
 	const hardcoded = CODE.replaceAll('`${Math.round(canvasAlpha * 100)}%`', '"92%"');
 	assert.notEqual(hardcoded, CODE, 'the canvasAlpha-derived value anchor moved');
 	assert.ok(pluginPageProblems(hardcoded).some((p) => p.includes('drift apart')), 'a hardcoded weight must redden — it would freeze the page while the slider moves');
+});
+
+test('mutation: washing a semantic token on the page roots reddens the scope boundary', () => {
+	// The measured non-defect: the 「发现」 tab paints no canvas, so the only backgrounds
+	// anyone could reach there are state colours and placeholders. If a future change
+	// "fixes the discover tab" by widening this override, that must cost someone a red.
+	const line = '"  --dsw-alias-bg-layer-3: color-mix(in srgb, var(--dsh-dream-skin-layer-src-3) var(" + PAGE_FILL_VAR + ", 92%), transparent);",';
+	assert.equal(CODE.split(line).length - 1, 1, 'the layer-3 override line must be findable to mutate next to it');
+	const widened = CODE.replace(line, line + '\n\t\t\t\t"  --dsw-alias-bg-skeleton: color-mix(in srgb, var(--dsw-alias-bg-skeleton) var(" + PAGE_FILL_VAR + ", 92%), transparent);",');
+	assert.notEqual(widened, CODE, 'the mutation has to change the bundle');
+	assert.ok(
+		pluginPageProblems(widened).some((p) => p.includes('--dsw-alias-bg-skeleton')),
+		`an override reaching a placeholder colour must be named, got: ${JSON.stringify(pluginPageProblems(widened))}`
+	);
+	// Control: the shipped bundle assigns exactly the three layer tokens.
+	assert.deepEqual(pluginPageProblems(CODE), [], `the shipped page-root override must stay inside its scope, got: ${JSON.stringify(pluginPageProblems(CODE))}`);
 });
