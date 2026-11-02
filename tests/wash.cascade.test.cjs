@@ -1203,6 +1203,15 @@ test('issue #105: the other plugin rule is read from its installed bundle, or re
 		'].join(", ");',
 		`const css = \`${scopedCall} {\n  ${block}\n}\`;`
 	].join('\n');
+	// Same bundle shape, the scope list as an argument: the count is a MEASUREMENT now
+	// (skin-center 0.4.13 ships 2 where 10.13.0 saw 3), so what the extractor may refuse
+	// is a scope that changed kind, never a scope that changed number.
+	const bundleWith = (scopes, block) => [
+		'const ACTIVE_VISUAL_SELECTOR = [',
+		...scopes.map((s) => `  "${s}",`),
+		'].join(", ");',
+		`const css = \`${scopedCall} {\n  ${block}\n}\`;`
+	].join('\n');
 	const write = (text) => {
 		const f = path.join(dir, 'client.js');
 		fs.writeFileSync(f, text, 'utf8');
@@ -1215,6 +1224,23 @@ test('issue #105: the other plugin rule is read from its installed bundle, or re
 		assert.match(rule.selector, /\[class\*="_fade"\]/, 'the selector is theirs, verbatim');
 		assert.match(rule.css, /background: none !important;/, 'the declaration block is theirs, verbatim');
 		assert.ok(rule.css.split('\n').length >= 4, 'and it is composed per scope, not once');
+
+		// A scope count that MOVES is measured, not refused — that is 0.4.13's real shape
+		// (2 html[…] prefixes where the 10.13.0 reading saw 3), and refusing it put the
+		// whole coexistence half of this gate out of service on a machine where nothing of
+		// ours had changed. What still has to be refused is a scope that changed KIND.
+		const twoScopes = pluginFadeRule({
+			DSH_SKIN_CENTER: write(bundleWith(
+				['html[data-dsh-skin]', 'html[data-dsh-custom-theme]:not([data-dsh-skin])'],
+				'background: none !important;'))
+		});
+		assert.equal(twoScopes.scopes.length, 2, 'the read scope list is what gets composed');
+		assert.equal(twoScopes.css.split('{')[0].split(',\n').length, 2, 'one selector per scope, no remembered count');
+		const bodyScoped = write(bundleWith(['html[data-dsh-skin]', 'body[data-dsh-skin]'], 'background: none !important;'));
+		assert.throws(() => pluginFadeRule({ DSH_SKIN_CENTER: bodyScoped }), /no longer all host-level html/,
+			'a body-level prefix reaches a different element — that is a different rule, so it is refused');
+		const single = write(bundleWith(['html[data-dsh-skin]'], 'background: none !important;'));
+		assert.equal(pluginFadeRule({ DSH_SKIN_CENTER: single }).scopes.length, 1, 'and one scope is still not a reason to stop measuring');
 
 		// Refusals, one piece at a time.
 		const devolved = write(bundle('background: none;'));

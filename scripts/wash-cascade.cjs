@@ -123,11 +123,16 @@ function pluginFadeRule(env) {
 	const av = text.match(/ACTIVE_VISUAL_SELECTOR\s*=\s*\[([\s\S]{0,600}?)\]\s*\.join\(\s*",\s*"\s*\)/);
 	if (!av) throw new Error(`${SKIN_CENTER_PKG}: no ACTIVE_VISUAL_SELECTOR join found — their scoped() prefix list is unreadable, so the composed rule would be invented`);
 	const scopes = [...av[1].matchAll(/"((?:[^"\\]|\\.)*)"/g)].map((m) => JSON.parse(`"${m[1]}"`));
-	// Their helper is `scopes.map((scope) => `${scope} ${selector}`).join(",\n")` — three
-	// `html[…]` prefixes. A fourth scope or a non-`html` one changes who the rule reaches,
-	// so it is refused rather than silently composed.
-	if (scopes.length !== 3 || !scopes.every((s) => s.startsWith('html['))) {
-		throw new Error(`${SKIN_CENTER_PKG}: ACTIVE_VISUAL_SELECTOR is no longer 3 html[…] scopes (read: ${JSON.stringify(scopes)}) — recompose by hand after re-reading scoped()`);
+	// Their helper is `scopes.map((scope) => `${scope} ${selector}`).join(",\n")`, so the
+	// rule we compose is the READ scope list, not a remembered one. What has to hold for
+	// that composition to mean the same thing: every scope is a host-level `html[…]`
+	// prefix (a body-level or non-`html` scope would reach a different element), and there
+	// is at least one. The COUNT is not an invariant — `@linxin666/dsh-client-ui-skin-center`
+	// 0.4.13 ships 2 where the 10.13.0 measurement saw 3, and refusing to run over a
+	// dropped scope made the whole coexistence half go red on a machine where nothing of
+	// ours had changed. The count is reported instead (`provenance`), so a move is visible.
+	if (scopes.length === 0 || !scopes.every((s) => s.startsWith('html['))) {
+		throw new Error(`${SKIN_CENTER_PKG}: the ACTIVE_VISUAL_SELECTOR scopes are no longer all host-level html[…] prefixes (read: ${JSON.stringify(scopes)}) — recompose by hand after re-reading scoped()`);
 	}
 	let selArg = null;
 	let selEnd = -1;
@@ -1075,7 +1080,12 @@ function measureCoexist(opts = {}) {
 	const plugin = opts.plugin || pluginFadeRule(opts.env);
 	const parts = buildCoexistFixture(opts);
 	const r = runChrome(coexistFixtureHtml(parts, plugin), opts.env);
-	if (r.ran) r.provenance = `${SKIN_CENTER_PKG}${plugin.version ? '@' + plugin.version : ''} — ${plugin.selector}`;
+	if (r.ran) {
+		// The scope COUNT is in the provenance line rather than pinned: 0.4.13 ships 2 where
+		// the 10.13.0 measurement saw 3, and a reading that cannot say which world it was
+		// taken in is how a stale expectation gets mistaken for a regression.
+		r.provenance = `${SKIN_CENTER_PKG}${plugin.version ? '@' + plugin.version : ''} — ${plugin.scopes.length} scope(s): ${plugin.scopes.join(' | ')} — ${plugin.selector}`;
+	}
 	return r;
 }
 
