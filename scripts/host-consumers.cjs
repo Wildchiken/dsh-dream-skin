@@ -14,18 +14,29 @@
  * FREEZES it into `scripts/data/host-token-census.json`, and the gates in
  * tests/ assert against the frozen file plus its provenance (host version).
  *
- * Two counts per token, because they mean different things:
- *   - `consumers` — `var(--token …)` occurrences: something READS it.
- *   - `declares`  — `--token:` occurrences: something DEFINES it.
+ * Three counts per token, because they mean different things:
+ *   - `consumers`   — `var(--token …)` occurrences: something READS it.
+ *   - `declares`    — `--token:` occurrences: something DEFINES it.
+ *   - `mentions`    — occurrences of the token as a WHOLE identifier: the regex
+ *                     `(--[a-z0-9][a-z0-9-]*)` is greedy, so an occurrence inside
+ *                     `--dsw-alias-markdown-code-block-banner` is counted for the
+ *                     banner, never for `…-code-block`.
  * A token with declares > 0 and consumers === 0 is host-authored dead weight we
  * are overriding pointlessly. A token with 0 of both is ours alone.
- * A third count, `mentions`, is the raw textual occurrence count (any mention
- * at all — `grep -o`). It exists to RECONCILE with reviews that quote
- * occurrences rather than reads; it is not a consumer signal. Measured on host
- * 0.2.0-rc.1 the reviews' figures reproduce exactly in this column
- * (`markdown-code-block` 37, `markdown-inline-code` 4, `specific-selector` 4,
- * `specific-tip` 2, `brand-primary-soft` 0) while `consumers` tells the
- * different, load-bearing story.
+ *
+ * Reviews quote plain `grep -o` counts, which have no boundary and therefore
+ * read a shadowed token as its longer siblings too. Host 0.2.0-rc.1 is the
+ * worked example: the review quoted 37 occurrences of `markdown-code-block`,
+ * this column said 30, and the 7 missing ones were the `-banner` row. To keep
+ * that reconciliation a PROPERTY of the file rather than a number somebody has
+ * to re-copy at every host bump, a shadowed token — one that has at least one
+ * longer token in the census — also carries `rawMentions`, counted by a fourth
+ * pass that searches for the bare substring with NO boundary rule at all. The
+ * gate then asserts `rawMentions === mentions + Σ(mentions of the longer
+ * tokens)`, which is only true while the boundary regex really honours it: a
+ * generator that lost the greediness would make `mentions` jump to the raw
+ * figure and break the sum. `consumers` still tells the load-bearing story, and
+ * `rawMentions` is not a consumer signal.
  *
  * The same run also freezes the FORWARD gap (issue #88) — the host colour
  * tokens a host surface reads and no skin defines. Its disposition table lives
@@ -183,6 +194,62 @@ function censusTokens(files, readFile = (f) => fs.readFileSync(f, 'utf8')) {
 	return tokens;
 }
 
+/**
+ * The boundary-free half of `mentions` (see the header).
+ *
+ * A token is SHADOWED when the corpus also carries a longer identifier that
+ * starts with it — `--dsw-alias-markdown-code-block` under
+ * `…-code-block-banner`. For those tokens, `mentions` is by construction
+ * smaller than what a reviewer's `grep -o` reports, and the difference has to
+ * be reproducible rather than argued: every occurrence of the bare substring
+ * belongs to exactly one maximal identifier, so
+ *
+ *   rawMentions(t) === mentions(t) + Σ mentions(u)   over the longer u
+ *
+ * counted two different ways — a greedy boundary regex for `mentions`, a plain
+ * substring scan for `rawMentions`. `tests/skin.quality.test.cjs` holds that
+ * equation for EVERY shadowed row in the file (315 of them on 0.2.1-rc.5), so it
+ * survives a host bump untouched and still reddens if the boundary rule is ever
+ * lost: a generator that dropped the greediness would push `mentions` up to the
+ * raw figure and break the sum.
+ *
+ * Counted case-SENSITIVELY, on purpose. The boundary regex is case-insensitive
+ * but records each identifier as written, so `--E` and `--e` are two rows; a
+ * case-insensitive substring scan would credit `--E` with occurrences that live
+ * inside lowercase keys, and the equation would fail for a reason that has
+ * nothing to do with boundaries. Case-sensitive is also what a reviewer's plain
+ * `grep -o` does, which is the figure this column exists to reconcile.
+ */
+function addRawMentions(tokens, files, readFile = (f) => fs.readFileSync(f, 'utf8')) {
+	const names = [...tokens.keys()].sort();
+	// Prefix blocks are contiguous in sorted order, and the block of `t` begins
+	// at `t` itself, so everything after it that still starts with `t` is a
+	// longer token shadowing it.
+	const shadowed = [];
+	for (let i = 0; i < names.length; i += 1) {
+		const t = names[i];
+		let j = i + 1;
+		while (j < names.length && names[j].startsWith(t)) j += 1;
+		if (j > i + 1) shadowed.push(t);
+	}
+	if (!shadowed.length) return tokens;
+	const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	const needles = shadowed.map((t) => [t, new RegExp(esc(t), 'g')]);
+	const raw = new Map(shadowed.map((t) => [t, 0]));
+	for (const file of files) {
+		let text;
+		try { text = readFile(file); } catch { continue; }
+		for (const [t, re] of needles) {
+			re.lastIndex = 0;
+			let n = 0;
+			while (re.exec(text) !== null) n += 1;
+			if (n) raw.set(t, raw.get(t) + n);
+		}
+	}
+	for (const [t, n] of raw) tokens.get(t).rawMentions = n;
+	return tokens;
+}
+
 function packageOf(file, root) {
 	const rel = root ? path.relative(root, file) : file;
 	return String(rel).split(/[\\/]/)[0];
@@ -313,6 +380,7 @@ function build({ quiet = false } = {}) {
 		return cache.get(f);
 	};
 	const tokens = censusTokens(files, readFile);
+	addRawMentions(tokens, files, readFile);
 	const inventory = packageInventory(root, files);
 	let hostVersion = null;
 	let dshVersion = null;
@@ -375,7 +443,14 @@ function build({ quiet = false } = {}) {
 		tokens: Object.fromEntries(
 			[...tokens.entries()]
 				.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-				.map(([name, row]) => [name, { declares: row.declares, consumers: row.consumers, mentions: row.mentions, files: row.files.size }])
+				.map(([name, row]) => [name, {
+					declares: row.declares,
+					consumers: row.consumers,
+					mentions: row.mentions,
+					// Present only on shadowed rows — see addRawMentions().
+					...(row.rawMentions === undefined ? {} : { rawMentions: row.rawMentions }),
+					files: row.files.size
+				}])
 		),
 		// The forward half (issue #88): host colour tokens nothing in our skins
 		// defines. `disposition` is merged in from the curated table so the
@@ -437,7 +512,8 @@ function build({ quiet = false } = {}) {
 	if (!quiet) {
 		const gaps = Object.keys(out.gap.entries).length;
 		const dead = Object.entries(hashTable).filter(([, r]) => r.files === 0).map(([b]) => b);
-		console.log(`${Object.keys(out.tokens).length} host tokens censused across ${files.length} files (dsh ${dshVersion || '?'})`);
+		const shadowed = Object.values(out.tokens).filter((r) => r.rawMentions !== undefined).length;
+		console.log(`${Object.keys(out.tokens).length} host tokens censused across ${files.length} files (dsh ${dshVersion || '?'}); ${shadowed} shadowed row(s) carry rawMentions`);
 		console.log(`corpus: ${inventory.packagesWithCode.length}/${inventory.packagesOnDisk.length} packages carry code (issue #94)`);
 		console.log(`forward gap: ${gaps} host colour token(s) read by the host and shipped by no skin`);
 		console.log(`hash literals: ${literals.length} site(s) over ${Object.keys(hashTable).length} base(s), ${dead.length} with 0 host hits (${dead.join(', ') || '—'})`);

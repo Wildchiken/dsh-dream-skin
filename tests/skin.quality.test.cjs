@@ -591,41 +591,165 @@ test('mutation: deleting the plugin-side readers turns a justified token unjusti
 	assert.equal(checkNamed(auditSkin(skin, { pluginSource: bundle }), 'token-consumers').pass, true);
 });
 
+/** What the allowlist is allowed to claim, as a pure predicate the legs can replay. */
+function slotProblems(allow, tokens) {
+	const out = [];
+	for (const [token, reason] of Object.entries(allow)) {
+		const row = tokens[token];
+		if (!row) { out.push(`${token}: allowlisted but not in the frozen census`); continue; }
+		if (row.consumers !== 0) out.push(`${token}: the census measures ${row.consumers} host consumer(s) — no longer an unconsumed slot`);
+		if (row.declares < 2) out.push(`${token}: the host declares it in ${row.declares} place(s), not both schemes`);
+		if (!(reason.length >= 60 && /consum|read|graded|rung|palette/.test(reason))) {
+			out.push(`${token}: the reason does not state the situation, just "keep"`);
+		}
+	}
+	return out;
+}
+
 test('the unconsumed-slot allowlist carries a real measurement and a reason each', () => {
 	// An allowlist without a reason is a hole with paperwork. Each entry must
 	// state the measured evidence from the frozen census AND why we keep it.
-	for (const [token, reason] of Object.entries(UNCONSUMED_HOST_SLOTS)) {
-		const row = CENSUS.tokens[token];
-		assert.ok(row, `${token}: is in the frozen census`);
-		assert.equal(row.consumers, 0, `${token}: the census still measures 0 host consumers`);
-		assert.ok(row.declares >= 2, `${token}: the host does declare it (both schemes)`);
-		assert.ok(reason.length >= 60 && /consum|read|graded|rung|palette/.test(reason),
-			`${token}: the reason states the situation, not just "keep"`);
-	}
+	assert.deepEqual(slotProblems(UNCONSUMED_HOST_SLOTS, CENSUS.tokens), []);
 });
 
-test('the host census is versioned and reconciles with the review\'s occurrence counts', () => {
-	// A census taken against a different host says nothing about this one, so
-	// the host version is part of the data. And because the review quoted raw
-	// occurrences, the file records that column too — with the two known
-	// prefix double-counts explained rather than silently disagreeing.
-	assert.ok(CENSUS.host && CENSUS.host.dshVersion, 'the census pins the host version it measured');
-	assert.ok(CENSUS.host.filesScanned > 500, 'and how much of the host it walked');
-	// Review figure → this census's exact-token `mentions`. `code-block` is 37
-	// in the review and 30 here because `--dsw-alias-markdown-code-block-banner`
-	// (7 occurrences) contains the former as a string prefix.
-	const REVIEW = {
-		'--dsw-alias-markdown-code-block': 30,
-		'--dsw-alias-markdown-inline-code': 4,
-		'--dsw-specific-selector': 4,
-		'--dsw-specific-tip': 2,
-		'--dsw-alias-button-elevated-fill': 4
-	};
-	for (const [token, mentions] of Object.entries(REVIEW)) {
-		assert.equal(CENSUS.tokens[token].mentions, mentions, `${token}: occurrences reconcile`);
+test('mutation: an allowlisted slot that gains a host consumer reddens by name', () => {
+	// Not hypothetical — this is exactly what happened on 2026-11-02. The census was
+	// re-taken against 0.2.1-rc.5 and `--dsw-specific-bubble-highlight` measured 1
+	// consumer (the experimental session inspector paints its chat-reveal highlight
+	// with it, and reads it back through `getComputedStyle`), where rc.1 measured 0.
+	// This gate is what forced that entry out of the allowlist, so the leg replays
+	// that very move: an allowlist cannot quietly outlive its own measurement.
+	const readNow = { ...CENSUS.tokens, '--dsw-alias-brand-text': { ...CENSUS.tokens['--dsw-alias-brand-text'], consumers: 1 } };
+	assert.deepEqual(slotProblems(UNCONSUMED_HOST_SLOTS, CENSUS.tokens), [], 'control: the same allowlist passes while nobody reads it');
+	const problems = slotProblems(UNCONSUMED_HOST_SLOTS, readNow);
+	assert.equal(problems.length, 1, `one entry reddens, got ${JSON.stringify(problems)}`);
+	assert.match(problems[0], /--dsw-alias-brand-text.*1 host consumer/);
+	// …and the live tree has already made the move rc.5 demanded.
+	assert.ok(!UNCONSUMED_HOST_SLOTS['--dsw-specific-bubble-highlight'],
+		'rc.5 gives bubble-highlight a consumer, so it must not sit in the allowlist');
+	assert.equal(CENSUS.tokens['--dsw-specific-bubble-highlight'].consumers, 1,
+		'and the frozen census really measures that one consumer (re-taken 2026-11-02 against 0.2.1-rc.5)');
+	// Still shipped, still justified — as a host-painted surface, not a declared rung.
+	const c = checkNamed(auditSkin(SKINS[0]), 'token-consumers');
+	assert.ok(c.pass, c.detail);
+	const listed = (c.detail.match(/declared-unconsumed[^)]*\)/) || [''])[0];
+	assert.ok(!/bubble-highlight/.test(listed), `the report must not still list it as unverified: ${listed}`);
+});
+
+/**
+ * The prefix-shadow equation, as a pure function so a mutation can be replayed
+ * against it (see scripts/host-consumers.cjs `addRawMentions`).
+ *
+ * `mentions` counts a token as a WHOLE identifier; `rawMentions` counts the bare
+ * substring and exists only on shadowed rows. Every occurrence of the substring
+ * belongs to exactly one maximal identifier, so the two columns must satisfy
+ * `rawMentions(t) === mentions(t) + Σ mentions(u)` over the longer u — a
+ * relation between two measurements taken by different code paths, which is what
+ * makes it a check rather than a restatement.
+ *
+ * The kid set is re-derived here by walking every prefix of every token, NOT by
+ * the generator's sorted-adjacency scan: a second implementation is the only way
+ * this file can disagree with the first.
+ */
+function shadowProblems(tokens) {
+	const names = Object.keys(tokens);
+	const set = new Set(names);
+	const kids = new Map();
+	for (const u of names) {
+		for (let len = 3; len < u.length; len += 1) {
+			const p = u.slice(0, len);
+			if (!set.has(p)) continue;
+			if (!kids.has(p)) kids.set(p, []);
+			kids.get(p).push(u);
+		}
 	}
+	const problems = [];
+	for (const t of names) {
+		const row = tokens[t];
+		const longer = kids.get(t) || [];
+		if (!longer.length) {
+			if (row.rawMentions !== undefined && row.rawMentions !== row.mentions) {
+				problems.push(`${t}: carries rawMentions ${row.rawMentions} but no longer token shadows it (mentions ${row.mentions})`);
+			}
+			continue;
+		}
+		if (row.rawMentions === undefined) {
+			problems.push(`${t}: shadowed by ${longer.length} longer token(s) but carries no rawMentions — re-run \`node scripts/host-consumers.cjs\``);
+			continue;
+		}
+		const sum = row.mentions + longer.reduce((s, k) => s + tokens[k].mentions, 0);
+		if (sum !== row.rawMentions) {
+			problems.push(`${t}: mentions ${row.mentions} + Σ(longer) ${sum - row.mentions} = ${sum} ≠ rawMentions ${row.rawMentions}`);
+		}
+	}
+	return problems;
+}
+
+test('the census reconciles a raw grep figure through the prefix-shadow equation', () => {
+	// A census taken against a different host says nothing about this one, so the
+	// host version is part of the data — and the reconciliation with a review that
+	// quoted `grep -o` counts has to be a PROPERTY of the file, not five numbers
+	// somebody re-copies at every host bump.
+	assert.ok(CENSUS.host && CENSUS.host.dshVersion, 'the census pins the host version it measured');
+	assert.match(CENSUS.host.dshVersion, /^\d+\.\d+\.\d+/, 'as a version, not a label');
+	assert.ok(CENSUS.host.filesScanned > 500, 'and how much of the host it walked');
+	const rows = Object.keys(CENSUS.tokens).filter((t) => CENSUS.tokens[t].rawMentions !== undefined);
+	assert.ok(rows.length > 100, `the shadow column covers the corpus, not a hand-picked few (${rows.length} rows)`);
+	assert.deepEqual(shadowProblems(CENSUS.tokens), [],
+		'every shadowed row satisfies rawMentions = mentions + Σ(longer mentions)');
+});
+
+test('the worked example: why the review said 37 and the census said 30', () => {
+	// The review (issue #81 round) quoted occurrence counts from a plain grep: 37
+	// for `--dsw-alias-markdown-code-block`, 4 for `markdown-inline-code`. Against
+	// the host it measured — 0.2.0-rc.1, frozen at commit 2c0bae4 — this census
+	// said 30, and the missing 7 were the `-banner` row: the grep has no boundary
+	// rule and counts the longer token's occurrences twice.
+	//
+	// Those figures describe rc.1. Re-frozen against 0.2.1-rc.5 the host itself
+	// moved: code-block 23 + banner 5 = 28, inline-code 3, and the review's 37/4
+	// no longer reproduce. That drift is precisely why nothing here pins them.
+	const t = '--dsw-alias-markdown-code-block';
+	const row = CENSUS.tokens[t];
+	assert.equal(row.rawMentions, row.mentions + CENSUS.tokens['--dsw-alias-markdown-code-block-banner'].mentions,
+		'the gap between a raw grep and this column is exactly the shadowing token');
+	assert.ok(row.rawMentions > row.mentions, 'and the shadow really does inflate the raw figure');
+	assert.equal(CENSUS.tokens['--dsw-alias-markdown-inline-code'].rawMentions, undefined,
+		'inline-code has no longer sibling on rc.5, so a raw grep and this column agree for it');
 	assert.ok(!CENSUS.tokens['--dsw-alias-brand-primary-soft'],
 		'the review\'s "0 occurrences" for brand-primary-soft reproduces as "absent from the host entirely"');
+});
+
+test('mutation: a census that lost the boundary rule reddens the shadow equation', () => {
+	// The failure this gate exists to catch. A token regex that stopped being greedy
+	// would credit `--dsw-alias-markdown-code-block` with the banner's occurrences, so
+	// `mentions` would rise to the raw figure and the sum would double-count — the
+	// exact shape a review would then read as "the census disagrees with itself".
+	const t = '--dsw-alias-markdown-code-block';
+	assert.deepEqual(shadowProblems(CENSUS.tokens), [], 'control: the frozen census is clean');
+	const boundaryless = { ...CENSUS.tokens, [t]: { ...CENSUS.tokens[t], mentions: CENSUS.tokens[t].rawMentions } };
+	const problems = shadowProblems(boundaryless);
+	// The lie propagates: every token that t shadows sums THROUGH t, so the report
+	// names t and each of its ancestors — a count derived from the census, not a
+	// number copied out of one run.
+	const ancestors = Object.keys(CENSUS.tokens).filter((u) => u !== t && t.startsWith(u));
+	assert.equal(problems.length, 1 + ancestors.length, `named rows: ${JSON.stringify(problems)}`);
+	assert.ok(problems.some((p) => p.startsWith(`${t}: mentions 28`)), 'the sabotaged row is named with both sides');
+	for (const u of ancestors) {
+		assert.ok(problems.some((p) => p.startsWith(`${u}:`)), `and so is ${u}, which sums through the sabotaged row`);
+	}
+	assert.match(problems[0], /≠ rawMentions/, 'every message carries the equation, not just "failed"');
+	// Second shape: the column missing on a shadowed row — a hand-edited or
+	// half-regenerated census — is a red, never a silent pass.
+	const noColumn = { ...CENSUS.tokens, [t]: { ...CENSUS.tokens[t] } };
+	delete noColumn[t].rawMentions;
+	const missing = shadowProblems(noColumn);
+	assert.equal(missing.length, 1, JSON.stringify(missing));
+	assert.match(missing[0], /carries no rawMentions/);
+	// Third shape: a rawMentions on a row that nothing shadows — i.e. the column
+	// was written from a stale kid set.
+	const invented = { ...CENSUS.tokens, '--dsw-specific-tip': { ...CENSUS.tokens['--dsw-specific-tip'], rawMentions: 99 } };
+	assert.match(shadowProblems(invented).join('\n'), /--dsw-specific-tip.*no longer token shadows it/);
 });
 
 // ── issue #76: the audit surface must ⊇ the solve surface ─────────────────

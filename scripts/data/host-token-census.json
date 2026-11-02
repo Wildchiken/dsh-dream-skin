@@ -949,6 +949,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 11,
       "files": 2
     },
     "--90a3ac": {
@@ -1021,6 +1022,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 7,
       "files": 1
     },
     "--END": {
@@ -1033,6 +1035,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 5,
       "files": 1
     },
     "--FOO-BAR--": {
@@ -1069,6 +1072,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--SocialCalcSpreadsheetControlSave--": {
@@ -1087,6 +1091,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 20,
+      "rawMentions": 344,
       "files": 6
     },
     "--absolute-git-dir": {
@@ -1105,6 +1110,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 8,
+      "rawMentions": 12,
       "files": 1
     },
     "--active-layer-color": {
@@ -1153,6 +1159,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 4,
+      "rawMentions": 6,
       "files": 3
     },
     "--app-color-async-children": {
@@ -1231,6 +1238,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 4,
+      "rawMentions": 6,
       "files": 3
     },
     "--app-color-idle-children": {
@@ -1255,6 +1263,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 6,
+      "rawMentions": 8,
       "files": 3
     },
     "--app-color-loading-children": {
@@ -1279,6 +1288,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 3,
+      "rawMentions": 4,
       "files": 3
     },
     "--app-color-messaging-children": {
@@ -1303,6 +1313,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 8,
       "files": 1
     },
     "--app-color-other-js-objects": {
@@ -1321,6 +1332,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 7,
+      "rawMentions": 9,
       "files": 3
     },
     "--app-color-painting-children": {
@@ -1333,6 +1345,7 @@
       "declares": 1,
       "consumers": 4,
       "mentions": 5,
+      "rawMentions": 7,
       "files": 2
     },
     "--app-color-performance-bad-dim": {
@@ -1345,6 +1358,7 @@
       "declares": 1,
       "consumers": 4,
       "mentions": 5,
+      "rawMentions": 7,
       "files": 2
     },
     "--app-color-performance-good-dim": {
@@ -1357,6 +1371,7 @@
       "declares": 1,
       "consumers": 3,
       "mentions": 4,
+      "rawMentions": 6,
       "files": 2
     },
     "--app-color-performance-ok-dim": {
@@ -1387,6 +1402,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 14,
+      "rawMentions": 17,
       "files": 3
     },
     "--app-color-rendering-children": {
@@ -1399,6 +1415,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 7,
+      "rawMentions": 9,
       "files": 3
     },
     "--app-color-scripting-children": {
@@ -1429,6 +1446,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 9,
+      "rawMentions": 11,
       "files": 4
     },
     "--app-color-system-children": {
@@ -1441,6 +1459,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--app-color-task-children": {
@@ -1537,6 +1556,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 25,
+      "rawMentions": 27,
       "files": 1
     },
     "--average-icon-url": {
@@ -1555,6 +1575,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 6,
+      "rawMentions": 93,
       "files": 3
     },
     "--b-5ga": {
@@ -1765,6 +1786,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 5,
+      "rawMentions": 799,
       "files": 4
     },
     "--c1avg": {
@@ -1873,6 +1895,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 3,
+      "rawMentions": 12,
       "files": 2
     },
     "--checklist-fail": {
@@ -1897,6 +1920,7 @@
       "declares": 2,
       "consumers": 4,
       "mentions": 6,
+      "rawMentions": 10,
       "files": 1
     },
     "--chevron-angle-right": {
@@ -1921,6 +1945,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--chrome-flags": {
@@ -1969,6 +1994,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 4,
+      "rawMentions": 18,
       "files": 1
     },
     "--code-background-color": {
@@ -1999,12 +2025,14 @@
       "declares": 4,
       "consumers": 3,
       "mentions": 8,
+      "rawMentions": 598,
       "files": 2
     },
     "--color-": {
       "declares": 0,
       "consumers": 4,
       "mentions": 6,
+      "rawMentions": 589,
       "files": 1
     },
     "--color-amber-50": {
@@ -2017,6 +2045,7 @@
       "declares": 2,
       "consumers": 14,
       "mentions": 16,
+      "rawMentions": 32,
       "files": 1
     },
     "--color-average-secondary": {
@@ -2029,6 +2058,7 @@
       "declares": 2,
       "consumers": 8,
       "mentions": 12,
+      "rawMentions": 56,
       "files": 4
     },
     "--color-background-elevation-1": {
@@ -2053,6 +2083,7 @@
       "declares": 2,
       "consumers": 6,
       "mentions": 8,
+      "rawMentions": 24,
       "files": 3
     },
     "--color-background-inverted-opacity-0": {
@@ -2119,18 +2150,21 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 18,
       "files": 2
     },
     "--color-continue-to-location-async": {
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 9,
       "files": 2
     },
     "--color-continue-to-location-async-hover": {
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--color-continue-to-location-async-hover-border": {
@@ -2143,6 +2177,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--color-continue-to-location-hover-border": {
@@ -2167,6 +2202,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--color-evaluated-expression-border": {
@@ -2179,6 +2215,7 @@
       "declares": 2,
       "consumers": 22,
       "mentions": 24,
+      "rawMentions": 38,
       "files": 1
     },
     "--color-fail-secondary": {
@@ -2191,6 +2228,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 142,
       "files": 1
     },
     "--color-gray-100": {
@@ -2221,6 +2259,7 @@
       "declares": 4,
       "consumers": 4,
       "mentions": 8,
+      "rawMentions": 16,
       "files": 1
     },
     "--color-gray-500": {
@@ -2257,6 +2296,7 @@
       "declares": 2,
       "consumers": 4,
       "mentions": 6,
+      "rawMentions": 12,
       "files": 1
     },
     "--color-green-700": {
@@ -2335,6 +2375,7 @@
       "declares": 2,
       "consumers": 4,
       "mentions": 6,
+      "rawMentions": 16,
       "files": 1
     },
     "--color-orange-50": {
@@ -2353,6 +2394,7 @@
       "declares": 2,
       "consumers": 18,
       "mentions": 20,
+      "rawMentions": 30,
       "files": 1
     },
     "--color-pass-secondary": {
@@ -2365,6 +2407,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 10,
       "files": 2
     },
     "--color-primary-old": {
@@ -2383,6 +2426,7 @@
       "declares": 4,
       "consumers": 5,
       "mentions": 9,
+      "rawMentions": 15,
       "files": 3
     },
     "--color-red-700": {
@@ -2401,6 +2445,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--color-ref-error100": {
@@ -2479,6 +2524,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--color-ref-neutral-variant100": {
@@ -2557,6 +2603,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--color-ref-neutral100": {
@@ -2659,6 +2706,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--color-ref-primary100": {
@@ -2737,6 +2785,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--color-ref-secondary100": {
@@ -2833,6 +2882,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--color-ref-tertiary100": {
@@ -2905,6 +2955,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--color-scrollbar-mac-hover": {
@@ -2917,6 +2968,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--color-scrollbar-other-hover": {
@@ -3001,6 +3053,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 9,
+      "rawMentions": 11,
       "files": 4
     },
     "--config-path": {
@@ -3019,6 +3072,7 @@
       "declares": 0,
       "consumers": 2,
       "mentions": 2,
+      "rawMentions": 32,
       "files": 1
     },
     "--console-color-black": {
@@ -3175,6 +3229,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 4,
+      "rawMentions": 5143,
       "files": 1
     },
     "--d1acj3b": {
@@ -3259,6 +3314,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--deploy-menu-arrow": {
@@ -3301,6 +3357,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 15,
       "files": 1
     },
     "--devices": {
@@ -3367,6 +3424,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 4,
+      "rawMentions": 9,
       "files": 1
     },
     "--dialog-margin-bottom": {
@@ -3667,6 +3725,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--disable-sdremote-bluetooth": {
@@ -3757,6 +3816,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 6,
+      "rawMentions": 12,
       "files": 1
     },
     "--document-zoom-reveal-height": {
@@ -3805,6 +3865,7 @@
       "declares": 2,
       "consumers": 18,
       "mentions": 20,
+      "rawMentions": 26,
       "files": 10
     },
     "--drop-shadow-depth-1": {
@@ -3835,6 +3896,7 @@
       "declares": 1,
       "consumers": 4,
       "mentions": 5,
+      "rawMentions": 14,
       "files": 3
     },
     "--ds-transition-duration-fast": {
@@ -3991,6 +4053,7 @@
       "declares": 1,
       "consumers": 109,
       "mentions": 110,
+      "rawMentions": 133,
       "files": 10
     },
     "--dsh-content-font-delta-secondary": {
@@ -4003,6 +4066,7 @@
       "declares": 0,
       "consumers": 28,
       "mentions": 31,
+      "rawMentions": 89,
       "files": 10
     },
     "--dsh-content-font-size-secondary": {
@@ -4069,12 +4133,14 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 16,
       "files": 2
     },
     "--dsh-font-family-code": {
       "declares": 0,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 6,
       "files": 2
     },
     "--dsh-font-family-code-default": {
@@ -4093,6 +4159,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsh-font-family-text-default": {
@@ -4141,6 +4208,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 4,
       "files": 1
     },
     "--dsh-menu-anchor": {
@@ -4159,6 +4227,7 @@
       "declares": 39,
       "consumers": 2,
       "mentions": 41,
+      "rawMentions": 87,
       "files": 26
     },
     "--dsh-scrollbar-thumb-border": {
@@ -4429,6 +4498,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2551,
       "files": 1
     },
     "--dsw-alias-bg-base": {
@@ -4543,6 +4613,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 6,
       "files": 3
     },
     "--dsw-alias-border-inverted2": {
@@ -4561,6 +4632,7 @@
       "declares": 2,
       "consumers": 90,
       "mentions": 94,
+      "rawMentions": 105,
       "files": 33
     },
     "--dsw-alias-border-l2-darkmode-thin": {
@@ -4585,6 +4657,7 @@
       "declares": 2,
       "consumers": 10,
       "mentions": 14,
+      "rawMentions": 32,
       "files": 6
     },
     "--dsw-alias-brand-primary-invert": {
@@ -4681,6 +4754,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 5,
       "files": 2
     },
     "--dsw-alias-button-tool-bar-fill-invisible": {
@@ -4777,6 +4851,7 @@
       "declares": 3,
       "consumers": 156,
       "mentions": 159,
+      "rawMentions": 186,
       "files": 37
     },
     "--dsw-alias-interactive-bg-hover-accent": {
@@ -4807,6 +4882,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--dsw-alias-label-deep-diving-shimmer": {
@@ -4837,6 +4913,7 @@
       "declares": 2,
       "consumers": 330,
       "mentions": 334,
+      "rawMentions": 367,
       "files": 50
     },
     "--dsw-alias-label-primary-bluish": {
@@ -4903,6 +4980,7 @@
       "declares": 2,
       "consumers": 21,
       "mentions": 23,
+      "rawMentions": 28,
       "files": 8
     },
     "--dsw-alias-markdown-code-block-banner": {
@@ -5125,6 +5203,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--dsw-alias-turn-trigger-bg-hover": {
@@ -5161,6 +5240,7 @@
       "declares": 1,
       "consumers": 5,
       "mentions": 6,
+      "rawMentions": 35,
       "files": 2
     },
     "--dsw-elevation-stroke-color": {
@@ -5185,12 +5265,14 @@
       "declares": 0,
       "consumers": 7,
       "mentions": 7,
+      "rawMentions": 361,
       "files": 3
     },
     "--dsw-font-base-16": {
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-base-16-font-family": {
@@ -5227,6 +5309,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-base-strong-16-font-family": {
@@ -5263,6 +5346,7 @@
       "declares": 2,
       "consumers": 72,
       "mentions": 74,
+      "rawMentions": 79,
       "files": 8
     },
     "--dsw-font-family-brand": {
@@ -5275,6 +5359,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsw-font-l-20-font-family": {
@@ -5311,6 +5396,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-m-18-font-family": {
@@ -5347,6 +5433,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 26,
       "files": 2
     },
     "--dsw-font-markdown-base-font-family": {
@@ -5377,6 +5464,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-markdown-base-italic-font-family": {
@@ -5419,6 +5507,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 13,
       "files": 2
     },
     "--dsw-font-markdown-base-strong-font-family": {
@@ -5449,6 +5538,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-markdown-base-strong-italic-font-family": {
@@ -5491,12 +5581,14 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 40,
       "files": 2
     },
     "--dsw-font-markdown-code-block": {
       "declares": 1,
       "consumers": 9,
       "mentions": 10,
+      "rawMentions": 32,
       "files": 4
     },
     "--dsw-font-markdown-code-block-font-family": {
@@ -5533,6 +5625,7 @@
       "declares": 1,
       "consumers": 11,
       "mentions": 12,
+      "rawMentions": 17,
       "files": 6
     },
     "--dsw-font-markdown-code-block-small-font-family": {
@@ -5599,6 +5692,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsw-font-markdown-h1-font-family": {
@@ -5635,6 +5729,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsw-font-markdown-h2-font-family": {
@@ -5671,6 +5766,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsw-font-markdown-h3-font-family": {
@@ -5707,6 +5803,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsw-font-markdown-h4-font-family": {
@@ -5743,6 +5840,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 25,
       "files": 2
     },
     "--dsw-font-markdown-small-font-family": {
@@ -5773,6 +5871,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-markdown-small-italic-font-family": {
@@ -5815,6 +5914,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 12,
       "files": 1
     },
     "--dsw-font-markdown-small-strong-font-family": {
@@ -5845,6 +5945,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-markdown-small-strong-italic-font-family": {
@@ -5887,6 +5988,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 14,
       "files": 2
     },
     "--dsw-font-markdown-table-font-family": {
@@ -5917,6 +6019,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsw-font-markdown-table-head-font-family": {
@@ -5965,6 +6068,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsw-font-s-14-font-family": {
@@ -6001,6 +6105,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-s-strong-14-font-family": {
@@ -6037,6 +6142,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-xl-24-font-family": {
@@ -6073,6 +6179,7 @@
       "declares": 1,
       "consumers": 31,
       "mentions": 32,
+      "rawMentions": 37,
       "files": 8
     },
     "--dsw-font-xs-13-font-family": {
@@ -6109,6 +6216,7 @@
       "declares": 1,
       "consumers": 4,
       "mentions": 5,
+      "rawMentions": 10,
       "files": 3
     },
     "--dsw-font-xs-strong-13-font-family": {
@@ -6145,6 +6253,7 @@
       "declares": 1,
       "consumers": 15,
       "mentions": 16,
+      "rawMentions": 21,
       "files": 4
     },
     "--dsw-font-xxs-12-font-family": {
@@ -6181,6 +6290,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-xxs-strong-12-font-family": {
@@ -6217,6 +6327,7 @@
       "declares": 1,
       "consumers": 5,
       "mentions": 6,
+      "rawMentions": 11,
       "files": 3
     },
     "--dsw-font-xxxs-11-font-family": {
@@ -6253,6 +6364,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--dsw-font-xxxs-strong-11-font-family": {
@@ -6379,6 +6491,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--dsw-shadow-lv1-blur": {
@@ -6403,6 +6516,7 @@
       "declares": 2,
       "consumers": 3,
       "mentions": 5,
+      "rawMentions": 9,
       "files": 4
     },
     "--dsw-specific-bubble-highlight": {
@@ -6445,6 +6559,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--dsw-specific-sidebar-nav-item-active-accent": {
@@ -6523,6 +6638,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 11,
       "files": 1
     },
     "--dsw-static-blue-500": {
@@ -6601,6 +6717,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 14,
       "files": 1
     },
     "--dsw-static-deepseek-500": {
@@ -6649,6 +6766,7 @@
       "declares": 2,
       "consumers": 3,
       "mentions": 5,
+      "rawMentions": 11,
       "files": 2
     },
     "--dsw-static-green-500-a08": {
@@ -6679,6 +6797,7 @@
       "declares": 2,
       "consumers": 4,
       "mentions": 6,
+      "rawMentions": 9,
       "files": 4
     },
     "--dsw-static-neutral-1000": {
@@ -6721,6 +6840,7 @@
       "declares": 2,
       "consumers": 5,
       "mentions": 7,
+      "rawMentions": 9,
       "files": 4
     },
     "--dsw-static-neutral-500": {
@@ -6775,6 +6895,7 @@
       "declares": 2,
       "consumers": 7,
       "mentions": 9,
+      "rawMentions": 17,
       "files": 1
     },
     "--dsw-static-neutral-bluish-1000": {
@@ -6811,6 +6932,7 @@
       "declares": 2,
       "consumers": 10,
       "mentions": 12,
+      "rawMentions": 15,
       "files": 1
     },
     "--dsw-static-neutral-bluish-500": {
@@ -6823,6 +6945,7 @@
       "declares": 2,
       "consumers": 5,
       "mentions": 7,
+      "rawMentions": 12,
       "files": 1
     },
     "--dsw-static-neutral-bluish-600": {
@@ -6841,6 +6964,7 @@
       "declares": 2,
       "consumers": 5,
       "mentions": 7,
+      "rawMentions": 18,
       "files": 1
     },
     "--dsw-static-neutral-bluish-750": {
@@ -6889,6 +7013,7 @@
       "declares": 2,
       "consumers": 3,
       "mentions": 5,
+      "rawMentions": 8,
       "files": 1
     },
     "--dsw-static-red-400-a12": {
@@ -6901,6 +7026,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--dsw-static-red-500": {
@@ -6913,6 +7039,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 7,
       "files": 2
     },
     "--dsw-static-red-600-a08": {
@@ -6961,6 +7088,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 49,
+      "rawMentions": 215,
       "files": 13
     },
     "--e1a4c": {
@@ -7117,6 +7245,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 20,
+      "rawMentions": 28,
       "files": 1
     },
     "--error-color": {
@@ -7141,6 +7270,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 6,
       "files": 2
     },
     "--evaluation": {
@@ -7153,6 +7283,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 10,
+      "rawMentions": 11,
       "files": 1
     },
     "--eveni-0qa01ga": {
@@ -7207,6 +7338,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 4,
+      "rawMentions": 114,
       "files": 1
     },
     "--f6qx53a": {
@@ -7225,6 +7357,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 30,
+      "rawMentions": 36,
       "files": 2
     },
     "--fail-icon-url": {
@@ -7261,6 +7394,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 5,
       "files": 1
     },
     "--file-selection": {
@@ -7381,6 +7515,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 5,
       "files": 1
     },
     "--foo-bar--": {
@@ -7477,6 +7612,7 @@
       "declares": 16,
       "consumers": 32,
       "mentions": 48,
+      "rawMentions": 76,
       "files": 1
     },
     "--gauge-circle-size-big": {
@@ -7495,6 +7631,7 @@
       "declares": 10,
       "consumers": 2,
       "mentions": 12,
+      "rawMentions": 22,
       "files": 1
     },
     "--gauge-label-font-size-big": {
@@ -7507,6 +7644,7 @@
       "declares": 10,
       "consumers": 2,
       "mentions": 12,
+      "rawMentions": 22,
       "files": 1
     },
     "--gauge-label-line-height-big": {
@@ -7519,6 +7657,7 @@
       "declares": 12,
       "consumers": 0,
       "mentions": 12,
+      "rawMentions": 22,
       "files": 1
     },
     "--gauge-percentage-font-size-big": {
@@ -7555,6 +7694,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 6,
       "files": 1
     },
     "--get-regexp": {
@@ -7591,6 +7731,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--git-path": {
@@ -7669,6 +7810,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 153,
       "files": 1
     },
     "--h-2fa": {
@@ -7687,6 +7829,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--h2brj9c8c": {
@@ -7795,12 +7938,14 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 56,
       "files": 1
     },
     "--highlight": {
       "declares": 0,
       "consumers": 0,
       "mentions": 50,
+      "rawMentions": 54,
       "files": 1
     },
     "--highlighter-background-color": {
@@ -7879,6 +8024,7 @@
       "declares": 0,
       "consumers": 4,
       "mentions": 76,
+      "rawMentions": 794,
       "files": 15
     },
     "--i1b6b1a6a2e": {
@@ -7909,6 +8055,7 @@
       "declares": 1,
       "consumers": 3,
       "mentions": 4,
+      "rawMentions": 8,
       "files": 3
     },
     "--icon-css-hover": {
@@ -7921,6 +8068,7 @@
       "declares": 6,
       "consumers": 30,
       "mentions": 36,
+      "rawMentions": 46,
       "files": 14
     },
     "--icon-default-hover": {
@@ -8041,6 +8189,7 @@
       "declares": 1,
       "consumers": 3,
       "mentions": 4,
+      "rawMentions": 6,
       "files": 3
     },
     "--icon-gap-toolbar-hover": {
@@ -8077,6 +8226,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 2
     },
     "--icon-request-response": {
@@ -8131,6 +8281,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 1,
+      "rawMentions": 397,
       "files": 1
     },
     "--image-file-3d-center": {
@@ -8329,6 +8480,7 @@
       "declares": 0,
       "consumers": 4,
       "mentions": 5,
+      "rawMentions": 11,
       "files": 4
     },
     "--image-file-arrow-drop-down-dark": {
@@ -8359,12 +8511,14 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--image-file-arrow-up-down": {
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-arrow-up-down-circle": {
@@ -8443,6 +8597,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-breakpoint-crossed-filled": {
@@ -8455,6 +8610,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--image-file-brush-2": {
@@ -8539,6 +8695,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-chevron-left-dot": {
@@ -8587,6 +8744,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-clear-list": {
@@ -8605,6 +8763,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--image-file-code-circle": {
@@ -8629,6 +8788,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-color-picker-filled": {
@@ -8689,12 +8849,14 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 4,
       "files": 1
     },
     "--image-file-cross-circle": {
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--image-file-cross-circle-filled": {
@@ -8713,6 +8875,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-database-off": {
@@ -8743,6 +8906,7 @@
       "declares": 0,
       "consumers": 2,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 3
     },
     "--image-file-devtools-thumbnail": {
@@ -8869,6 +9033,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-experiment-check": {
@@ -8887,6 +9052,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-eye-crossed": {
@@ -8977,6 +9143,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--image-file-filter-clear": {
@@ -9013,6 +9180,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-flowsheet": {
@@ -9031,6 +9199,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--image-file-folder-asterisk": {
@@ -9049,6 +9218,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--image-file-frame-crossed": {
@@ -9079,6 +9249,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--image-file-gear-filled": {
@@ -9139,6 +9310,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 6,
       "files": 2
     },
     "--image-file-heap-snapshots": {
@@ -9175,6 +9347,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-iframe-crossed": {
@@ -9199,6 +9372,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-info-filled": {
@@ -9301,6 +9475,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 4,
       "files": 1
     },
     "--image-file-keyboard-arrow-right": {
@@ -9325,6 +9500,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-label-auto": {
@@ -9343,6 +9519,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-layers-filled": {
@@ -9367,6 +9544,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-lightbulb-spark": {
@@ -9397,6 +9575,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-lock-person": {
@@ -9493,6 +9672,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-pause-circle": {
@@ -9511,6 +9691,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 5,
       "files": 1
     },
     "--image-file-performance-panel-delete-annotation": {
@@ -9763,6 +9944,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-spark-info": {
@@ -9793,6 +9975,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 4,
       "files": 1
     },
     "--image-file-step-into": {
@@ -9859,6 +10042,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-thumb-down-filled": {
@@ -9871,6 +10055,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--image-file-thumb-up-filled": {
@@ -9967,6 +10152,7 @@
       "declares": 0,
       "consumers": 2,
       "mentions": 3,
+      "rawMentions": 5,
       "files": 2
     },
     "--image-file-warning-filled": {
@@ -10027,6 +10213,7 @@
       "declares": 0,
       "consumers": 2,
       "mentions": 5,
+      "rawMentions": 15,
       "files": 1
     },
     "--indent-marker-active-bg-color": {
@@ -10081,6 +10268,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 5,
+      "rawMentions": 14,
       "files": 1
     },
     "--input-outline": {
@@ -10111,6 +10299,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 5,
       "files": 1
     },
     "--inspect-brk": {
@@ -10177,6 +10366,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 3,
+      "rawMentions": 72,
       "files": 3
     },
     "--j1aef": {
@@ -10225,6 +10415,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 25,
+      "rawMentions": 60,
       "files": 8
     },
     "--json-tree-collapsed-lines": {
@@ -10447,6 +10638,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 10,
+      "rawMentions": 87,
       "files": 7
     },
     "--l-1fa": {
@@ -10495,6 +10687,7 @@
       "declares": 4,
       "consumers": 1,
       "mentions": 5,
+      "rawMentions": 6,
       "files": 3
     },
     "--legacy-accent-color-hover": {
@@ -10513,6 +10706,7 @@
       "declares": 2,
       "consumers": 3,
       "mentions": 5,
+      "rawMentions": 10,
       "files": 3
     },
     "--legacy-focus-ring-inactive-shadow-color": {
@@ -10585,6 +10779,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 16,
       "files": 1
     },
     "--link-color": {
@@ -10669,6 +10864,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 251,
       "files": 1
     },
     "--m3ch0j3a": {
@@ -10765,6 +10961,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 14,
+      "rawMentions": 17,
       "files": 1
     },
     "--message-corner-rounder-background": {
@@ -10789,6 +10986,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 16,
+      "rawMentions": 53,
       "files": 1
     },
     "--metric-array": {
@@ -10831,6 +11029,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 10,
+      "rawMentions": 15,
       "files": 1
     },
     "--metrics-height": {
@@ -10921,6 +11120,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--mgbbh1a71e": {
@@ -11017,6 +11217,7 @@
       "declares": 0,
       "consumers": 2,
       "mentions": 3,
+      "rawMentions": 5,
       "files": 1
     },
     "--min-font-size-inv": {
@@ -11149,6 +11350,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 6,
+      "rawMentions": 12,
       "files": 1
     },
     "--msvc": {
@@ -11185,6 +11387,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 40,
+      "rawMentions": 159,
       "files": 12
     },
     "--name-only": {
@@ -11281,6 +11484,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 4,
+      "rawMentions": 7,
       "files": 1
     },
     "--network-overview-service-worker-respond-with": {
@@ -11443,6 +11647,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--nqv7fs00ema": {
@@ -11509,12 +11714,14 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 29,
+      "rawMentions": 321,
       "files": 10
     },
     "--o1ac": {
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--o1ach": {
@@ -11617,6 +11824,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 13,
       "files": 2
     },
     "--outline-width": {
@@ -11629,6 +11837,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 5,
+      "rawMentions": 10,
       "files": 2
     },
     "--output-dir": {
@@ -11647,6 +11856,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 236,
       "files": 1
     },
     "--override-adorner-active-background-color": {
@@ -11743,6 +11953,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 3,
+      "rawMentions": 11,
       "files": 1
     },
     "--override-color-perf-monitor-cpu-layout-duration": {
@@ -11797,6 +12008,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 1
     },
     "--override-color-perf-monitor-jsheap-total-size": {
@@ -12175,6 +12387,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 9,
+      "rawMentions": 237,
       "files": 6
     },
     "--p1acf": {
@@ -12193,6 +12406,7 @@
       "declares": 1,
       "consumers": 2,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 1
     },
     "--padding-left": {
@@ -12229,6 +12443,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 25,
+      "rawMentions": 27,
       "files": 1
     },
     "--pass-icon-url": {
@@ -12259,6 +12474,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 16,
+      "rawMentions": 20,
       "files": 1
     },
     "--peek-dur": {
@@ -12307,6 +12523,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 6,
+      "rawMentions": 48,
       "files": 1
     },
     "--plugin-badge-background-color": {
@@ -12319,6 +12536,7 @@
       "declares": 4,
       "consumers": 4,
       "mentions": 8,
+      "rawMentions": 14,
       "files": 1
     },
     "--plugin-badge-size-big": {
@@ -12337,6 +12555,7 @@
       "declares": 4,
       "consumers": 2,
       "mentions": 6,
+      "rawMentions": 10,
       "files": 1
     },
     "--plugin-icon-url-dark": {
@@ -12367,6 +12586,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--preset": {
@@ -12379,6 +12599,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 6,
+      "rawMentions": 7,
       "files": 1
     },
     "--print-uris": {
@@ -12403,6 +12624,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 26,
+      "rawMentions": 30,
       "files": 8
     },
     "--profile-directory": {
@@ -12553,6 +12775,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 42,
+      "rawMentions": 1031,
       "files": 13
     },
     "--radius": {
@@ -12619,6 +12842,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--ref-palette-blue100": {
@@ -12697,6 +12921,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 2
     },
     "--ref-palette-cyan100": {
@@ -12775,6 +13000,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--ref-palette-error100": {
@@ -12853,6 +13079,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--ref-palette-green100": {
@@ -12877,6 +13104,7 @@
       "declares": 0,
       "consumers": 1,
       "mentions": 1,
+      "rawMentions": 5,
       "files": 1
     },
     "--ref-palette-green40": {
@@ -12937,6 +13165,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--ref-palette-indigo100": {
@@ -13015,6 +13244,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--ref-palette-neutral-variant100": {
@@ -13093,6 +13323,7 @@
       "declares": 1,
       "consumers": 21,
       "mentions": 23,
+      "rawMentions": 51,
       "files": 4
     },
     "--ref-palette-neutral100": {
@@ -13201,6 +13432,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--ref-palette-orange100": {
@@ -13279,6 +13511,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--ref-palette-pink100": {
@@ -13363,6 +13596,7 @@
       "declares": 1,
       "consumers": 2,
       "mentions": 3,
+      "rawMentions": 5,
       "files": 1
     },
     "--ref-palette-primary100": {
@@ -13441,6 +13675,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--ref-palette-purple100": {
@@ -13519,6 +13754,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--ref-palette-secondary100": {
@@ -13615,6 +13851,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--ref-palette-tertiary100": {
@@ -13693,6 +13930,7 @@
       "declares": 1,
       "consumers": 1,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--ref-palette-yellow100": {
@@ -13807,6 +14045,7 @@
       "declares": 0,
       "consumers": 2,
       "mentions": 2,
+      "rawMentions": 32,
       "files": 1
     },
     "--report-border-color-secondary": {
@@ -13819,6 +14058,7 @@
       "declares": 2,
       "consumers": 6,
       "mentions": 8,
+      "rawMentions": 12,
       "files": 1
     },
     "--report-content-max-width-minus-edge-gap": {
@@ -13837,6 +14077,7 @@
       "declares": 3,
       "consumers": 7,
       "mentions": 10,
+      "rawMentions": 22,
       "files": 1
     },
     "--report-font-family-monospace": {
@@ -13849,6 +14090,7 @@
       "declares": 8,
       "consumers": 10,
       "mentions": 18,
+      "rawMentions": 34,
       "files": 1
     },
     "--report-font-size-secondary": {
@@ -13867,6 +14109,7 @@
       "declares": 8,
       "consumers": 14,
       "mentions": 22,
+      "rawMentions": 32,
       "files": 1
     },
     "--report-line-height-secondary": {
@@ -13891,6 +14134,7 @@
       "declares": 4,
       "consumers": 16,
       "mentions": 20,
+      "rawMentions": 30,
       "files": 1
     },
     "--report-text-color-secondary": {
@@ -13975,6 +14219,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--risa-5na": {
@@ -13993,6 +14238,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--rland-uua": {
@@ -14017,6 +14263,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 3,
+      "rawMentions": 4,
       "files": 1
     },
     "--rny31h": {
@@ -14029,6 +14276,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 9,
       "files": 1
     },
     "--ro-bind": {
@@ -14119,6 +14367,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 15,
+      "rawMentions": 4965,
       "files": 6
     },
     "--s-1fa": {
@@ -14221,6 +14470,7 @@
       "declares": 4,
       "consumers": 6,
       "mentions": 10,
+      "rawMentions": 40,
       "files": 1
     },
     "--score-icon-margin-left": {
@@ -14239,6 +14489,7 @@
       "declares": 10,
       "consumers": 50,
       "mentions": 60,
+      "rawMentions": 62,
       "files": 1
     },
     "--score-icon-size-big": {
@@ -14269,6 +14520,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 3,
       "files": 1
     },
     "--sdtirol-n2a": {
@@ -14341,6 +14593,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 3,
+      "rawMentions": 25,
       "files": 2
     },
     "--shiki-background": {
@@ -14401,6 +14654,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--shiki-token-string-expression": {
@@ -14413,6 +14667,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 10,
+      "rawMentions": 17,
       "files": 1
     },
     "--show-element-display": {
@@ -14437,6 +14692,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 3,
       "files": 1
     },
     "--signal": {
@@ -14455,6 +14711,7 @@
       "declares": 1,
       "consumers": 3,
       "mentions": 4,
+      "rawMentions": 7,
       "files": 1
     },
     "--size-12": {
@@ -14593,6 +14850,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 3,
+      "rawMentions": 33,
       "files": 2
     },
     "--source-code-font-family": {
@@ -14773,18 +15031,21 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 4555,
       "files": 1
     },
     "--sys-color-base": {
       "declares": 4,
       "consumers": 5,
       "mentions": 9,
+      "rawMentions": 21,
       "files": 3
     },
     "--sys-color-base-container": {
       "declares": 2,
       "consumers": 3,
       "mentions": 5,
+      "rawMentions": 12,
       "files": 2
     },
     "--sys-color-base-container-elevated": {
@@ -14797,6 +15058,7 @@
       "declares": 2,
       "consumers": 3,
       "mentions": 7,
+      "rawMentions": 10,
       "files": 5
     },
     "--sys-color-blue-bright": {
@@ -14809,6 +15071,7 @@
       "declares": 2,
       "consumers": 4,
       "mentions": 6,
+      "rawMentions": 246,
       "files": 3
     },
     "--sys-color-cdt-base-container": {
@@ -14821,6 +15084,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 10,
       "files": 2
     },
     "--sys-color-cyan-bright": {
@@ -14833,6 +15097,7 @@
       "declares": 4,
       "consumers": 276,
       "mentions": 280,
+      "rawMentions": 288,
       "files": 45
     },
     "--sys-color-divider-on-tonal-container": {
@@ -14851,6 +15116,7 @@
       "declares": 2,
       "consumers": 76,
       "mentions": 80,
+      "rawMentions": 119,
       "files": 18
     },
     "--sys-color-error-bright": {
@@ -14887,6 +15153,7 @@
       "declares": 2,
       "consumers": 17,
       "mentions": 19,
+      "rawMentions": 35,
       "files": 8
     },
     "--sys-color-green-bright": {
@@ -14947,6 +15214,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 6,
       "files": 2
     },
     "--sys-color-on-base-divider": {
@@ -14971,6 +15239,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 7,
       "files": 2
     },
     "--sys-color-on-error-container": {
@@ -15025,6 +15294,7 @@
       "declares": 2,
       "consumers": 177,
       "mentions": 191,
+      "rawMentions": 317,
       "files": 42
     },
     "--sys-color-on-surface-error": {
@@ -15043,6 +15313,7 @@
       "declares": 2,
       "consumers": 5,
       "mentions": 7,
+      "rawMentions": 11,
       "files": 3
     },
     "--sys-color-on-surface-light-graphics": {
@@ -15079,6 +15350,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--sys-color-on-tertiary-container": {
@@ -15097,6 +15369,7 @@
       "declares": 2,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 11,
       "files": 1
     },
     "--sys-color-on-yellow-container": {
@@ -15109,6 +15382,7 @@
       "declares": 2,
       "consumers": 4,
       "mentions": 6,
+      "rawMentions": 19,
       "files": 3
     },
     "--sys-color-orange-bright": {
@@ -15127,6 +15401,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 7,
       "files": 3
     },
     "--sys-color-pink-bright": {
@@ -15139,6 +15414,7 @@
       "declares": 3,
       "consumers": 160,
       "mentions": 163,
+      "rawMentions": 195,
       "files": 32
     },
     "--sys-color-primary-bright": {
@@ -15151,6 +15427,7 @@
       "declares": 2,
       "consumers": 4,
       "mentions": 6,
+      "rawMentions": 22,
       "files": 5
     },
     "--sys-color-purple-bright": {
@@ -15169,6 +15446,7 @@
       "declares": 2,
       "consumers": 62,
       "mentions": 67,
+      "rawMentions": 84,
       "files": 24
     },
     "--sys-color-state-disabled-container": {
@@ -15277,6 +15555,7 @@
       "declares": 4,
       "consumers": 10,
       "mentions": 14,
+      "rawMentions": 171,
       "files": 7
     },
     "--sys-color-surface-error": {
@@ -15301,6 +15580,7 @@
       "declares": 2,
       "consumers": 14,
       "mentions": 16,
+      "rawMentions": 19,
       "files": 10
     },
     "--sys-color-surface-yellow-high": {
@@ -15343,6 +15623,7 @@
       "declares": 2,
       "consumers": 9,
       "mentions": 11,
+      "rawMentions": 17,
       "files": 5
     },
     "--sys-color-tertiary-container": {
@@ -15361,6 +15642,7 @@
       "declares": 2,
       "consumers": 12,
       "mentions": 14,
+      "rawMentions": 25,
       "files": 6
     },
     "--sys-color-token-attribute-value": {
@@ -15421,6 +15703,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 20,
       "files": 3
     },
     "--sys-color-token-property-special": {
@@ -15439,6 +15722,7 @@
       "declares": 2,
       "consumers": 1,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 2
     },
     "--sys-color-token-string-special": {
@@ -15469,6 +15753,7 @@
       "declares": 2,
       "consumers": 2,
       "mentions": 4,
+      "rawMentions": 9,
       "files": 3
     },
     "--sys-color-token-variable-special": {
@@ -15493,6 +15778,7 @@
       "declares": 2,
       "consumers": 12,
       "mentions": 14,
+      "rawMentions": 58,
       "files": 4
     },
     "--sys-color-yellow-bright": {
@@ -15595,6 +15881,7 @@
       "declares": 1,
       "consumers": 15,
       "mentions": 16,
+      "rawMentions": 33,
       "files": 5
     },
     "--sys-shape-corner-medium-small": {
@@ -15613,6 +15900,7 @@
       "declares": 1,
       "consumers": 81,
       "mentions": 82,
+      "rawMentions": 190,
       "files": 21
     },
     "--sys-size-10": {
@@ -15679,6 +15967,7 @@
       "declares": 1,
       "consumers": 157,
       "mentions": 158,
+      "rawMentions": 197,
       "files": 27
     },
     "--sys-size-20": {
@@ -15745,6 +16034,7 @@
       "declares": 1,
       "consumers": 193,
       "mentions": 194,
+      "rawMentions": 246,
       "files": 32
     },
     "--sys-size-30": {
@@ -15811,6 +16101,7 @@
       "declares": 1,
       "consumers": 149,
       "mentions": 150,
+      "rawMentions": 152,
       "files": 25
     },
     "--sys-size-40": {
@@ -15949,6 +16240,7 @@
       "declares": 0,
       "consumers": 3,
       "mentions": 3,
+      "rawMentions": 122,
       "files": 1
     },
     "--sys-typescale-body4-bold": {
@@ -16015,6 +16307,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 5,
       "files": 1
     },
     "--sys-typescale-headline1-line-height": {
@@ -16033,6 +16326,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 5,
       "files": 1
     },
     "--sys-typescale-headline2-line-height": {
@@ -16051,6 +16345,7 @@
       "declares": 1,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--sys-typescale-headline3-line-height": {
@@ -16069,6 +16364,7 @@
       "declares": 1,
       "consumers": 9,
       "mentions": 10,
+      "rawMentions": 16,
       "files": 7
     },
     "--sys-typescale-headline4-line-height": {
@@ -16087,6 +16383,7 @@
       "declares": 1,
       "consumers": 13,
       "mentions": 14,
+      "rawMentions": 26,
       "files": 8
     },
     "--sys-typescale-headline5-line-height": {
@@ -16129,6 +16426,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 49,
+      "rawMentions": 457,
       "files": 19
     },
     "--t60b56a": {
@@ -16183,6 +16481,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 9,
+      "rawMentions": 17,
       "files": 2
     },
     "--temp-write-sid": {
@@ -16195,6 +16494,7 @@
       "declares": 0,
       "consumers": 6,
       "mentions": 7,
+      "rawMentions": 15,
       "files": 1
     },
     "--terminal-cursor-accent": {
@@ -16225,6 +16525,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 4,
+      "rawMentions": 31,
       "files": 1
     },
     "--text-disabled": {
@@ -16351,6 +16652,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 111,
       "files": 1
     },
     "--to-X": {
@@ -16423,6 +16725,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 4,
+      "rawMentions": 26,
       "files": 1
     },
     "--toplevel-warning-background-color": {
@@ -16471,6 +16774,7 @@
       "declares": 0,
       "consumers": 2,
       "mentions": 3,
+      "rawMentions": 6,
       "files": 1
     },
     "--trajectory-assistant-ttft-color": {
@@ -16651,6 +16955,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 4,
       "files": 1
     },
     "--trusted-host": {
@@ -16705,6 +17010,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 13,
+      "rawMentions": 57,
       "files": 4
     },
     "--uc0atv": {
@@ -16783,6 +17089,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 10,
+      "rawMentions": 13,
       "files": 1
     },
     "--user-color-source": {
@@ -16837,6 +17144,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 4,
       "files": 1
     },
     "--value-bar": {
@@ -16885,6 +17193,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--version-info": {
@@ -16939,6 +17248,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--viewer-container-height": {
@@ -17011,6 +17321,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 6,
       "files": 1
     },
     "--watch-expression-delete-button-background-color": {
@@ -17071,6 +17382,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 15,
       "files": 1
     },
     "--with-build-platform-configure-options": {
@@ -17257,6 +17569,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 5,
       "files": 1
     },
     "--xc": {
@@ -17293,6 +17606,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 1,
+      "rawMentions": 2,
       "files": 1
     },
     "--yer-zna": {
@@ -17329,6 +17643,7 @@
       "declares": 0,
       "consumers": 0,
       "mentions": 2,
+      "rawMentions": 7,
       "files": 1
     },
     "--zbx025d": {

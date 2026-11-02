@@ -232,12 +232,20 @@ const REQUIRED_TOKENS = [
 // badge background and a focus ring), so it is a real painted surface and
 // belongs in the `tints` scoring surface.
 //
-// What the same method DOES find is four host slots that nobody consumes —
+// What the same method DID find is four host slots that nobody consumes —
 // not on the host side and not on ours. They are recorded below rather than
 // deleted: the host declares them, so any consumer we cannot see (a desktop
 // shell, a third-party plugin, a later host build) gets the skin's value
 // instead of the host neutral. What must not happen is counting them among
 // VERIFIED surfaces, and the check's report line says so out loud.
+//
+// One of the four left on 2026-11-02, when the census was re-taken against
+// 0.2.1-rc.5: `--dsw-specific-bubble-highlight` measures 1 consumer there —
+// `dsh-experimental-session-inspector` paints its chat-reveal highlight with it
+// and reads it back through `getComputedStyle` — where rc.1 measured 0. So it is
+// no longer an allowlisted slot but a host-painted surface, and the gate that
+// demands 0 consumers of every entry is what forced the reclassification; the
+// allowlist cannot quietly outlive the measurement it was written from.
 //
 // `scripts/data/host-token-census.json` is the frozen host measurement
 // (regenerate with `node scripts/host-consumers.cjs`); the plugin side is read
@@ -251,9 +259,7 @@ const UNCONSUMED_HOST_SLOTS = {
   '--dsw-alias-button-primary-dimmed':
     'same measurement; graded by the `accent` check as the dimmed button fill',
   '--dsw-specific-tip':
-    'the host paints tooltips from --dsw-alias-tooltip-bg instead; kept because it is a host-declared rung of the elevation ladder',
-  '--dsw-specific-bubble-highlight':
-    'host declares, nothing reads; shipped for palette completeness'
+    'the host paints tooltips from --dsw-alias-tooltip-bg instead; kept because it is a host-declared rung of the elevation ladder'
 };
 
 /**

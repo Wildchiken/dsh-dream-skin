@@ -16,9 +16,10 @@
  * reader was looking at, and borrowed 弹窗透明度. Both halves of that mistake are
  * pinned here, in both directions.
  *
- * Boundary: this is a source-level contract for CSS we could not eyeball in a live
- * 0.2.1-rc.5 host (this machine runs 0.2.0-rc.1). It proves the rules are present and
- * gated, not that the page looks right.
+ * Boundary: this is a source-level contract for CSS we have not eyeballed on a live
+ * page. The host install this round is 0.2.1-rc.5 and the census is re-taken against
+ * it, but no rendered readout of the plugin page at this version is on record — these
+ * cases prove the rules are present and gated, not that the page looks right.
  */
 const { test } = require('node:test');
 const assert = require('node:assert');
