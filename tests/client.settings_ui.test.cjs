@@ -144,7 +144,10 @@ test('the bundle registers the seven item rows exactly once each, and orders the
 	assert.ok(page.section, 'a "settings.section" registration must exist');
 	assert.equal(page.section.desc.id, 'dream-skin');
 	assert.equal(page.section.desc.order, 10);
-	assert.equal(page.section.desc.label, '个性化皮肤', 'the settings nav label is a 钉点: other gates match the whole string');
+	assert.equal(typeof page.section.desc.label, 'function',
+		'the nav label is resolved per render, the way every first-party host section does it (`label: () => t("nav")`) — a static string puts Chinese in an English host\'s nav');
+	assert.equal(page.section.desc.label(), '个性化皮肤',
+		'with no locale service answering, the label falls back to the string this plugin shipped before — never empty, never key-shaped');
 	assert.equal(page.section.desc.locale, 'settings.dreamSkin');
 	assert.deepEqual(page.section.desc.children, { 'settings.dreamSkin.item': { kind: 'list', scope: 'root' } },
 		'the section must still declare one root-scoped list child, or the rows have nowhere to mount');
@@ -2850,4 +2853,59 @@ test('mutation: silencing the fill note reddens the low-power case', () => {
 	page.setState(ADV, { kind: 'image', hasImage: true, fit: 'blur', performance: true });
 	assert.equal(textOf(page.renderRow(ADV)).includes('background.blurSuppressed'), false,
 		'mutation expected: the chip is silent again while doing nothing, which is the reported bug');
+});
+
+// ---------------------------------------------------------------------------
+// 14. the nav label: dictionaries, registration fallback, and the icon hook
+// ---------------------------------------------------------------------------
+
+/**
+ * The settings nav entry is now resolved per locale, which means THREE places have to
+ * agree: the eight dictionary values, the fallback in `sectionNavLabel`, and the list the
+ * tail IIFE matches rows against (it lives in its own scope and cannot read the
+ * dictionaries). Two of those three were a single hand-written string before; this is the
+ * gate that stops them drifting apart again — the same shape as the audit-surface and
+ * reserved-key gates, where a copied constant has to be re-derived from the other source.
+ */
+const navDictValues = () => [...CODE.matchAll(/^\t\t\t"settings\.nav": "(.*)",$/gmi)].map((m) => m[1]);
+const hookNavLabels = () => {
+	const start = CODE.indexOf('var NAV_ROW_LABELS = [');
+	assert.ok(start > 0, 'the nav-icon hook must keep its candidate list');
+	const end = CODE.indexOf(']', start);
+	return [...CODE.slice(start, end).matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+};
+
+test('the nav label is one fact in three places: dictionaries, fallback, and the icon hook', () => {
+	const dict = navDictValues();
+	assert.equal(dict.length, 8, 'every language dictionary must carry settings.nav');
+	assert.equal(new Set(dict).size, 8, 'and no two languages may share a value silently — the hook list is per-string');
+	assert.deepEqual(hookNavLabels(), dict,
+		'the hook recognises exactly the strings the section can answer with (a missing one loses the icon, an extra one paints somebody else\'s row)');
+	const fallback = (CODE.match(/const NAV_FALLBACK = "([^"]+)"/) || [])[1];
+	assert.equal(fallback, dict[0], 'the fallback is the zh value, which is what a host without a locale service will show');
+	// None of the candidates may be the bare word that belonged to a third-party plugin
+	// (issue #82's L1 walk-on: 「皮肤」 is @linxin666/dsh-client-ui-skin-center's row).
+	for (const label of dict) {
+		assert.notEqual(label, '皮肤', 'the bare 「皮肤」 row is not ours');
+		assert.ok(label.length > 2, `a two-character candidate would match half the nav: ${label}`);
+	}
+});
+
+test('mutation: a nav label the hook does not know reddens the agreement gate', () => {
+	const dict = navDictValues();
+	// ① A dictionary gains a language the hook never heard of.
+	const added = CODE.replace('\t\t\t"settings.nav": "Тема / Оформление",', '\t\t\t"settings.nav": "Тема / Оформление",\n\t\t\t"settings.nav": "Temat / Wygląd",');
+	assert.notEqual(added, CODE, 'the mutation has to change the bundle');
+	const hook = hookNavLabels();
+	const after = [...added.matchAll(/^\t\t\t"settings\.nav": "(.*)",$/gmi)].map((m) => m[1]);
+	assert.notDeepEqual(hook, after, 'a ninth value with no hook candidate must be detectable');
+	// ② The hook loses one — the silent direction: the row still renders, only the icon is gone.
+	const lost = CODE.replace('"Тема / Оформление"\n  ]', '"Тема / Оформлениеx"\n  ]');
+	assert.notEqual(lost, CODE, 'the hook-list mutation has to change the bundle');
+	const lostHook = (() => {
+		const start = lost.indexOf('var NAV_ROW_LABELS = [');
+		const end = lost.indexOf(']', start);
+		return [...lost.slice(start, end).matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+	})();
+	assert.notDeepEqual(lostHook, dict, 'a renamed hook candidate must stop matching the dictionaries');
 });

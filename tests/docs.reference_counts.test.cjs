@@ -137,3 +137,55 @@ test('mutation: a wrong pane count, a missing command menu, or a wrong declarati
 	assert.notEqual(wrongDecl, readme, 'the declaration-count anchor moved');
 	assert.ok(compositorProblems(wrongDecl, numbers).some((p) => p.includes('条声明')), 'a wrong declaration count must be named');
 });
+
+// ── the settings nav label, per language ──────────────────────────────────
+//
+// Since 11.3.0 the host nav entry is resolved from the plugin's own dictionaries
+// (`label: () => sectionNavLabel()`), because the host renders slot labels verbatim.
+// That makes each README's "open Settings → X" a claim about one specific string in the
+// bundle — and this round already drifted that text twice by hand, so it is derived here
+// rather than copied.
+
+/** The eight `settings.nav` values, in dictionary order (zh, en, ja, ko, es, fr, de, ru). */
+const navLabels = () => [...CODE.matchAll(/^\t\t\t"settings\.nav": "(.*)",$/gmi)].map((m) => m[1]);
+const NAV_ORDER = ['zh', 'en', 'ja', 'ko', 'es', 'fr', 'de', 'ru'];
+
+/** The check as a pure function, so a mutation case can feed it a broken document. */
+function navLabelProblems(values, readDoc) {
+	const problems = [];
+	const docFor = (lang) => (lang === 'zh' ? 'README.md' : `docs/i18n/README.${lang}.md`);
+	for (let i = 0; i < NAV_ORDER.length; i += 1) {
+		const doc = readDoc(docFor(NAV_ORDER[i]));
+		if (!doc.includes(values[i])) {
+			problems.push(`${docFor(NAV_ORDER[i])} does not name the section the way its own language renders it ("${values[i]}")`);
+		}
+	}
+	// The Chinese nav text must not be left behind in a document that speaks another language.
+	for (const lang of I18N) {
+		if (readDoc(`docs/i18n/README.${lang}.md`).includes('个性化皮肤')) {
+			problems.push(`docs/i18n/README.${lang}.md still points at the Chinese nav entry`);
+		}
+	}
+	return problems;
+}
+
+test('reference counts: every README names the nav entry its own language will see', () => {
+	const values = navLabels();
+	assert.equal(values.length, 8, 'the bundle must carry settings.nav in all eight dictionaries');
+	assert.equal(new Set(values).size, 8, 'eight distinct nav strings, one per language');
+	assert.deepEqual(navLabelProblems(values, read), [], `the nav wording drifted:\n  ${navLabelProblems(values, read).join('\n  ')}`);
+});
+
+test("mutation: a README left on another language's nav text reddens by name", () => {
+	const values = navLabels();
+	const enPath = 'docs/i18n/README.en.md';
+	const drifted = read(enPath).split(values[1]).join('个性化皮肤');
+	assert.notEqual(drifted, read(enPath), 'the mutation has to change the document');
+	const swapped = new Map([[enPath, drifted]]);
+	const problems = navLabelProblems(values, (rel) => (swapped.has(rel) ? swapped.get(rel) : read(rel)));
+	assert.ok(problems.some((line) => line.includes('README.en.md')),
+		`the gate must name the drifted document, got: ${JSON.stringify(problems)}`);
+	// Control: the same helper over the real tree is silent, so the red above is the drift
+	// and not a check that cannot pass.
+	assert.deepEqual(navLabelProblems(values, read), [], 'control: the unmutated tree must pass');
+});
