@@ -142,13 +142,36 @@ function readPackument(opts) {
 	return { data, source: "registry" };
 }
 
+/**
+ * The host's rejection shape, read as it actually is. Measured on the installed
+ * `@deepseek-ai/dsh-app-boot @ 0.2.1-rc.5`: a compatible runtime returns `undefined`,
+ * an incompatible one returns
+ * `{ name, version, runtimeVersion, requirements: { <peer>: <range> }, exempted }`.
+ * Earlier captures used a `peers` field, so both names are accepted.
+ *
+ * Anything else is a contract change, and this script refuses to guess: a verdict it
+ * cannot read used to fall through as "no failing peers" — i.e. every host version on
+ * the registry printed as `loads`, including 0.3.x and 0.9.0, which is exactly the
+ * silent-green shape the rest of this repository exists to refuse.
+ */
+function verdictPeers(verdict, version) {
+	if (verdict === undefined || verdict === null) return [];
+	if (typeof verdict !== "object") {
+		throw new Error(`the host answered ${version} with a ${typeof verdict}, not a verdict — read the host source before trusting any line printed here`);
+	}
+	const table = verdict.requirements || verdict.peers;
+	if (table && typeof table === "object") return Object.keys(table);
+	if (Object.keys(verdict).length === 0) return [];
+	throw new Error(`the host's rejection shape for ${version} is unknown to this script (fields: ${Object.keys(verdict).join(", ")}) — it names neither \`requirements\` nor \`peers\`; read the host source before trusting any "loads" line printed here`);
+}
+
 // ───────────────────────────── the judgment ───────────────────────────────
 
 /**
  * The table, as a pure function: `evaluate(version)` answers the way the host does (`undefined`
- * = the bundle would load; an object with `peers` = it would be skipped), and `mirror` is the
- * dependency-free ruler used both as the fallback and, when the host answered, as the thing that
- * must agree with it.
+ * = the bundle would load; an object naming the peers it refused = it would be skipped), and
+ * `mirror` is the dependency-free ruler used both as the fallback and, when the host answered,
+ * as the thing that must agree with it.
  */
 function buildTable({ packument, range, evaluate, mirror, limit = 12 }) {
 	const problems = [];
@@ -167,7 +190,7 @@ function buildTable({ packument, range, evaluate, mirror, limit = 12 }) {
 		let verdict;
 		try { verdict = evaluate(version); }
 		catch (e) { throw new Error(`the evaluator could not judge ${version}: ${e.message.split("\n")[0]}`); }
-		const peers = verdict && verdict.peers ? Object.keys(verdict.peers) : [];
+		const peers = verdictPeers(verdict, version);
 		const ok = peers.length === 0;
 		const row = { version, publishedAt: time[version] || null, ok, peers: peers.sort(), exempted: !!(verdict && verdict.exempted) };
 		if (mirror) {

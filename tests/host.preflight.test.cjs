@@ -277,3 +277,56 @@ test("the profile half degrades the same way: named skip off strict, exit 4 on s
 	const strict = await preflight.main([...SAMPLE_ARG, "--profile", "no-such-profile-xyz", "--strict", "--limit", "1"], env, { findHost: () => host });
 	assert.equal(strict.exitCode, 4, "a runbook that asked for the load and did not get one is a broken pipeline");
 });
+
+// ── the rejection shape (measured on dsh-app-boot 0.2.1-rc.5) ───────────────
+//
+// The host answers `undefined` when a bundle would load, and names the refused peers
+// under **`requirements`** when it would not. This script used to ask for
+// `verdict.peers`, which the installed host never returns — so every published version
+// (0.3.0-rc.1 and 0.9.0 included) came out as `loads` and the preflight printed a green
+// table for a window that excludes them. These cases pin the shape so the next rename
+// stops the run instead of quietly passing.
+
+test("the host's `requirements` rejection is read as a refusal, and the mirror agrees", () => {
+	const RANGE = ">=0.1.0-rc.6 <0.3.0-0";
+	const inWindow = (v) => {
+		const { parse, cmp, satisfies } = require("../scripts/lib/peer-window.cjs");
+		return satisfies(v, RANGE) === true && parse(v) && cmp(parse(v), parse(v)) === 0;
+	};
+	const refusal = (v) => (inWindow(v) ? undefined : {
+		name: "dsh-dream-skin", version: "11.3.0", runtimeVersion: v,
+		requirements: { "@deepseek-ai/dsh-client-locale": RANGE }, exempted: false
+	});
+	const table = preflight.buildTable({
+		packument: { versions: ["0.1.0-rc.6", "0.2.1-rc.5", "0.3.0-rc.1", "0.9.0"], time: {} },
+		range: RANGE, evaluate: refusal, mirror: true
+	});
+	const byVersion = Object.fromEntries(table.rows.map((r) => [r.version, r]));
+	assert.equal(byVersion["0.2.1-rc.5"].ok, true, "a runtime inside the window loads");
+	assert.equal(byVersion["0.3.0-rc.1"].ok, false, "0.3.x must come out SKIPPED — this is the row the old reader printed as `loads`");
+	assert.equal(byVersion["0.9.0"].ok, false, "and so must 0.9.0");
+	assert.deepEqual(byVersion["0.3.0-rc.1"].peers, ["@deepseek-ai/dsh-client-locale"], "the refused peer is named from `requirements`");
+	// The thing under test is the DISAGREEMENT channel: a correctly-read host and the mirror
+	// must say the same thing about every row. The table's other problems (0.9.0 sits outside
+	// our window, and this synthetic packument carries no publish stamps) are the tool working
+	// — asserting `problems == []` here would have deleted them from the check.
+	assert.deepEqual(table.problems.filter((p) => p.includes("DISAGREE")), [],
+		`mirror and host must agree once the rejection shape is read correctly, got: ${JSON.stringify(table.problems.filter((p) => p.includes("DISAGREE")))}`);
+});
+
+test("the older `peers` shape still reads, and a shape we do not know stops the run", () => {
+	const RANGE = ">=0.1.0-rc.6 <0.3.0-0";
+	const legacy = preflight.buildTable({
+		packument: { versions: ["0.3.0-rc.1"], time: {} }, range: RANGE, mirror: false,
+		evaluate: () => ({ peers: { "@deepseek-ai/dsh-client-locale": RANGE } })
+	});
+	assert.equal(legacy.rows[0].ok, false, "a captured `peers` verdict must keep working (fixtures and older hosts use it)");
+	assert.throws(
+		() => preflight.buildTable({
+			packument: { versions: ["0.3.0-rc.1"], time: {} }, range: RANGE, mirror: false,
+			evaluate: () => ({ verdict: 1, reason: "something new" })
+		}),
+		/unknown to this script/,
+		"a rejection shape nobody recognises must abort, not default to `loads`"
+	);
+});

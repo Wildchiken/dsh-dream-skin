@@ -32,20 +32,31 @@ const SLOT_DISPOSITIONS = ['unmounted', 'skinned', 'out-of-scope'];
 
 const HOST_SLOTS = {
 	'shell.bottom': {
-		disposition: 'unmounted',
+		disposition: 'out-of-scope',
 		since: '0.2.1-alpha.1',
-		// The two host-side identifiers. `anchor` is the stable data attribute
-		// (the one we would use if this face ever needed a rule); `hash` is the
-		// build-hash class, recorded ONLY as evidence — never as a selector.
+		// Re-decided on 2026-11-02 against the re-taken census (dsh 0.2.1-rc.5). The prediction
+		// written into the `unmounted` claim came true: a registrant appeared, so the old claim
+		// expired and this one replaces it. The three corpus hits are three different things, and
+		// the distinction is the whole decision:
+		//   • dsh-client-ui-layout — renders the slot (`renderSlot("shell.bottom", {})`), as always;
+		//   • dsh-cordis-client-runner — its slots CONTRACT CATALOG (a doc string describing the
+		//     region, including "empty content reserves no space; the occupant owns its height,
+		//     visibility, and controls"), not a registration;
+		//   • dsh-experimental-inspector — the only real registrant: it injects the docked DevTools
+		//     panel here, behind a shortcut, with the panel store starting at "unopened".
+		// Neither shipped profile loads the inspector (web: 11 bundles, desktop: 3, neither list
+		// contains it), so in practice the row still collapses. And when it IS open, the occupant
+		// paints its own surfaces — this is a tool panel, not frame chrome the skin owns.
 		anchor: 'data-shell-bottom',
 		hash: 'pI_x6G_bottomRow',
 		paint: 'background: var(--dsw-alias-bg-base)',
 		why:
-			'The layout package renders this slot from 0.2.1-alpha.1 onward, but no package in the host install ' +
-			'registers it — measured 0 files in the frozen corpus, and the only mentions anywhere are the ' +
-			'render call itself. With no registrant `renderSlot` renders an empty element and the frame\'s ' +
-			'`auto` grid row collapses, so there is nothing to paint. Declared rather than skinned: the day a ' +
-			'registrant appears, `expectedRegistrants: 0` fails and this decision comes back.'
+			'Registrant exists in 0.2.1-rc.5 (dsh-experimental-inspector injects the DevTools panel here, ' +
+			'shortcut-gated, store starts "unopened"; the runner hit is its slots contract catalog and the ' +
+			'layout hit is the render call), but no shipped profile loads that package and the host contract ' +
+			'says the occupant owns its height and visibility — so the face is out of the skin\'s scope, not ' +
+			'unmounted any more. Flips to `skinned` the day the strip is measured painting through our wash ' +
+			'with content behind it.'
 	}
 };
 
@@ -105,6 +116,16 @@ function checkSlots({ slots, story, allow = HOST_SLOTS, kinds = SLOT_DISPOSITION
 					'nothing to paint yet; the disposition expires the moment that number moves'
 			);
 		}
+		if (entry.disposition === 'out-of-scope') {
+			// The same visibility rule, one branch over: "we looked, we decided not to paint it"
+			// has to be as readable in the output as "there is nothing to paint", or a decision
+			// quietly becomes the absence of one. Its measurement rides along so a reviewer can
+			// check the claim against the census without opening the data file.
+			findings.push(
+				`${name} measures ${registrants} registrant file(s) on the frozen host (${(row.mentions || []).slice(0, 3).join(', ')}) ` +
+					`and is deliberately ${entry.disposition} since ${entry.since} — ${entry.paint}`
+			);
+		}
 	}
 
 	// A disposition for a region the census never measured is stale policy.
@@ -115,6 +136,7 @@ function checkSlots({ slots, story, allow = HOST_SLOTS, kinds = SLOT_DISPOSITION
 	const counts = {
 		watched: measured.length,
 		unmounted: measured.filter((n) => allow[n] && allow[n].disposition === 'unmounted').length,
+		outOfScope: measured.filter((n) => allow[n] && allow[n].disposition === 'out-of-scope').length,
 		live: measured.filter((n) => ((entries[n] && entries[n].registrants) || 0) > 0).length
 	};
 	return { problems, findings, counts };

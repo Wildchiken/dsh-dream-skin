@@ -183,6 +183,11 @@ function measureFade(files, readFile, packageOf) {
 const FADE_DISPOSITIONS = {
 	"@deepseek-ai/dsh-client-ui-workspace": { kind: "host-target", since: "10.8.0", note: "the session-list foot fade our anchor exists for (`<hash>_fade`)" },
 	"@deepseek-ai/dsh-client-ui-chat": { kind: "no-impact", since: "10.9.0", note: "`<hash>_fadeTop` / `<hash>_fadeBottom` scroll masks — selector-shaped, but the tokens do not END in `_fade`, so [class$=\"_fade\"] cannot address them" },
+	// Measured on the host this census was re-taken against (0.2.1-rc.5): the settings package
+	// owns exactly one `_fade`-ish token, `.<hash>_faded`, and it is a TEXT COLOUR class
+	// (`color: var(--dsw-alias-label-tertiary)`), not a foot fade. The token ends in `_faded`,
+	// so our suffix anchor cannot reach it — a name collision, no shared face.
+	"@deepseek-ai/dsh-client-ui-settings-general": { kind: "no-impact", since: "11.3.0", note: "`.<hash>_faded` is a label-colour class (`color: var(--dsw-alias-label-tertiary)`); the token ends in `_faded`, so [class$=\"_fade\"] cannot address it — name collision, no shared face" },
 	"@linxin666/dsh-client-ui-skin-center": { kind: "coexistent", since: "10.9.0", note: "writes [data-slot=\"sidebar.workspaces\"] [class*=\"_fade\"] { background: none !important } — the same goal as #97 with a broader operator, higher specificity and !important; who-covers-whom is measured by the wash:check coexistence stage, not argued" }
 };
 
