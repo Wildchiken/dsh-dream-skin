@@ -172,7 +172,7 @@ function dirtySeed(tables) {
 }
 
 /** Boot a dirty page, run apply, and hand back the page plus the row's actions. */
-async function bootDirty({ code = null, hostState = null, hostAnswer = null, without = [], settle = true } = {}) {
+async function bootDirty({ code = null, hostState = null, hostAnswer = null, without = [], override = null, settle = true } = {}) {
 	const h = buildSandbox({ seed: {}, code: code || undefined });
 	const entry = h.factory(makeRequire());
 	const t = tablesOf(entry);
@@ -185,6 +185,9 @@ async function bootDirty({ code = null, hostState = null, hostAnswer = null, wit
 		if (!(key in seed)) throw new Error('withholding a key the dirty table never carried: ' + key);
 		delete seed[key];
 	}
+	// Then the values a case needs to be un-shapeable — a stored list longer than the UI
+	// can write, a corrupt one, a stale one.
+	if (override) Object.assign(seed, override);
 	const h2 = buildSandbox({ seed, code: code || undefined, hostState, hostAnswer });
 	const entry2 = h2.factory(makeRequire());
 	const ctx = makeApplyContext(h2);
@@ -243,7 +246,7 @@ test('mutation: a key written as an inline literal is named instead of skipped',
 	// Text-level on purpose: the ledger scans the bundle, so the injected statement does not
 	// have to run for the gate to owe a finding — and the shipped tree has to stay clean for
 	// the same reason it is asserted above, not because nothing was injected.
-	const anchor = '\t\tfunction resetSettingsToFactory(ctx) {';
+	const anchor = '\t\tfunction resetSettingsToFactory() {';
 	assert.equal(countOf(SOURCE, anchor), 1, 'the anchor this leg patches: ' + JSON.stringify(anchor));
 	const grown = SOURCE.replace(anchor, anchor + '\n\t\t\twriteStorage("dsh-dream-skin:cursor-glow", "1");');
 	assert.deepEqual(inlineKeyLiterals(SOURCE), [], 'control: the shipped bundle declares every key it quotes');
@@ -428,27 +431,180 @@ test('a parked segment lands on the no-answer exits when the page does hold a li
 	}
 });
 
-test('mutation: a rotation reset that writes what it cannot see reddens the no-answer case', async () => {
-	// Blue-team B1 replayed on the bundle: the shipped shape is "merge only over a value
-	// this session actually got", and the defect was the unconditional merge. So this leg
-	// removes BOTH guards — leaving either one in place keeps the list safe, which is the
-	// point of having two, and a leg that patches one would pass for the wrong reason.
-	const anchor = '\t\t\tif (!hostProbeSettled) return false;\n'
-		+ '\t\t\tconst stored = readStorage(WALLPAPER_ROTATION_KEY);\n'
-		+ '\t\t\tif (stored === null || stored === undefined || stored === "") return false;\n';
+/** A list longer than the settings UI can write, so the reset has to pass it through. */
+const LONG_LIST = Array.from({ length: 25 }, (_, i) => `https://a/${String(i + 1).padStart(2, '0')}.png`);
+
+test('the stored list is copied through verbatim — longer than the UI can write, inert entries and all', async () => {
+	// Blue-team-fix B2/B8: this reset used to merge through `readWallpaperRotationConfig()`,
+	// which de-duplicates, drops what the render gate refuses and caps the list at 20. Pressing
+	// 恢复出厂 therefore rewrote a 25-link file as 20 links and PUSHED the shortening — and the
+	// promise in eight languages is that the list is untouched. `urls` now travels byte-for-byte
+	// from the stored string; the read path filters on every read anyway, so keeping an inert
+	// entry costs the page nothing.
+	const { h, ctx } = await bootDirty({
+		override: { [ROTATION_KEY]: JSON.stringify({ on: 1, mode: 'random', minutes: 7, urls: LONG_LIST, lastRotatedAt: 1234, source: 'links' }) }
+	});
+	ctx.actionBags[PACKS_ROW].resetFactory();
+	const after = JSON.parse(h.getItem(ROTATION_KEY));
+	assert.deepEqual(after.urls, LONG_LIST, 'the file holds 25 and the page still shows the first 20 — but the reset is not the thing that deletes five');
+	assert.equal(after.on, 0, 'the switches still go back');
+	assert.equal(after.minutes, 60, 'and the interval with them');
+
+	const inert = ['https://ok/a.png', 'not-a-url-at-all', 'https://ok/b.png'];
+	const filtered = await bootDirty({ override: { [ROTATION_KEY]: JSON.stringify({ on: 1, urls: inert }) } });
+	filtered.ctx.actionBags[PACKS_ROW].resetFactory();
+	assert.deepEqual(JSON.parse(filtered.h.getItem(ROTATION_KEY)).urls, inert,
+		'an entry the render gate refuses stays in the file exactly where the user left it');
+});
+
+test('a stored value that cannot be read as a list is left alone instead of flattened', async () => {
+	// Blue-team-fix B3: the gate once asked only "is the raw string non-empty" — and `"null"`,
+	// `"{}"`, a corrupt string, an array, a bare JSON string and `{"urls":"https://x/a.png"}` all
+	// pass that. The reader flattens every one of them to `urls: []`, so the reset pushed an
+	// empty list over a file it had never understood. Not readable ⇒ not writable.
+	const junk = ['{}', 'null', '{oops', '{"urls":"https://x/a.png"}', '[]', '"a string"', '{"urls":{"0":"https://x/a.png"}}'];
+	for (const raw of junk) {
+		const page = await bootDirty({ hostAnswer: 'refused', override: { [ROTATION_KEY]: raw }, settle: false });
+		page.ctx.actionBags[PACKS_ROW].resetFactory();
+		await flush();
+		assert.equal(page.h.getItem(ROTATION_KEY), raw,
+			`${raw}: a value no list can be read out of is not "an empty list" — write nothing, push nothing`);
+		const touched = page.h.sent.sets.reduce((all, p) => all.concat(Object.keys(p)), []);
+		assert.ok(!touched.includes(ROTATION_KEY),
+			`${raw}: rotation must not reach dream-skin.json, got ${JSON.stringify(page.h.sent.sets)}`);
+	}
+});
+
+test('a stale local list does not outrank the host list that has not answered yet', async () => {
+	// Blue-team-fix B5: the ONLY shape where `hostProbeSettled` carries weight — the page does
+	// have a list (so "can I read one" passes), it is simply the older one, because rotation was
+	// last edited from another origin. Writing now merges the stale list, and adoption then skips
+	// the key (this session wrote it), so the newer list is destroyed for good. Parking lets the
+	// durable list arrive first.
+	const stale = { on: 1, mode: 'random', minutes: 9, urls: ['https://old/a.png', 'https://old/b.png'], lastRotatedAt: 11, source: 'links' };
+	const fresh = { on: 1, mode: 'sequential', minutes: 3, urls: ['https://new/x.png', 'https://new/y.png', 'https://new/z.png'], lastRotatedAt: 22, source: 'links' };
+	const page = await bootDirty({
+		hostState: { [ROTATION_KEY]: JSON.stringify(fresh) },
+		override: { [ROTATION_KEY]: JSON.stringify(stale) },
+		settle: false
+	});
+	page.ctx.actionBags[PACKS_ROW].resetFactory();
+	await flush();
+	const after = JSON.parse(page.h.getItem(ROTATION_KEY));
+	assert.deepEqual(after.urls, fresh.urls, 'the list that survives is the durable one, not the one this origin remembered');
+	assert.equal(after.on, 0, 'and the parked segment still landed, so the switches went back');
+	const pushed = page.h.sent.sets.filter((p) => Object.prototype.hasOwnProperty.call(p, ROTATION_KEY)).map((p) => JSON.parse(p[ROTATION_KEY]));
+	assert.equal(pushed.length, 1, 'one push carries the whole thing');
+	assert.deepEqual(pushed[0].urls, fresh.urls, 'and the file is written back its own list');
+});
+
+test('a rotation edit made after the press is not talked over by the parked segment', async () => {
+	// Blue-team-fix B1/B7: press 恢复出厂 while the probe is in flight, then edit the rotation
+	// list yourself. The answer lands seconds later — and the parked write must not revert what
+	// the user did in between, because that later action is the current intent. Adoption does not
+	// count as such an action (it fills the cache directly, never `writtenKeys`), which is exactly
+	// what makes that set the right test.
+	// Discriminated on the fields `setRotationList` carries over (it switches `on` off by design,
+	// so `on` proves nothing here): the interval, the order and the source are the reset's own
+	// targets, and the user's write preserves them.
+	const page = await bootDirty({ hostState: { [ROTATION_KEY]: JSON.stringify(HOST_ROTATION) }, settle: false });
+	page.ctx.actionBags[PACKS_ROW].resetFactory();
+	page.ctx.actionBags['dream-skin-wallpaper-advanced'].setRotationList('https://mine/only.png');
+	await flush();
+	const after = JSON.parse(page.h.getItem(ROTATION_KEY));
+	assert.deepEqual(after.urls, ['https://mine/only.png'], 'their list, as they left it');
+	assert.equal(after.minutes, 7, 'the press did not come back to overwrite the interval they were reading');
+	assert.equal(after.mode, 'random', 'nor the order');
+	assert.equal(after.source, 'folder', 'nor the source they had just picked');
+});
+
+test('mutation: with the readability guards gone, a value that cannot be read becomes an empty list', async () => {
+	// One leg per guard. This one takes the READABILITY block out and leaves `hostProbeSettled`
+	// in, so what reddens is the shape the block exists for — `"{}"`, `"null"`, corrupt JSON, an
+	// array, a `urls` that is not an array — and, on the no-answer exits, the absent key the
+	// original B1 rode in on.
+	const anchor = '\t\t\tif (typeof raw !== "string" || raw === "") return false;\n'
+		+ '\t\t\tlet stored;\n'
+		+ '\t\t\ttry { stored = JSON.parse(raw); } catch { return false; }\n'
+		+ '\t\t\tif (stored === null || typeof stored !== "object" || Array.isArray(stored)) return false;\n'
+		+ '\t\t\tif (!Array.isArray(stored.urls)) return false;\n';
 	assert.equal(countOf(SOURCE, anchor), 1, 'the anchor this leg patches: ' + JSON.stringify(anchor));
-	const blind = SOURCE.replace(anchor, '\t\t\tvoid readStorage(WALLPAPER_ROTATION_KEY);\n');
+	const blind = SOURCE.replace(anchor, '\t\t\tvoid raw;\n\t\t\tconst stored = { urls: [] };\n');
 	assert.notEqual(blind, SOURCE, 'the mutation has to change the bundle');
-	const kept = await bootDirty({ hostAnswer: 'unreachable', settle: false, without: [ROTATION_KEY] });
+	const kept = await bootDirty({ hostAnswer: 'unreachable', override: { [ROTATION_KEY]: '{}' }, settle: false });
 	kept.ctx.actionBags[PACKS_ROW].resetFactory();
 	await flush();
-	assert.ok(kept.h.getItem(ROTATION_KEY) === undefined, 'control: the shipped bundle leaves the key alone');
-	const broken = await bootDirty({ code: blind, hostAnswer: 'unreachable', settle: false, without: [ROTATION_KEY] });
+	assert.equal(kept.h.getItem(ROTATION_KEY), '{}', 'control: the shipped bundle will not rewrite what it cannot read');
+	const broken = await bootDirty({ code: blind, hostAnswer: 'unreachable', override: { [ROTATION_KEY]: '{}' }, settle: false });
 	broken.ctx.actionBags[PACKS_ROW].resetFactory();
 	await flush();
-	assert.ok(broken.h.getItem(ROTATION_KEY) !== undefined,
-		'the blind reset DOES write a rotation value it never read — which is what the case above must be able to see');
+	assert.notEqual(broken.h.getItem(ROTATION_KEY), '{}', 'the guardless reset DOES overwrite an unreadable value');
 	assert.deepEqual(JSON.parse(broken.h.getItem(ROTATION_KEY)).urls, [], 'and what it writes is the empty list');
+	const absent = await bootDirty({ code: blind, hostAnswer: 'unreachable', without: [ROTATION_KEY], settle: false });
+	absent.ctx.actionBags[PACKS_ROW].resetFactory();
+	await flush();
+	assert.ok(absent.h.getItem(ROTATION_KEY) !== undefined, 'same for the key that is not there at all — the original B1');
+});
+
+test('mutation: with the settled gate gone, a stale local list destroys the host list still in flight', async () => {
+	// Blue-team-fix B5: the other guard, proven load-bearing on its OWN. Every earlier case has a
+	// second guard behind it, so removing this one looked safe — until the page holds an OLDER
+	// list of its own, which is the only situation where "can I read a list" is true but the
+	// answer is wrong.
+	const anchor = '\t\t\tif (!hostProbeSettled) return false;\n';
+	assert.equal(countOf(SOURCE, anchor), 1, 'the anchor this leg patches: ' + JSON.stringify(anchor));
+	const loose = SOURCE.replace(anchor, '');
+	assert.notEqual(loose, SOURCE, 'the mutation has to change the bundle');
+	const stale = JSON.stringify({ on: 1, mode: 'random', minutes: 9, urls: ['https://old/a.png', 'https://old/b.png'], source: 'links' });
+	const fresh = JSON.stringify({ on: 1, mode: 'sequential', minutes: 3, urls: ['https://new/x.png', 'https://new/y.png', 'https://new/z.png'], source: 'links' });
+	const kept = await bootDirty({ hostState: { [ROTATION_KEY]: fresh }, override: { [ROTATION_KEY]: stale }, settle: false });
+	kept.ctx.actionBags[PACKS_ROW].resetFactory();
+	await flush();
+	assert.deepEqual(JSON.parse(kept.h.getItem(ROTATION_KEY)).urls, JSON.parse(fresh).urls, 'control: the shipped bundle waits for the durable list');
+	const broken = await bootDirty({ code: loose, hostState: { [ROTATION_KEY]: fresh }, override: { [ROTATION_KEY]: stale }, settle: false });
+	broken.ctx.actionBags[PACKS_ROW].resetFactory();
+	await flush();
+	assert.deepEqual(JSON.parse(broken.h.getItem(ROTATION_KEY)).urls, JSON.parse(stale).urls,
+		'without the gate the stale list wins, adoption is skipped because this session wrote the key, and the host list is gone');
+});
+
+test('mutation: re-filtering the list on the way out reddens the verbatim case', async () => {
+	// The other half of B2/B8: `urls` must travel byte-for-byte. Send it through the reader's
+	// filter and the 25-link file comes back as 20 — which is the promise broken by a button
+	// whose whole claim is that it does not touch the list.
+	const anchor = '\t\t\t\turls: stored.urls\n';
+	assert.equal(countOf(SOURCE, anchor), 1, 'the anchor this leg patches: ' + JSON.stringify(anchor));
+	const filtered = SOURCE.replace(anchor, '\t\t\t\turls: normalizeRotationUrls(stored.urls)\n');
+	assert.notEqual(filtered, SOURCE, 'the mutation has to change the bundle');
+	const kept = await bootDirty({ override: { [ROTATION_KEY]: JSON.stringify({ on: 1, urls: LONG_LIST }) } });
+	kept.ctx.actionBags[PACKS_ROW].resetFactory();
+	assert.equal(JSON.parse(kept.h.getItem(ROTATION_KEY)).urls.length, 25, 'control: 25 links in, 25 links out');
+	const broken = await bootDirty({ code: filtered, override: { [ROTATION_KEY]: JSON.stringify({ on: 1, urls: LONG_LIST }) } });
+	broken.ctx.actionBags[PACKS_ROW].resetFactory();
+	assert.equal(JSON.parse(broken.h.getItem(ROTATION_KEY)).urls.length, 20, 'the filtering writer truncates the file to what the UI could have written');
+});
+
+test('mutation: a parked segment that talks over a later edit reddens the ordering case', async () => {
+	// B1/B7: the debt must be retired by the USER writing rotation after the press, not paid on
+	// top of them.
+	const anchor = '\t\t\tif (writtenKeys.has(WALLPAPER_ROTATION_KEY)) return false;\n';
+	assert.equal(countOf(SOURCE, anchor), 1, 'the anchor this leg patches: ' + JSON.stringify(anchor));
+	const clobber = SOURCE.replace(anchor, '');
+	assert.notEqual(clobber, SOURCE, 'the mutation has to change the bundle');
+	const hostState = { [ROTATION_KEY]: JSON.stringify(HOST_ROTATION) };
+	const kept = await bootDirty({ hostState, settle: false });
+	kept.ctx.actionBags[PACKS_ROW].resetFactory();
+	kept.ctx.actionBags['dream-skin-wallpaper-advanced'].setRotationList('https://mine/only.png');
+	await flush();
+	assert.equal(JSON.parse(kept.h.getItem(ROTATION_KEY)).minutes, 7, 'control: the later word stands');
+	const broken = await bootDirty({ code: clobber, hostState, settle: false });
+	broken.ctx.actionBags[PACKS_ROW].resetFactory();
+	broken.ctx.actionBags['dream-skin-wallpaper-advanced'].setRotationList('https://mine/only.png');
+	await flush();
+	const after = JSON.parse(broken.h.getItem(ROTATION_KEY));
+	assert.equal(after.minutes, 60, 'without the guard the unpaid segment hands back the factory interval');
+	assert.equal(after.mode, 'sequential', 'and the factory order, over an edit made after the press');
+	assert.deepEqual(after.urls, ['https://mine/only.png'], 'the list itself is still theirs — this leg is about ordering, not content');
 });
 
 test('mutation: a parked segment nobody pays reddens the late-answer case', async () => {

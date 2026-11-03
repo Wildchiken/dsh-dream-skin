@@ -66,12 +66,14 @@ const BUDGETS = [
 	// recover from the code. Half a step (8 KiB), taken with the size of THIS feature and not as a
 	// general allowance: the next raise needs its own argument, and the slimming round this one
 	// defers is a standing debt with a number attached, not a line to forget. 610,182 B used.
-	// The pre-release review round then spent what was left, WITHOUT a second raise: +4,131 B for the
-	// rotation write's two gates, the parked segment and its three settled-exit flushes, the retire at
-	// the reset head, the readable name in the notice, and the repaint guard — minus the 300-odd bytes
-	// of my own prose that got shorter and the `textAlign` line that was out of scope and went back
-	// out. 614,313 B used, 87 B of headroom: the ceiling is now FULL, so the slimming round is a
-	// PRECONDITION for the next change to this file, not a note in a list.
+	// The pre-release review round then spent what was left, WITHOUT a second raise: +4,204 B over two
+	// rounds for the rotation write's gates, the parked segment and its three settled-exit flushes,
+	// the ordering guard, the retire at the reset head, the readable name in the notice and the
+	// two-phase try/catch — minus the prose I wrote in round one and then had to compress (the
+	// second round netted +73 B only because three of my own comments got shorter), and the
+	// `textAlign` line that was out of scope and went back out. 614,386 B used, 14 B of headroom:
+	// the ceiling is now FULL to within a line of comment, so the slimming round is a PRECONDITION
+	// for the next change to this file, not a note in a list.
 	{ rel: 'lib/client.js', ceiling: 600 * 1024, reason: 'browser half; one combo-served file by host design' },
 	{ rel: 'lib/index.js', ceiling: 40 * 1024, reason: 'host half' }
 ];
