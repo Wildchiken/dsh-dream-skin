@@ -24,7 +24,7 @@ const { test, after } = require('node:test');
 const assert = require('node:assert');
 const { CODE, releaseAllIntervals } = require('./fixtures/page-sandbox.cjs');
 const {
-	buildSettingsPage,
+	buildSettingsPage: buildBarePage,
 	findAll,
 	findOne,
 	textOf,
@@ -32,6 +32,20 @@ const {
 	inputTypes,
 	controls
 } = require('./fixtures/settings-render.cjs');
+
+/**
+ * The wallpaper sliders are only on screen while a wallpaper is (they act on nothing otherwise), so
+ * the pages here carry a tiny local picture unless a case asks for a bare profile (`bare: true`).
+ * A local picture keeps the default form (固定图片 → 本地图片), so every other row is unchanged.
+ */
+const TINY_WALLPAPER = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
+function buildSettingsPage(opts) {
+	const options = opts || {};
+	if (options.bare === true) return buildBarePage(options);
+	return buildBarePage(Object.assign({}, options, {
+		seed: Object.assign({ 'dsh-dream-skin:wallpaper': TINY_WALLPAPER }, options.seed || {})
+	}));
+}
 
 // Pages built here release their own timers, but a case that throws before it renders would leave the
 // sandbox's composer poll armed; sweeping every sandbox once is cheaper than a 24s idle exit.
@@ -75,7 +89,8 @@ const groupRoots = (section) => (section[0] ? section[0].children : []);
  * that carries `aria-expanded`).
  */
 const isTitleLine = (node) => node.tag === 'h3'
-	|| (node.tag === 'button' && 'aria-expanded' in node.props)
+	// A `Fold` disclosure (data-dream-skin-fold) is a row inside a block, not a title line.
+	|| (node.tag === 'button' && 'aria-expanded' in node.props && !('data-dream-skin-fold' in node.props))
 	|| (node.tag === 'div' && node.props.style !== undefined
 		&& node.props.style.color === 'var(--dsw-alias-label-primary)'
 		&& node.props.style.fontSize === '13px');
@@ -186,21 +201,22 @@ test('the default panel carries one control family per group, and only the glass
 	// sidebar gate mounts its slider only while the gate is OPEN, so the DEFAULT panel carries four
 	// glass sliders; the all-gates-open panel asserted at the end of this case is the eight-slider one.
 	assert.equal(types.filter((type) => type === 'range').length, 7, 'seven sliders: the four the open gates own plus the three framing rows of 固定图片');
-	// W7a: five switches — the three 「单独设置…」 gates (sidebar / composer / popup), the
-	// low-power pin and the advanced row's auto-dim.
-	assert.equal(types.filter((type) => type === 'checkbox').length, 5, 'five switches: three 「单独设置」 gates, low power, auto-dim');
+	// Three switches — the sidebar's 「单独设置」 gate (the only one that stores anything), the
+	// low-power pin and the advanced row's auto-dim. The composer / popup gates only hid their
+	// slider, so they went when the per-surface sliders moved into one fold.
+	assert.equal(types.filter((type) => type === 'checkbox').length, 3, 'three switches: the sidebar gate, low power, auto-dim');
 	assert.equal(types.filter((type) => type === 'file').length, 2, 'two file pickers: the local wallpaper and the theme-pack import');
 	assert.equal(types.filter((type) => type === 'color').length, 1, 'one system colour picker (the accent)');
 	// W7a: the accent's hex entry is the panel's only TYPED control, so the total is 13 + 1.
 	assert.equal(types.filter((type) => type === 'text').length, 1, 'one hex box: the only place a colour can be typed');
-	assert.equal(types.length, 16, 'the panel total moved — a control was added or dropped');
+	assert.equal(types.length, 14, 'the panel total moved — a control was added or dropped');
 
 	// Which group owns which family is the part a regrouping round actually moves, so it is named.
-	// W7a: every 「单独设置」 gate sits DIRECTLY ABOVE the slider it owns (that slider is unmounted
-	// while the gate is closed), so the range/checkbox runs interleave instead of splitting.
+	// The sidebar gate sits DIRECTLY ABOVE the slider it owns (unmounted while the gate is closed),
+	// inside the per-surface fold with the composer and popup sliders.
 	assert.deepEqual(inputTypes(page.renderRow('dream-skin-glass')),
-		['range', 'range', 'checkbox', 'checkbox', 'range', 'checkbox', 'range', 'checkbox'],
-		'default: the sidebar gate is CLOSED, so the slider it owns is not mounted and two switches sit side by side');
+		['range', 'range', 'checkbox', 'range', 'range', 'checkbox'],
+		'default: the sidebar gate is CLOSED, so the slider it owns is not mounted');
 	assert.deepEqual(inputTypes(page.renderRow(ADV)), ['file', 'range', 'range', 'range', 'checkbox'],
 		'固定图片 offers the local picker, the three framing rows and its auto-dim switch — 设计稿 44 mounts 位置与缩放 with the form, picture or not');
 	for (const id of ['dream-skin', 'dream-skin-accent', 'dream-skin-wallpaper', 'dream-skin-packs']) {
@@ -211,18 +227,18 @@ test('the default panel carries one control family per group, and only the glass
 	// stored release puts the sidebar slider back under the switch that owns it.
 	const released = buildSettingsPage({ seed: GATES_OPEN_SEED });
 	assert.deepEqual(inputTypes(released.renderRow('dream-skin-glass')),
-		['range', 'range', 'checkbox', 'range', 'checkbox', 'range', 'checkbox', 'range', 'checkbox'],
-		'all gates open: the glass group carries five sliders, each under its own switch');
+		['range', 'range', 'checkbox', 'range', 'range', 'range', 'checkbox'],
+		'sidebar gate open: the glass group carries five sliders');
 	assert.equal(inputTypes(released.renderSection()).filter((type) => type === 'range').length, 8,
 		'and the all-gates-open panel is the eight-slider one (five glass plus three framing)');
-	assert.equal(inputTypes(released.renderSection()).length, 17, 'seventeen controls, one per gate open');
+	assert.equal(inputTypes(released.renderSection()).length, 15, 'fifteen controls with the sidebar gate open');
 });
 
 // ---------------------------------------------------------------------------
 // 4. the glass group, control by control
 // ---------------------------------------------------------------------------
 
-test('the glass group lists its three 「单独设置」 gates above the sliders they own, then low power', () => {
+test('the glass group: two wallpaper sliders, the per-surface fold (sidebar gate + three sliders), then low power', () => {
 	const page = buildSettingsPage({ seed: GATES_OPEN_SEED });
 	const glass = page.renderRow('dream-skin-glass');
 	const state = page.stateOf('dream-skin-glass');
@@ -249,15 +265,13 @@ test('the glass group lists its three 「单独设置」 gates above the sliders
 	assert.equal(sliders[4].node.props.value, 100 - Math.round(state.modalOpacity * 100), 'popup opacity is shown inverted');
 
 	assert.deepEqual(checkboxLabels(glass),
-		['glass.separateSidebar', 'glass.separateComposer', 'glass.separateModal', 'glass.performance'],
-		'four switches, in this order: the three 「单独设置」 gates, then low-power mode');
+		['glass.separateSidebar', 'glass.performance'],
+		'two switches, in this order: the sidebar 「单独设置」 gate, then low-power mode');
 	const boxes = controls(glass).filter((control) => control.type === 'checkbox');
 	// W7a: the stored sidebar key asks the REVERSE question ("follow the wallpaper"), and a
 	// fresh profile sets the sidebar on its own — so the user-facing gate starts ON.
 	assert.equal(boxes[0].node.props.checked, true, 'a fresh profile sets the sidebar separately, so the gate is open');
-	assert.equal(boxes[1].node.props.checked, true, 'the composer gate defaults to open (view state, never persisted)');
-	assert.equal(boxes[2].node.props.checked, true, 'and so does the popup one');
-	assert.equal(boxes[3].node.props.checked, !!state.performance, 'the low-power switch mirrors the store, not a hard-coded false');
+	assert.equal(boxes[1].node.props.checked, !!state.performance, 'the low-power switch mirrors the store, not a hard-coded false');
 });
 
 // ---------------------------------------------------------------------------
@@ -486,7 +500,7 @@ const sliderRow = (input) => {
 
 /**
  * The stored sidebar key asks the REVERSE question ("follow the wallpaper"), so '0' means the user
- * stopped following it: every 「单独设置」 gate is then OPEN and the slider it owns is mounted. A
+ * stopped following it: the 「单独设置侧边栏透明度」 gate is then OPEN and its slider is mounted. A
  * factory-fresh profile FOLLOWS the wallpaper (SIDEBAR_DEFAULTS.link, trunk 10.28.0), which
  * unmounts the sidebar slider, so a case that counts FIVE glass sliders seeds this.
  */
@@ -623,12 +637,12 @@ test('a11y: the five glass sliders and the framing group each carry their label 
 	assert.deepEqual(sliderProblems(section), [], 'every slider is named and reads out its own display');
 });
 
-test('a11y: all six switches sit inside their own <label>, wording and onChange intact', () => {
+test('a11y: all four switches sit inside their own <label>, wording and onChange intact', () => {
 	const page = buildSettingsPage({});
 	const glass = page.renderRow('dream-skin-glass');
 	assert.deepEqual(switchProblems(glass,
-		['glass.separateSidebar', 'glass.separateComposer', 'glass.separateModal', 'glass.performance']), [],
-		'the four glass switches are labelled by their own text');
+		['glass.separateSidebar', 'glass.performance']), [],
+		'the two glass switches are labelled by their own text');
 
 	page.setState(ADV, { kind: 'url', url: 'https://example.com/w.jpg' });
 	assert.deepEqual(switchProblems(page.renderRow(ADV), ['bg2.refresh', 'bg2.autodim']), [],
@@ -718,9 +732,9 @@ test('mutation: un-wrapping the shared switch row reddens the switch case', () =
 	assert.notEqual(mutated, CODE, 'mutation ④ has to change the bundle');
 
 	const control = buildSettingsPage({});
-	const GLASS_SWITCHES = ['glass.separateSidebar', 'glass.separateComposer', 'glass.separateModal', 'glass.performance'];
+	const GLASS_SWITCHES = ['glass.separateSidebar', 'glass.performance'];
 	assert.deepEqual(switchProblems(control.renderRow('dream-skin-glass'), GLASS_SWITCHES), [],
-		'control: all four glass switches are wrapped');
+		'control: both glass switches are wrapped');
 
 	const broken = buildSettingsPage({ code: mutated });
 	const problems = switchProblems(broken.renderRow('dream-skin-glass'), GLASS_SWITCHES);
@@ -2166,20 +2180,17 @@ test('mutation: a shared slider wired to the wrong action reddens the shared-blo
 
 
 // ---------------------------------------------------------------------------
-// 15. W7a: the accent's way back, the material as ONE choose, the three
-//     「单独设置」 gates and the four import/export entries
+// 15. W7a: the accent's way back, the material as ONE choose, the per-surface
+//     fold and the four import/export entries
 //
 // This round collapsed each of those to ONE entry and made the way back
 // unconditional. The cases below state the resulting facts; the three mutation
-// legs at the end delete the accent reset, keep a gated slider mounted anyway
+// legs at the end delete the accent reset, keep the sidebar's gated slider mounted anyway
 // and drop the export entry, and expect the SAME checkers to name each defect.
 // ---------------------------------------------------------------------------
 
 /** The accent row's typed hex box — the panel's only <input type=text>. */
 const accentHexBox = (row) => findOne(row, (node) => node.tag === 'input' && node.props.type === 'text');
-
-/** The three 「单独设置…」 gates, in the order the glass group lists them. */
-const SEPARATE_GATES = ['glass.separateSidebar', 'glass.separateComposer', 'glass.separateModal'];
 
 /** The four import/export entries, by the i18n key each prints. */
 const PACK_ENTRIES = ['packs.import', 'packs.surprise', 'packs.export', 'packs.share'];
@@ -2209,24 +2220,6 @@ const accentProblems = (row) => {
 	if (commit === null) problems.push('no 应用 button: one drag inside the palette would become a dozen colours');
 	else if (commit.props.disabled !== true) problems.push('应用 starts enabled, so it cannot tell a draft from the applied colour');
 	if (buttonByKey(row, 'accent.clear') === null) problems.push('no way back: 恢复主题色 is not rendered');
-	return problems;
-};
-
-/** Everything wrong with the glass group's gates — empty when each one owns its slider. */
-const gateProblems = (nodes, gates) => {
-	const problems = [];
-	const rendered = controls(nodes).filter((control) => control.type === 'checkbox').map((control) => control.label);
-	for (const key of gates) {
-		if (rendered.indexOf(key) === -1) problems.push(key + ': the gate is not rendered at all');
-	}
-	if (problems.length > 0) return problems;
-	// Each gate is a CheckRow, i.e. the wiring is the shared one: a boolean `checked` and an
-	// onChange that takes the new boolean.
-	for (const key of gates) {
-		const box = controls(nodes).filter((control) => control.type === 'checkbox' && control.label === key)[0];
-		if (typeof box.node.props.checked !== 'boolean') problems.push(key + ': the gate announces no state');
-		if (typeof box.node.props.onChange !== 'function') problems.push(key + ': the gate lost its onChange');
-	}
 	return problems;
 };
 
@@ -2322,28 +2315,25 @@ test('w7a: the material is ONE choose — two chips, one pressed, and a click wr
 		'clicking the second option writes exactly that material — the choice is a real one');
 });
 
-test('w7a: each 「单独设置」 gate owns its slider — closing one unmounts it, and only the sidebar gate is stored', () => {
+test('the per-surface fold: closed on a fresh page, and it owns the sidebar gate and the three surface sliders', () => {
+	// The shipped state: every Fold opens closed, so the glass group shows the two wallpaper sliders,
+	// one disclosure line and low power — nothing else.
+	const fresh = buildSettingsPage({ foldsClosed: true, seed: GATES_OPEN_SEED });
+	const closed = fresh.renderRow('dream-skin-glass');
+	assert.deepEqual(controls(closed).filter((control) => control.type === 'range').map((control) => control.label),
+		['background.opacity', 'background.blur'], 'closed: only the wallpaper pair is on screen');
+	assert.deepEqual(checkboxLabels(closed), ['glass.performance'], 'and only the low-power switch');
+	const toggle = findOne(closed, (node) => node.tag === 'button' && 'data-dream-skin-fold' in node.props);
+	assert.ok(toggle, 'the fold is a real button');
+	assert.equal(toggle.props['aria-expanded'], false, 'announced as collapsed');
+	assert.ok(textOf([toggle]).includes('glass.perSurface'), 'and it names what it holds');
+	fresh.clearHookCalls();
+	toggle.props.onClick();
+	assert.deepEqual(fresh.hookCalls, [{ hook: 'Fold#0', value: true }], 'a click opens it (view state, nothing stored)');
+
+	// Open, the sidebar gate still owns its slider through the STORED key, which asks the reverse question.
 	const page = buildSettingsPage({ seed: GATES_OPEN_SEED });
-	const open = page.renderRow('dream-skin-glass');
-	assert.deepEqual(gateProblems(open, SEPARATE_GATES), [], 'the three gates are CheckRow switches, in one language');
-	assert.equal(rangeInputs(open).length, 5, 'all five sliders are reachable while every gate is open');
-
-	// Closing a gate is the component's own cell (the same door a click asks for), and the slider
-	// it owns is GONE rather than left enabled-but-dead.
-	const closedComposer = buildSettingsPage({ hookInitials: { 'GlassRow#1': false }, seed: GATES_OPEN_SEED });
-	const closedRow = closedComposer.renderRow('dream-skin-glass');
-	assert.deepEqual(controls(closedRow).filter((control) => control.type === 'range').map((control) => control.label),
-		['background.opacity', 'background.blur', 'background.sidebarOpacity', 'modal.title'],
-		'closed: the composer slider is unmounted and the other four stay');
-	assert.equal(controls(closedRow).filter((control) => control.type === 'checkbox').length, 4,
-		'the gate itself stays on the panel, so the way back is always one click away');
-
-	const closedModal = buildSettingsPage({ hookInitials: { 'GlassRow#2': false }, seed: GATES_OPEN_SEED });
-	assert.deepEqual(controls(closedModal.renderRow('dream-skin-glass')).filter((control) => control.type === 'range').map((control) => control.label),
-		['background.opacity', 'background.blur', 'background.sidebarOpacity', 'composer.opacity'],
-		'closed: the popup slider is unmounted and the other four stay');
-
-	// The sidebar gate goes through the STORED key, which asks the reverse question.
+	assert.equal(rangeInputs(page.renderRow('dream-skin-glass')).length, 5, 'open: all five sliders are reachable');
 	const linked = buildSettingsPage({ seed: { 'dsh-dream-skin:sidebar-link': '1' } });
 	const linkedRow = linked.renderRow('dream-skin-glass');
 	const sidebarGate = controls(linkedRow).filter((control) => control.type === 'checkbox')[0];
@@ -2354,18 +2344,17 @@ test('w7a: each 「单独设置」 gate owns its slider — closing one unmounts
 	sidebarGate.node.props.onChange({ target: { checked: true } });
 	assert.equal(linked.sandbox.localStorage.getItem('dsh-dream-skin:sidebar-link'), '0',
 		'opening the gate stops following the wallpaper — the key keeps its REVERSE meaning, no new key');
+});
 
-	// The other two are VIEW state: the click writes one hook cell and nothing durable.
-	closedComposer.clearHookCalls();
-	controls(closedRow).filter((control) => control.type === 'checkbox')[1].node.props.onChange({ target: { checked: false } });
-	assert.deepEqual(closedComposer.hookCalls, [{ hook: 'GlassRow#1', value: false }],
-		'the composer gate writes its own cell, not a store action');
-	assert.equal(closedComposer.sandbox.localStorage.getItem('dsh-dream-skin:composer-separate'), null,
-		'and nothing is persisted for it');
-	// A stored look-alike key changes nothing: these gates are never read back from storage.
-	const seeded = buildSettingsPage({ seed: Object.assign({}, GATES_OPEN_SEED, { 'dsh-dream-skin:composer-separate': '0', 'dsh-dream-skin:modal-separate': '0' }) });
-	assert.equal(rangeInputs(seeded.renderRow('dream-skin-glass')).length, 5,
-		'a stored look-alike key cannot close a gate, because no gate is persisted');
+test('without a wallpaper the two wallpaper sliders are replaced by one line that says why', () => {
+	const bare = buildSettingsPage({ bare: true, seed: GATES_OPEN_SEED });
+	const row = bare.renderRow('dream-skin-glass');
+	assert.deepEqual(controls(row).filter((control) => control.type === 'range').map((control) => control.label),
+		['background.sidebarOpacity', 'composer.opacity', 'modal.title'],
+		'no picture behind the page: 壁纸能见度 / 壁纸模糊度 would drag and change nothing, so they are gone');
+	assert.ok(textOf(row).includes('glass.noWallpaper'), 'and the row says where to pick one');
+	const washed = buildSettingsPage({ seed: GATES_OPEN_SEED }).renderRow('dream-skin-glass');
+	assert.ok(!textOf(washed).includes('glass.noWallpaper'), 'with a wallpaper the line is gone and the sliders are back');
 });
 
 test('w7a: the four import/export entries live in the zone above the library, and 随机换一个 asks twice', () => {
@@ -2574,17 +2563,16 @@ test('mutation: deleting 恢复主题色 reddens the accent case', () => {
 });
 
 test('mutation: keeping a gated slider mounted reddens the gate case', () => {
-	const head = 'composerOpen ? (0, react_jsx_runtime.jsx)(Slider, {';
-	const tail = 'help: t("composer.hint")\n\t\t\t\t\t}) : null,';
-	assert.equal(countOf(CODE, head), 1, 'the composer gate anchor must occur exactly once');
-	assert.equal(countOf(CODE, tail), 1, 'the composer slider terminator must occur exactly once');
-	const mutated = CODE.replace(head, '(0, react_jsx_runtime.jsx)(Slider, {').replace(tail, 'help: t("composer.hint")\n\t\t\t\t\t}),');
+	const head = 'sidebarLink ? null : (0, react_jsx_runtime.jsx)(Slider, {';
+	assert.equal(countOf(CODE, head), 1, 'the sidebar gate anchor must occur exactly once');
+	const mutated = CODE.replace(head, 'false ? null : (0, react_jsx_runtime.jsx)(Slider, {');
 	assert.notEqual(mutated, CODE, 'mutation ㉓ has to change the bundle');
 
-	const control = buildSettingsPage({ hookInitials: { 'GlassRow#1': false }, seed: GATES_OPEN_SEED });
+	const LINKED = { 'dsh-dream-skin:sidebar-link': '1' };
+	const control = buildSettingsPage({ seed: LINKED });
 	assert.equal(rangeInputs(control.renderRow('dream-skin-glass')).length, 4, 'control: a closed gate hides its slider');
 
-	const broken = buildSettingsPage({ code: mutated, hookInitials: { 'GlassRow#1': false }, seed: GATES_OPEN_SEED });
+	const broken = buildSettingsPage({ code: mutated, seed: LINKED });
 	const shown = controls(broken.renderRow('dream-skin-glass')).filter((item) => item.type === 'range').map((item) => item.label);
 	assert.deepEqual(shown, ['background.opacity', 'background.blur', 'background.sidebarOpacity', 'composer.opacity', 'modal.title'],
 		'mutation expected: the closed gate keeps its slider, so the switch controls nothing');
