@@ -104,8 +104,14 @@ function walkNodes(node, out) {
  * @param opts.matchMedia (query) => boolean, the engine's answer for a media query; omitted means
  *                        "no preference", which is what every case that predates the responsive
  *                        tiers expects
+ * @param opts.hostState  the durable map the boot probe answers with — arriving a microtask after
+ *                        apply(), and adopted by the page unless the page wrote the key first
+ * @param opts.hostAnswer 'unreachable' makes the GET throw (the SAME catch the 4 s timeout loses
+ *                        through), 'refused' answers `{ok:false}`. Both settle the push gate
+ *                        WITHOUT adopting anything, which is the distinction the factory reset
+ *                        turns on (11.4.0 blue-team B1 / adjudication T6).
  */
-function buildSandbox({ failWrite = null, seed = {}, code = null, storeMissing = false, matchMedia = null, hostState = null }) {
+function buildSandbox({ failWrite = null, seed = {}, code = null, storeMissing = false, matchMedia = null, hostState = null, hostAnswer = null }) {
 	const body = makeEl('body');
 	const head = makeEl('head');
 	const documentElement = makeEl('html');
@@ -195,7 +201,13 @@ function buildSandbox({ failWrite = null, seed = {}, code = null, storeMissing =
 		// dropped on the floor here.
 		sent.urls.push(url);
 		const bodyObj = JSON.parse(init.body);
-		if (bodyObj.method === 'get') return { ok: true, status: 200, json: async () => ({ ok: true, value: hostState === null ? {} : hostState }) };
+		if (bodyObj.method === 'get') {
+			// The two exits that open the push gate without ever adopting a value — the
+			// factory reset's whole question is the difference between them and an answer.
+			if (hostAnswer === 'unreachable') throw new TypeError('host probe: no answer');
+			if (hostAnswer === 'refused') return { ok: true, status: 200, json: async () => ({ ok: false, error: { code: 'unreadable' } }) };
+			return { ok: true, status: 200, json: async () => ({ ok: true, value: hostState === null ? {} : hostState }) };
+		}
 		if (bodyObj.method === 'set') {
 			sent.sets.push(bodyObj.patch);
 			return { ok: true, status: 200, json: async () => ({ ok: true }) };

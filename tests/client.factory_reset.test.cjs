@@ -53,6 +53,19 @@ function ownedKeys(source) {
 	return splitKeys(source).storage;
 }
 
+/**
+ * The third ledger (11.4.0, third-party T2). `splitKeys` reads DECLARATIONS, so a setting
+ * written with an INLINE literal — `writeStorage("dsh-dream-skin:cursor-glow", …)` with no
+ * constant behind it — is owned by the plugin, invisible to both declaration ledgers, and
+ * never reset: the coverage gate would stay green on a feature it cannot see. This scans
+ * every quoted key literal and requires each one to have a declaration.
+ */
+function inlineKeyLiterals(source) {
+	const declared = new Set([...source.matchAll(/const [A-Z0-9_]+ = "(dsh-dream-skin:[^"]+)"/g)].map((m) => m[1]));
+	const used = new Set([...source.matchAll(/"(dsh-dream-skin:[a-z0-9-]+)"/g)].map((m) => m[1]));
+	return [...used].filter((key) => !declared.has(key));
+}
+
 function tablesOf(e) {
 	return {
 		FACTORY_DEFAULTS: e.FACTORY_DEFAULTS,
@@ -159,13 +172,20 @@ function dirtySeed(tables) {
 }
 
 /** Boot a dirty page, run apply, and hand back the page plus the row's actions. */
-async function bootDirty({ code = null, hostState = null, settle = true } = {}) {
+async function bootDirty({ code = null, hostState = null, hostAnswer = null, without = [], settle = true } = {}) {
 	const h = buildSandbox({ seed: {}, code: code || undefined });
 	const entry = h.factory(makeRequire());
 	const t = tablesOf(entry);
 	// Rebuild with the dirty seed now that the tables are known (they are module data,
 	// so this reads them off the same bundle the behaviour below runs on).
-	const h2 = buildSandbox({ seed: dirtySeed(t), code: code || undefined, hostState });
+	const seed = dirtySeed(t);
+	// Keys to withhold locally: the desktop shell's fresh origin, where the ONLY copy of
+	// the rotation list is the one still sitting in `$DSH_HOME/dream-skin.json`.
+	for (const key of without) {
+		if (!(key in seed)) throw new Error('withholding a key the dirty table never carried: ' + key);
+		delete seed[key];
+	}
+	const h2 = buildSandbox({ seed, code: code || undefined, hostState, hostAnswer });
 	const entry2 = h2.factory(makeRequire());
 	const ctx = makeApplyContext(h2);
 	entry2.apply(ctx);
@@ -184,6 +204,10 @@ test('the reset table claims every key this plugin owns, exactly once', () => {
 	const keys = ownedKeys(SOURCE);
 	assert.ok(keys.size >= 24, `the enumeration has to see the whole namespace, got ${keys.size}`);
 	assert.deepEqual(bucketProblems(tables, keys), [], `\n${problemsText(bucketProblems(tables, keys))}\n`);
+	// …and the enumeration sees every key the bundle actually uses, not only the ones it
+	// declares (third-party T2): an inline literal is a key this gate would never learn about.
+	assert.deepEqual(inlineKeyLiterals(SOURCE), [],
+		'a storage key written as an inline literal has no constant, so no ledger claims it — declare it');
 	// Non-trivial in all four directions, or "covered" would be vacuous.
 	assert.ok(Object.keys(tables.FACTORY_DEFAULTS).length >= 14, 'the shipped-look bucket is the big one');
 	assert.ok(tables.FACTORY_RESET_ABSENT.length >= 5, 'absent-means-default keys exist (framing, accent, low-power)');
@@ -213,6 +237,19 @@ test('mutation: an unclaimed new setting reddens the coverage gate by name', () 
 	const both = tablesOf(exportsOf());
 	both.FACTORY_RESET_ABSENT = [...both.FACTORY_RESET_ABSENT, 'dsh-dream-skin:packs'];
 	assert.match(bucketProblems(both, keys).join('\n'), /dsh-dream-skin:packs.*cannot both go back and stay/);
+});
+
+test('mutation: a key written as an inline literal is named instead of skipped', () => {
+	// Text-level on purpose: the ledger scans the bundle, so the injected statement does not
+	// have to run for the gate to owe a finding — and the shipped tree has to stay clean for
+	// the same reason it is asserted above, not because nothing was injected.
+	const anchor = '\t\tfunction resetSettingsToFactory(ctx) {';
+	assert.equal(countOf(SOURCE, anchor), 1, 'the anchor this leg patches: ' + JSON.stringify(anchor));
+	const grown = SOURCE.replace(anchor, anchor + '\n\t\t\twriteStorage("dsh-dream-skin:cursor-glow", "1");');
+	assert.deepEqual(inlineKeyLiterals(SOURCE), [], 'control: the shipped bundle declares every key it quotes');
+	const keys = ownedKeys(grown);
+	assert.ok(!keys.has('dsh-dream-skin:cursor-glow'), 'the declaration ledger really does miss it — that is the hole');
+	assert.deepEqual(inlineKeyLiterals(grown), ['dsh-dream-skin:cursor-glow'], 'and this ledger names it');
 });
 
 test('mutation: a keep entry whose reason rotted into a word reddens', () => {
@@ -297,25 +334,36 @@ test('the reset repaints through the boot path, and re-syncs every row store', a
 	assert.ok(notices.some((n) => /packs\.resetDone/.test(n)), `the confirmation is the reset's own line: ${JSON.stringify(notices)}`);
 });
 
+const ROTATION_KEY = 'dsh-dream-skin:wallpaper-rotation';
+/** A three-URL list as it would sit in `$DSH_HOME/dream-skin.json` — one entry longer
+ *  than the local copy anywhere in this file, so "which list survived" is never ambiguous. */
+const HOST_ROTATION = { on: 1, mode: 'random', minutes: 7, urls: ['https://a/one.png', 'https://a/two.png', 'https://a/three.png'], lastRotatedAt: 1234, source: 'links' };
+
 test('a reset pressed before the host answers is not undone by the answer', async () => {
 	// The desktop shell answers from `$DSH_HOME/dream-skin.json` a beat after boot, and on
 	// a dynamic-port launch that beat is long. Someone who presses 恢复出厂 immediately
 	// must not have the pre-reset durable map land on top of their own action — the rule
 	// that makes the factory SEED lose to the host (issue #51) must not be read as "the
 	// host always wins".
+	// The rotation key is staged on the HOST side only (11.4.0, blue-team B2): on the
+	// launch this covers, the page has no list of its own, and the list the reset merges
+	// onto is the one it has to wait for.
 	const stale = {
 		'dsh-dream-skin:skin': 'rose',
 		'dsh-dream-skin:modal-opacity': '0.9',
-		'dsh-dream-skin:accent': '#abcdef'
+		'dsh-dream-skin:accent': '#abcdef',
+		[ROTATION_KEY]: JSON.stringify(HOST_ROTATION)
 	};
 	// Control first: the harness really can deliver that map, so the assertions below are
 	// not passing because adoption never happens.
-	const untreated = await bootDirty({ hostState: stale });
+	const untreated = await bootDirty({ hostState: stale, without: [ROTATION_KEY] });
 	assert.equal(untreated.h.getItem('dsh-dream-skin:skin'), 'rose',
 		'control: an untouched page adopts the durable host map — this fixture does stage the race');
 	assert.equal(untreated.h.getItem('dsh-dream-skin:accent'), '#abcdef', 'and more than one key of it');
+	assert.deepEqual(JSON.parse(untreated.h.getItem(ROTATION_KEY)).urls, HOST_ROTATION.urls,
+		'and the list this page did not have locally arrives from the file — that is the channel the reset below has to read from');
 
-	const raced = await bootDirty({ hostState: stale, settle: false });
+	const raced = await bootDirty({ hostState: stale, settle: false, without: [ROTATION_KEY] });
 	raced.ctx.actionBags[PACKS_ROW].resetFactory();
 	await flush();
 	assert.equal(raced.h.getItem('dsh-dream-skin:skin'), raced.tables.FACTORY_DEFAULTS['dsh-dream-skin:skin'],
@@ -330,6 +378,98 @@ test('a reset pressed before the host answers is not undone by the answer', asyn
 		`the pending sync has to flush after settlement, got ${JSON.stringify(raced.h.sent.sets)}`);
 	assert.equal(raced.h.getItem('dsh-dream-skin:packs'), DIRTY['dsh-dream-skin:packs'],
 		'and the content the host map also carried is still the user\'s');
+	// B1, the data-loss half of this race: the one key the reset writes FIELD by field
+	// merges onto the list it can read. At the click there was nothing to read, so the
+	// segment parked and finished when the answer landed — the list is preserved AND the
+	// switches went back, which is the whole promise the button makes in eight languages.
+	const after = JSON.parse(raced.h.getItem(ROTATION_KEY));
+	assert.deepEqual(after.urls, HOST_ROTATION.urls, 'a reset that never saw the list must not push an empty one over it');
+	assert.equal(after.on, 0, 'and the parked segment really landed: the switches are back, not quietly skipped');
+	assert.equal(after.minutes, 60, 'the interval with them');
+	const rotPush = raced.h.sent.sets
+		.filter((p) => Object.prototype.hasOwnProperty.call(p, ROTATION_KEY))
+		.map((p) => JSON.parse(p[ROTATION_KEY]));
+	assert.equal(rotPush.length, 1, `rotation reaches the file exactly once, got ${rotPush.length}`);
+	assert.deepEqual(rotPush[0].urls, HOST_ROTATION.urls, 'and what reaches dream-skin.json is the user list with the switches back');
+});
+
+test('a list only the file has is never written over when the host does not answer', async () => {
+	// Adjudication T6 killed the obvious fix: the 4 s timeout and the `{ok:false}` exits
+	// settle the push gate having adopted NOTHING, so "wait until it settles" would have
+	// merged onto an empty read and pushed the wipe through a now-open gate. The safe
+	// action is the one that leaves the key alone — not writing is also not pushing.
+	for (const hostAnswer of ['unreachable', 'refused']) {
+		const page = await bootDirty({ hostAnswer, settle: false, without: [ROTATION_KEY] });
+		page.ctx.actionBags[PACKS_ROW].resetFactory();
+		await flush();
+		assert.ok(page.h.getItem(ROTATION_KEY) === undefined,
+			`${hostAnswer}: a reset that could not read the list must not create one — this value is the wipe, written while the gate opens behind it`);
+		const touched = page.h.sent.sets.reduce((all, p) => all.concat(Object.keys(p)), []);
+		assert.ok(!touched.includes(ROTATION_KEY),
+			`${hostAnswer}: nothing about rotation may reach dream-skin.json, got ${JSON.stringify(page.h.sent.sets)}`);
+		// The rest of the reset did happen, so this is a named skip and not a dead button.
+		assert.equal(page.h.getItem('dsh-dream-skin:skin'), page.tables.FACTORY_DEFAULTS['dsh-dream-skin:skin'],
+			`${hostAnswer}: the settings half still lands — the user is not left pressing a button that did nothing`);
+	}
+});
+
+test('a parked segment lands on the no-answer exits when the page does hold a list', async () => {
+	// The stable-origin browser whose GET times out: localStorage is durable, so the list
+	// IS in front of the page and the parked write becomes admissible the moment the gate
+	// opens — merging onto what is there, not onto an empty read.
+	for (const hostAnswer of ['unreachable', 'refused']) {
+		const page = await bootDirty({ hostAnswer, settle: false });
+		page.ctx.actionBags[PACKS_ROW].resetFactory();
+		await flush();
+		const after = JSON.parse(page.h.getItem(ROTATION_KEY));
+		assert.deepEqual(after.urls, JSON.parse(DIRTY[ROTATION_KEY]).urls, `${hostAnswer}: the stored list survives`);
+		assert.equal(after.on, 0, `${hostAnswer}: the parked segment landed, so the switches are back and not owed forever`);
+		assert.equal(after.minutes, 60, `${hostAnswer}: the interval with them`);
+	}
+});
+
+test('mutation: a rotation reset that writes what it cannot see reddens the no-answer case', async () => {
+	// Blue-team B1 replayed on the bundle: the shipped shape is "merge only over a value
+	// this session actually got", and the defect was the unconditional merge. So this leg
+	// removes BOTH guards — leaving either one in place keeps the list safe, which is the
+	// point of having two, and a leg that patches one would pass for the wrong reason.
+	const anchor = '\t\t\tif (!hostProbeSettled) return false;\n'
+		+ '\t\t\tconst stored = readStorage(WALLPAPER_ROTATION_KEY);\n'
+		+ '\t\t\tif (stored === null || stored === undefined || stored === "") return false;\n';
+	assert.equal(countOf(SOURCE, anchor), 1, 'the anchor this leg patches: ' + JSON.stringify(anchor));
+	const blind = SOURCE.replace(anchor, '\t\t\tvoid readStorage(WALLPAPER_ROTATION_KEY);\n');
+	assert.notEqual(blind, SOURCE, 'the mutation has to change the bundle');
+	const kept = await bootDirty({ hostAnswer: 'unreachable', settle: false, without: [ROTATION_KEY] });
+	kept.ctx.actionBags[PACKS_ROW].resetFactory();
+	await flush();
+	assert.ok(kept.h.getItem(ROTATION_KEY) === undefined, 'control: the shipped bundle leaves the key alone');
+	const broken = await bootDirty({ code: blind, hostAnswer: 'unreachable', settle: false, without: [ROTATION_KEY] });
+	broken.ctx.actionBags[PACKS_ROW].resetFactory();
+	await flush();
+	assert.ok(broken.h.getItem(ROTATION_KEY) !== undefined,
+		'the blind reset DOES write a rotation value it never read — which is what the case above must be able to see');
+	assert.deepEqual(JSON.parse(broken.h.getItem(ROTATION_KEY)).urls, [], 'and what it writes is the empty list');
+});
+
+test('mutation: a parked segment nobody pays reddens the late-answer case', async () => {
+	// The other half: if the settled exits stop calling the flush, the reset is silently
+	// half-done (switches stay on). Both sites have to go, or the adopted path would still
+	// pay and this leg would pass for the wrong reason.
+	const call = '\t\t\t\tif (flushParkedRotationReset() && typeof refreshNotify === "function") refreshNotify();';
+	assert.equal(countOf(SOURCE, call), 2, 'both settled exits pay the parked segment, so this leg patches 2 sites');
+	const unpaid = SOURCE.split(call).join('\t\t\t\tvoid flushParkedRotationReset;');
+	assert.notEqual(unpaid, SOURCE, 'the mutation has to change the bundle');
+	const hostState = { [ROTATION_KEY]: JSON.stringify(HOST_ROTATION) };
+	const live = await bootDirty({ hostState, settle: false, without: [ROTATION_KEY] });
+	live.ctx.actionBags[PACKS_ROW].resetFactory();
+	await flush();
+	assert.equal(JSON.parse(live.h.getItem(ROTATION_KEY)).on, 0, 'control: the shipped bundle pays the parked write');
+	const broken = await bootDirty({ code: unpaid, hostState, settle: false, without: [ROTATION_KEY] });
+	broken.ctx.actionBags[PACKS_ROW].resetFactory();
+	await flush();
+	const after = JSON.parse(broken.h.getItem(ROTATION_KEY));
+	assert.deepEqual(after.urls, HOST_ROTATION.urls, 'the list is still safe — this leg is not about data loss');
+	assert.equal(after.on, 1, 'and the switches stayed ON: an unpaid segment is a reset that quietly did half its job');
 });
 
 test('one host push carries the whole reset', async () => {
@@ -347,9 +487,9 @@ test('mutation: a reset that forgets a row store leaves the page disagreeing wit
 	// `restorePersistedState` repaints the DOCUMENT. A row whose store is fed only by user
 	// actions keeps showing the value the reset just undid unless it is re-synced by hand —
 	// so take the packs re-sync out and the re-sync assertion must be the one that breaks.
-	const anchor = '\t\t\t\t\t\tsyncPack();\n\t\t\t\t\t\tsyncWallpaper();';
+	const anchor = '\t\t\t\t\t\t\tsyncPack();\n\t\t\t\t\t\t\tsyncWallpaper();';
 	assert.equal(countOf(SOURCE, anchor), 1, 'the anchor this leg patches: ' + JSON.stringify(anchor));
-	const forgot = SOURCE.replace(anchor, '\t\t\t\t\t\tsyncWallpaper();');
+	const forgot = SOURCE.replace(anchor, '\t\t\t\t\t\t\tsyncWallpaper();');
 	assert.notEqual(forgot, SOURCE, 'the mutation has to change the bundle');
 	const live = await bootDirty();
 	const liveBefore = live.ctx.storeStates[PACKS_ROW].revision;
