@@ -59,14 +59,14 @@ const BUDGETS = [
 	// of the 8 dictionaries, 11 new keys and one rewritten statement. Half a step, chosen because
 	// this change is smaller than the one above it. 580 KB used, the rest is headroom.
 	// 592 -> 600 KiB on purpose, 11.4.0, and said out loud because 11.3.0 promised this would not
-	// happen quietly: the factory-reset row costs 8,407 B — 3,392 B of it in eight dictionaries,
+	// happen quietly: the factory-reset row costs 9,474 B — 1,976 B of it in the four eight-language keys,
 	// 2,998 B of code (the four buckets, the field-level rotation reset, the seven row stores it has
 	// to re-sync) and the rest the audit comments that name WHICH keys a reset may not touch. The
 	// alternative was to delete that copy, which is the one part of this feature a reader cannot
 	// recover from the code. Half a step (8 KiB), taken with the size of THIS feature and not as a
 	// general allowance: the next raise needs its own argument, and the slimming round this one
-	// defers is a standing debt with a number attached, not a line to forget. 609,115 B used,
-	// 5,285 B of headroom.
+	// defers is a standing debt with a number attached, not a line to forget. 610,182 B used,
+	// 4,218 B of headroom.
 	{ rel: 'lib/client.js', ceiling: 600 * 1024, reason: 'browser half; one combo-served file by host design' },
 	{ rel: 'lib/index.js', ceiling: 40 * 1024, reason: 'host half' }
 ];

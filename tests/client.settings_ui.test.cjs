@@ -2432,6 +2432,57 @@ function resetLabel(source, lang) {
 	return m[1];
 }
 
+test('a translated button label grows instead of losing characters', () => {
+	// WHY THIS EXISTS. The page's button vocabulary used to carry `height: "32px"`. Every
+	// label on it is translated eight ways, and the narrowest content column the panel is
+	// ever served is 131px (the tier table above) — so 「恢复出厂设置（保留导入内容）」 is
+	// three lines inside a 32px box, i.e. two lines clipped. There is no live layout in
+	// this suite, so the claim is made the only way that is true without a browser: the
+	// shipped style must ALLOW growth, and the one-line size must be reproducible by
+	// arithmetic so nothing else on the page shifts.
+	const row = buildSettingsPage({}).renderRow('dream-skin-packs');
+	const armedRow = buildSettingsPage({ hookInitials: { 'PacksRow#3': true } }).renderRow('dream-skin-packs');
+	const oneLineHeight = (style) => {
+		const pt = px(String(style.padding).split(' ')[0] || '0');
+		const lh = px(style.lineHeight);
+		const border = px(String(style.border).split(' ')[0]);
+		return pt * 2 + lh + border * 2;
+	};
+	for (const [key, node, expect] of [
+		['packs.reset', press(armedRow, 'packs.resetArmed') || press(row, 'packs.reset'), 32],
+		['packs.surprise', press(row, 'packs.surprise'), 32],
+		['packs.import', press(row, 'packs.import'), 32]
+	]) {
+		assert.ok(node, `the ${key} button is rendered`);
+		const style = node.props.style;
+		assert.equal(style.height, 'auto', `${key}: a fixed height clips a long translation`);
+		assert.ok(/px$/.test(String(style.minHeight)), `${key}: minHeight is what keeps the row geometry stable`);
+		assert.equal(style.whiteSpace, 'normal', `${key}: the label has to be allowed to wrap at 131px`);
+		assert.equal(oneLineHeight(style), expect,
+			`${key}: one line still measures ${expect}px (padding + line box + border), so nothing on the page moved`);
+	}
+	// The disarmed state is the one a user sees first, and it must be the PLAIN button:
+	// an always-red entry trains people to ignore the colour that means "this one bites".
+	const plain = press(row, 'packs.reset');
+	assert.notEqual(plain.props.style.color, 'var(--dsw-alias-state-error-primary)',
+		'disarmed it is not dressed as the dangerous one; the arm is what earns the red');
+});
+
+function press(nodes, key) {
+	return buttonByKey(nodes, key);
+}
+
+test('mutation: putting the fixed height back reddens the growth case', () => {
+	// The leg that proves the case above is the one holding this style, not decoration.
+	assert.equal(countOf(CODE, 'height: "32px",\n\t\t\t\tminHeight: "32px"'), 0, 'the shipped shape is height:auto + minHeight');
+	const clipped = CODE.replace('height: "auto",\n\t\t\t\tminHeight: "32px"', 'height: "32px",\n\t\t\t\tminHeight: "32px"');
+	assert.notEqual(clipped, CODE, 'the mutation has to change the bundle');
+	const row = buildSettingsPage({ code: clipped }).renderRow('dream-skin-packs');
+	const node = buttonByKey(row, 'packs.reset');
+	assert.equal(node.props.style.height, '32px',
+		'mutation expected: the label is pinned to one line again — this is the assertion the case above makes red');
+});
+
 test('w1: 恢复出厂 sits below the library, discloses its scope before the first press, and asks twice', () => {
 	const page = buildSettingsPage({});
 	page.setState('dream-skin-packs', { ids: ['pack-a'], names: { 'pack-a': 'Pack A' }, active: 'abyss' });
@@ -2455,7 +2506,8 @@ test('w1: 恢复出厂 sits below the library, discloses its scope before the fi
 	const resetAt = group.children.indexOf(press.parent);
 	const gridAt = group.children.findIndex((child) => findAll([child], (node) => node.props.role === 'group').length > 0);
 	assert.ok(resetAt !== -1, 'the reset row is a direct child of the zone block');
-	assert.ok(gridAt === -1 || resetAt > gridAt, 'and it prints after the library, not among its entries');
+	assert.ok(gridAt !== -1, 'and the library grid renders, so the ordering claim below is not vacuous');
+	assert.ok(resetAt > gridAt, 'it prints after the library, not among its entries');
 
 	// First press arms, writes nothing.
 	page.clearHookCalls();
