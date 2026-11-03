@@ -34,7 +34,7 @@
 
 | 样式 | 用于 | 关键几何 | 一行高度怎么算 |
 |---|---|---|---|
-| `styles.button` | 分区里的一级动作（导入主题包、随机换一个、导出、分享、保存、恢复出厂） | `width: fit-content` / `maxWidth: 100%` / `height: auto` / `minHeight: 32px` / `lineHeight: 18px` / `padding: 6px 14px` / `radius 8px` / `fontSize 13px` / `whiteSpace: normal` / `textAlign: left` | 6 + 18 + 6 + 2(边框) = **32px** |
+| `styles.button` | 分区里的一级动作（导入主题包、随机换一个、导出、分享、保存、恢复出厂） | `width: fit-content` / `maxWidth: 100%` / `height: auto` / `minHeight: 32px` / `lineHeight: 18px` / `padding: 6px 14px` / `radius 8px` / `fontSize 13px` / `whiteSpace: normal` | 6 + 18 + 6 + 2(边框) = **32px** |
 | `styles.tinyButton` | 卡片内的次级动作（应用 / 收藏 / 移除 / 选择历史） | `minHeight: 26px` / `lineHeight: 24px` / `padding: 0 10px` / `fontSize: 12px` / `whiteSpace: normal`，底色透明 | 0 + 24 + 0 + 2 = **26px** |
 | `styles.tinyButtonActive` | 上面那枚的"已选中"叠层（品牌色 + 边框 + 柔和底） | 只叠颜色，不改几何 | 同上 |
 | `styles.buttonDanger` | 只改一件事：`color: var(--dsw-alias-state-error-primary)` | 不带几何 | — |
@@ -42,6 +42,8 @@
 | `styles.actionRow` | 装上面这些按钮的一行 | `display: flex` / `alignItems: center` / `gap: 12px` / **`flexWrap: wrap`** | — |
 
 **规则：按钮样式不许带固定 `height`。** 页面上每一枚按钮的标签都有八种语言版本，而最窄内容列只有 131px——`height: 32px` 配上 15 个汉字的标签（恢复出厂设置（保留导入内容））就是三行文字塞进一行的高度，等于裁掉两行。改成 `height: auto` + `minHeight` 之后，**单行标签仍然精确是 32px**（见上表算式），所以页面别处不会移动，而长标签可以往下长。这条由 `a translated button label grows instead of losing characters` 钉住，并有一条把 `height: "32px"` 放回去的变异腿证明它会红。
+
+**同一轮里 `textAlign` 被加进又请出。** 修几何时顺手写了 `textAlign: "left"`，它影响的不是那枚出事的按钮，而是 `styles.button` 的 11 个调用点加 `tinyButton` 的 6 个（再经 `inputActionStyle` 转手，共约 20 枚）——一级与卡片按钮的文本全部从居中变左对齐。蓝军把它记成 🟡（B7）后本版**删掉**：折行的长标签居中并不坏，而"顺手把整页按钮的对齐换掉"这件事既没有活页目视，也不属于这个修复的范围。要改对齐请单独一轮，并且八语都要看过。
 
 **危险色只在"已经按下第一次"之后出现**（§4）。未 arm 的恢复出厂就是普通 `styles.button`——常驻红色会把红色训练成"背景噪音"，那正是这个颜色最不该失去的东西。
 
@@ -63,8 +65,21 @@
 3. 主题包库：有导入项时是 `role="group"` 的卡片网格（标签 + 应用 / 收藏 / 移除，移除是 `tinyButton + buttonDanger` **一次点击即生效**，因为它只删一个包，不碰整页）；没有导入项时打印 `packs.empty` 一行说明；
 4. **恢复出厂设置**（§4 形状，未 arm 时标签即作用域声明）。
 
+### §5.1 轮播那一枚键为什么"有时候不写"
+
+`dsh-dream-skin:wallpaper-rotation` 是唯一一枚**字段级**复位键：开关、顺序、间隔、来源回出厂，`urls` 是你录进去的内容。`writeWallpaperRotationConfig` 是**合并**写法，所以它保住的是"这一次读得到的列表"，而桌面壳每次换端口，启动时 `localStorage` 恒空——列表只躺在 `$DSH_HOME/dream-skin.json` 里，要等 `loadFromHost()` 采用才可见。蓝军 B1 实测：在此之前按下复位，合并读到的是一份空列表，于是把 `urls: []` 写下去并推回文件，用户的列表**永久消失**，而八语 README 正在承诺"轮播列表一律不动"。
+
+裁定 T6 又否掉了最直觉的修法：`loadFromHost()` 有四条退出（采用 / 4s 超时 / `{ok:false}` / 采用环中途抛错），后两条**把推送闸门打开却什么都没采用**——"等 settled 再复位"照样毁数据。所以现行的门槛是两个条件，缺一不可：`hostProbeSettled` **且** 本地读得到一枚非空的轮播值（`resetWallpaperRotationConfig`）。不满足时**不写**：不写也就不推，`dream-skin.json` 里的列表原样保留，而"键不存在"读回来本来就等于出厂值。若复位是在探测在飞时按下的，这一段挂起（`parkedRotationReset`），三条落定出口各补一次（`flushParkedRotationReset`）：答复到了就合并保住列表，答复没到就仍然什么都不写。
+
+门：`tests/client.factory_reset.test.cjs` 把轮播列表**只放在宿主那一侧**（`hostState` + `without`），本地留空——这才是出事那台机器的形状；两条变异腿分别把两道闸门拆掉（拆一道仍然安全，所以另一条腿必须把两条一起拆），各自点名翻红。
+
 ## §6 这份规格没有证明什么
 
 - **没有活页目视**。本文件的几何全部来自样式对象的读数与算术；渲染夹具（`tests/fixtures/settings-render.cjs`）自己写明没有 React 协调器、没有布局引擎，所以"三行文字现在真的显示成三行"这件事**仍未被任何地方看过**，131px 那一档尤其。
 - §2 的 161px 是唯一一次活页量到的宽度读数，其余是算出来的上界。
+- **§5.1 的门槛与挂起没有真机复跑**。四条文本回答全部来自 `tests/fixtures/page-sandbox.cjs`（含新加的 `hostAnswer: 'unreachable' | 'refused'` 两条出口）；真桌面壳的动态端口 + 真 4s 超时没有实测过，超时那条尤其只由"同一 catch"支撑。
+- **复位失败没有用户可见文案**（蓝军 B4 只修了一半）。重绘链现在整体在 `try/catch` 里，抛错会 `console.warn` 并且**照样**播报"已恢复出厂"——存储真的是出厂值了，行可能还是旧读数。一条"复位没做完"的播报要八条字典串，而 bundle 已在自己声明的天花板下（`tests/package.runtime_size.test.cjs`，欠一轮真瘦身），所以本版选择不写而不是悄悄抬高天花板。
+- **复位过的用户，出厂壁纸按用户值落盘**（蓝军 B3）。`FACTORY_DEFAULTS` 的写入不带 `factory` 标记，所以那张出厂图（现测 4,650 B 的 data-url）进了 `dream-skin.json` 成了"你选的"。第三方实测驳回了"以后拿不到出厂图更新"这个后果方向（迁移按指纹匹配存量值），真代价是文件膨胀与"纯出厂状态不推"这条不变式对复位过的用户不再成立。
+- **二次确认在行组件里，不在动作里**（第三方 T4）。`resetFactory` 本身无确认令牌：绕过 UI 直接调它，一下就复位。当前调用点只有那枚按钮和测试夹具的 action bag，所以这是纵深防御的欠缺，不是可达的破坏路径。
+- **复位头 retire 在飞的轮播探测（第三方 T1）没有回归用例**。`resetSettingsToFactory` 现在第一件事是 `abandonWallpaperRotation()`，否则一次已经发出的图片探测晚回来会把 `lastRotatedAt` 盖回复位后的 0 并再推一次；但本轮的复位夹具里 `Image` 是空实现（`page-sandbox.cjs`），驱动不了那条晚回来的回调，所以这条只有代码与这段说明，没有门。`tests/client.smoke.test.cjs` 里有可驱动的轮播夹具，下一轮要补就从那里接。
 - 若下一轮改了任何一节的形状，**本文必须同轮改**；本文与代码不一致时，以门为准（门会红，本文不会）。

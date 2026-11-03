@@ -97,7 +97,7 @@ Les deux voies sont superposables et indépendantes : un preset décide du « ma
 | 🪟 **Opacité des popups** | Un curseur qui contrôle la transparence du fond des menus déroulants / overlays / boîtes de dialogue, persisté ; toutes les surfaces peintes avec le jeton de fond flottant (Réglages, gestionnaire d’extensions, infobulles de trajectoire, cartes flottantes) partagent un seuil de lisibilité à 92 % d’opacité —la surface surélevée du thème elle-même—, tandis que les voies menu et voile restent en pleine amplitude |
 | 🧩 **Bibliothèque locale de packs** | Vos packs importés au même endroit ; **appliquer / mettre en favori / supprimer** en un clic |
 | 🎲 **Surprenez-moi** | Passez aléatoirement à un autre thème ; **étoilez** vos favoris pour changer rapidement |
-| 🧹 **Rétablir les réglages d’usine (11.4.0)** | En bas du bloc import / export, avec confirmation en deux temps (appuyer deux fois, ou annuler). Remet chaque **réglage** : curseurs, interrupteurs, thème, accent, matériau et valeurs du fond. **Vos packs importés, favoris, chemin de dossier et liens de rotation sont conservés** : c’est votre contenu, pas un réglage par défaut |
+| 🧹 **Rétablir les réglages d’usine (11.4.0)** | En bas du bloc import / export, avec confirmation en deux temps (appuyer deux fois, ou annuler). Remet chaque **réglage** : curseurs, interrupteurs, thème, accent, matériau et valeurs du fond ; **le lien du fond revient aussi à l’image d’usine (Bing quotidien)**. **Vos packs importés, favoris, chemin de dossier et liens de rotation sont conservés** : c’est votre contenu, pas un réglage par défaut |
 | ✅ **Validation + restauration** | L'import d'un pack valide le format / les tokens requis / la validité des couleurs ; en cas d'échec ou de suppression, retour arrière sécurisé |
 
 > Tout se superpose sur un preset, **activez/désactivez et revenez à l'apparence native de DSH en un clic** — n'hésitez pas à expérimenter,
@@ -167,7 +167,7 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 | 🔁 **Rotation des fonds d'écran** | Avec le fond « URL d'image », choisissez une source : une **liste de liens** (jusqu'à 20 liens d'image http/https, un par ligne) ou un **dossier local** (indiquez son chemin ; lit les jpg / png / webp / gif / avif / bmp de ce dossier et de jusqu'à trois niveaux de vrais sous-dossiers, sans HEIC, SVG, dossiers masqués ni liens symboliques ; pour un dossier, « dans l'ordre » devient « par nom de dossier » ; les photos ajoutées ensuite rejoignent la rotation), puis faites défiler dans l'ordre ou au hasard toutes les 5 minutes à 7 jours, ou appuyez sur « Fond suivant maintenant ». Le dossier est lu par la partie hôte du plugin, qui n'atteint que les images du dossier choisi. Un lien cassé ou une image illisible n'écarte que lui-même ; rien ne tourne fenêtre masquée (rattrapage au retour) ; désactivée par défaut (ticket #61) |
 | 🔤 **Surfaces internes opaques** | Cartes, champs de saisie, bulles de message restent lisibles — jamais délavés |
 | ↩️ **Restauration par défaut** | Revenir à l'apparence native de DSH (suivre le système) en un clic |
-| 💾 **Persistance à trois niveaux** | Skin & wallpaper dans `localStorage` **et un fichier côté hôte** — survivent au rechargement et au nouveau port que DSH Desktop reçoit à chaque lancement |
+| 💾 **Persistance à trois niveaux** | Skin & wallpaper dans `localStorage` **et le fichier `dream-skin.json` côté hôte** — survivent au rechargement et au nouveau port que DSH Desktop reçoit à chaque lancement |
 
 ---
 

@@ -201,7 +201,19 @@ test("mutation: a README left on another language's nav text reddens by name", (
  * who picks the German README should not get a strictly smaller picture of the plugin.
  */
 function capabilityRows(text) {
-	return text.split('\n').filter((l) => /^\| \p{So}/u.test(l)).map((l) => l.match(/^\| (\p{So}+)/u)[1]);
+	return text.split('\n').filter((l) => /^\| \p{So}/u.test(l)).map((l) => ({
+		// The row's identity: the emoji that opens it.
+		mark: l.match(/^\| (\p{So}+)/u)[1],
+		// Its shape: how many cells (the leading and trailing pipes do not count).
+		cells: l.split('|').length - 2,
+		// Its TECHNICAL vocabulary: backticked tokens are file names, API layers and
+		// storage keys. They translate to themselves, so eight documents must carry the
+		// same set — and this is the part of the row a wrong value hides in (external
+		// blue-team B6: the emoji ledger could not see one). Numbers are NOT ledgered:
+		// word order and local number formatting legitimately differ ("92 %" / "92%"),
+		// so a digits ledger would demand re-translation, not tell the truth.
+		codes: (l.match(/`[^`]+`/g) || []).slice().sort().join(' ')
+	}));
 }
 
 const DOC_PATHS = ['README.md'].concat(I18N.map((lang) => `docs/i18n/README.${lang}.md`));
@@ -217,7 +229,12 @@ function capabilityProblems(readDoc) {
 			continue;
 		}
 		for (let i = 0; i < zh.length; i += 1) {
-			if (zh[i] !== rows[i]) problems.push(`${rel}: row ${i + 1} is ${rows[i]} where the Chinese README has ${zh[i]}`);
+			const want = zh[i];
+			const got = rows[i];
+			const where = `${rel}: row ${i + 1} (${want.mark})`;
+			if (want.mark !== got.mark) problems.push(`${where} is ${got.mark} where the Chinese README has ${want.mark}`);
+			if (want.cells !== got.cells) problems.push(`${where} has ${got.cells} cells where the Chinese README has ${want.cells}`);
+			if (want.codes !== got.codes) problems.push(`${where} names ${got.codes || '(no code tokens)'} where the Chinese README names ${want.codes}`);
 		}
 	}
 	return problems;
@@ -226,6 +243,33 @@ function capabilityProblems(readDoc) {
 test('reference counts: all eight READMEs advertise the same capability table', () => {
 	assert.deepEqual(capabilityProblems(read), [],
 		`the translations advertise a different feature list from the Chinese README:\n  ${capabilityProblems(read).join('\n  ')}`);
+});
+
+test('mutation: drift INSIDE a parity row reddens, not only a row that is missing', () => {
+	// Blue-team B6: the ledger used to read nothing but the row-opening emoji, so a cell
+	// could promise the opposite of the feature and eight documents stayed green. What is
+	// now compared per row is shape (cells) and vocabulary (backticked tokens) — NOT the
+	// prose: "keeps your imports" turned into "wipes your imports" still passes, and anyone
+	// wanting that checked needs a claim site, not this parity gate.
+	const enPath = 'docs/i18n/README.en.md';
+	const en = read(enPath);
+	// (a) the persistence row stops naming the file it stores into.
+	const lostCode = en.replace('**and the host-side `dream-skin.json`**', '**and a host-side file**');
+	assert.notEqual(lostCode, en, 'the code-token leg has to change the document');
+	const codeProblems = capabilityProblems((rel) => (rel === enPath ? lostCode : read(rel)));
+	assert.ok(codeProblems.some((line) => /row \d+ .*names /.test(line)),
+		`a row that stops naming the file must be caught by name, got ${JSON.stringify(codeProblems)}`);
+	// (b) a row that grows a cell — the table stops being that table.
+	const lines = en.split('\n');
+	const at = lines.findIndex((l) => l.startsWith('| \u{1F9F9}'));
+	assert.ok(at > 0, 'this leg needs the 恢复出厂 row in the English README');
+	const grown = [...lines];
+	grown[at] = grown[at].replace(/\|\s*$/, '| and it wipes the wallpaper list too |');
+	assert.notEqual(grown.join('\n'), en, 'the cell leg has to change the document');
+	const cellProblems = capabilityProblems((rel) => (rel === enPath ? grown.join('\n') : read(rel)));
+	assert.ok(cellProblems.some((line) => /cells where/.test(line)),
+		`an extra cell must be caught by count, got ${JSON.stringify(cellProblems)}`);
+	assert.deepEqual(capabilityProblems(read), [], 'control: the unmutated tree must pass');
 });
 
 test('mutation: a capability row shipped in one language only reddens by name', () => {
@@ -246,7 +290,7 @@ test('mutation: a capability row shipped in one language only reddens by name', 
 	swapped[atLowPower - 1] = tmp;
 	const swappedDoc = swapped.join('\n');
 	const swapProblems = capabilityProblems((rel) => (rel === enPath ? swappedDoc : read(rel)));
-	assert.ok(swapProblems.some((line) => /row \d+ is/.test(line)),
+	assert.ok(swapProblems.some((line) => /row \d+ \(.*\) is /.test(line)),
 		`a re-ordered table must be named by row, got: ${JSON.stringify(swapProblems)}`);
 	assert.deepEqual(capabilityProblems(read), [], 'control: the unmutated tree must pass');
 });

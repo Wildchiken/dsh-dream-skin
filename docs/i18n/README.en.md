@@ -97,7 +97,7 @@ The two ways are layered and independent: a preset decides the "material &amp; b
 | 🪟 **Popup opacity** | A slider that controls dropdown / overlay / dialog bottom-fill transparency, persisted; every surface painted from the popup-base token (Settings, the plugin manager, trajectory tooltips, floating cards) shares a readability floor at 92% opaque — the skin's own elevation fill — while the menu and scrim legs stay full-range |
 | 🧩 **Local pack library** | Your imported packs in one place; **apply / favorite / remove** in a click |
 | 🎲 **Surprise me** | Randomly switch to a different theme; **star** favorites to switch fast |
-| 🧹 **Restore factory settings (11.4.0)** | At the bottom of the import / export block, with a two-stage confirm (press it twice, or cancel). Puts every **setting** back — sliders, switches, skin, accent, material, wallpaper numbers. Your **imported theme packs, favourites, wallpaper folder path and rotation links are kept**: that is your content, not a default. The low-power switch returns to following the system |
+| 🧹 **Restore factory settings (11.4.0)** | At the bottom of the import / export block, with a two-stage confirm (press it twice, or cancel). Puts every **setting** back — sliders, switches, skin, accent, material, wallpaper numbers, **and the wallpaper link itself, which goes back to the shipped Bing daily image**. Your **imported theme packs, favourites, wallpaper folder path and rotation links are kept**: that is your content, not a default. The low-power switch returns to following the system |
 | ✅ **Validation + rollback** | Pack import validates format / required tokens / color legality; failures or removals fall back safely |
 
 > Everything layers on top of a preset, **toggle it on/off and revert to DSH's built-in look in one click** — go ahead
@@ -167,7 +167,7 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 | 🔁 **Wallpaper rotation** | With the Image URL wallpaper selected, pick a source: a **link list** (up to 20 http/https image links, one per line) or a **local folder** (give its path; reads jpg / png / webp / gif / avif / bmp in this folder and up to three levels of real subfolders — no HEIC, SVG, hidden folders or symlinks; photos added later join automatically), and cycle through it in order or at random every 5 minutes to 7 days (for a folder, in order means by folder name: the folder's own images, then each subfolder by name), or press "Next wallpaper now". The folder is read by the plugin's host part, which can only reach images inside the chosen folder. A bad link or unreadable image only drops itself; nothing rotates while the window is hidden (it catches up on return); off by default (issue #61) |
 | 🔤 **Opaque inner surfaces** | Cards, inputs, message bubbles stay readable — never washed out |
 | ↩️ **Default restore** | Back to DSH's built-in appearance (follow system) in one click |
-| 💾 **Three-layer persistence** | Skin & wallpaper live in `localStorage` **and a host-side file** — survives reload, and survives the new port DSH Desktop gets on every launch |
+| 💾 **Three-layer persistence** | Skin & wallpaper live in `localStorage` **and the host-side `dream-skin.json`** — survives reload, and survives the new port DSH Desktop gets on every launch |
 
 ---
 
