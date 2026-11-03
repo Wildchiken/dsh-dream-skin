@@ -744,7 +744,7 @@ test('mutation: un-wrapping the shared switch row reddens the switch case', () =
 });
 
 test('mutation: restoring the nested button reddens the pack-card case', () => {
-	const anchor = 'jsxs)("div", {\n\t\t\t\t\t\t\t\tkey: id,\n\t\t\t\t\t\t\t\trole: "group",';
+	const anchor = 'jsxs)("div", {\n\t\t\t\t\t\t\t\t\t\tkey: id,\n\t\t\t\t\t\t\t\t\t\trole: "group",';
 	assert.equal(countOf(CODE, anchor), 1, 'the pack-card container anchor must occur exactly once');
 	const mutated = CODE.replace(anchor, anchor.replace('jsxs)("div"', 'jsxs)("button"'));
 	assert.notEqual(mutated, CODE, 'mutation ⑤ has to change the bundle');
@@ -2346,6 +2346,22 @@ test('the per-surface fold: closed on a fresh page, and it owns the sidebar gate
 		'opening the gate stops following the wallpaper — the key keeps its REVERSE meaning, no new key');
 });
 
+test('the accent and pack folds open closed: the dots, 恢复主题色 and the zone title stay, the rest is one click away', () => {
+	const page = buildSettingsPage({ foldsClosed: true });
+	const accent = page.renderRow('dream-skin-accent');
+	assert.equal(findAll(accent, (node) => node.tag === 'button' && node.props.title && /^#/.test(node.props.title)).length, 12,
+		'the twelve preset dots are on screen');
+	assert.ok(!textOf(accent).includes('accent.random'), 'random waits behind 自定义…');
+	assert.ok(buttonByKey(accent, 'accent.clear'), '恢复主题色 stays outside the fold: the way back is never behind a click');
+	assert.equal(findAll(accent, (node) => node.tag === 'input').length, 0, 'no hex box or colour well until the fold opens');
+	assert.ok(textOf(accent).includes('accent.more'), 'the fold names itself');
+
+	const packs = page.renderRow('dream-skin-packs');
+	assert.equal(zoneHeadings(packs).length, 1, 'the zone keeps its heading');
+	for (const key of ['packs.import', 'packs.surprise', 'packs.reset']) assert.ok(!textOf(packs).includes(key), key + ' waits behind the fold');
+	assert.ok(textOf(packs).includes('packs.more'), 'the fold names what it holds');
+});
+
 test('without a wallpaper the two wallpaper sliders are replaced by one line that says why', () => {
 	const bare = buildSettingsPage({ bare: true, seed: GATES_OPEN_SEED });
 	const row = bare.renderRow('dream-skin-glass');
@@ -2372,7 +2388,8 @@ test('w7a: the four import/export entries live in the zone above the library, an
 		'they are ONE row of entries, not actions scattered through the library');
 
 	// The zone's entries come BEFORE the library grid: the grid is theme SELECTION only.
-	const group = row[0];
+	// The zone body sits inside its 「主题包、分享与恢复出厂」 fold: the block is the fold's own container.
+	const group = findOne(row, (node) => node.tag === 'div' && node.children.some((child) => child && child.props && 'data-dream-skin-fold' in child.props));
 	const entriesAt = group.children.indexOf(entries[0].parent);
 	const gridAt = group.children.findIndex((child) => child.tag === 'div' && findAll([child], (node) => node.props.role === 'group').length > 0);
 	assert.ok(entriesAt !== -1 && gridAt !== -1, 'both the entry row and the library grid are direct children of the block');
@@ -2491,7 +2508,8 @@ test('w1: 恢复出厂 sits below the library, discloses its scope before the fi
 
 	// It sits BELOW the library grid: the grid is theme selection, this is the page's
 	// one undo-everything action and must not read as another entry of the library row.
-	const group = row[0];
+	// The zone body sits inside its 「主题包、分享与恢复出厂」 fold: the block is the fold's own container.
+	const group = findOne(row, (node) => node.tag === 'div' && node.children.some((child) => child && child.props && 'data-dream-skin-fold' in child.props));
 	const resetAt = group.children.indexOf(press.parent);
 	const gridAt = group.children.findIndex((child) => findAll([child], (node) => node.props.role === 'group').length > 0);
 	assert.ok(resetAt !== -1, 'the reset row is a direct child of the zone block');
