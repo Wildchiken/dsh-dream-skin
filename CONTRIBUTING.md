@@ -65,6 +65,8 @@ npm test        # VM 冒烟测试（factory 求值、apply 挂载、主题包导
 - 纯原生接入：无注入、不改安装包、不做破坏性更改，失败可回退
 - 对外文本（CHANGELOG / README / docs / lib / tests）禁含 C0 控制字节：`text hygiene` 用例把关（Tab、LF 允许，CR 只允许作为 CRLF 的一半）。背景是真实事故——写文档时转义示例被降级成它所指的控制字节，含 NUL 的文件会被 git 判为二进制，一次小改动在 diff 里长成整文件重写
 - 主题 token 契约见 [docs/themes-spec.md](./docs/themes-spec.md)
+- 改设置页版式之前读 [docs/settings-theme-ui.md](./docs/settings-theme-ui.md)：分区顺序、响应式档的列宽算术、以及按钮词汇表（**按钮样式不许带固定 `height`**——每枚按钮的标签都有八种语言，而最窄内容列只有 131px，钉死高度就是裁字；单行尺寸用 padding + 行高 + 边框算出来，别靠目测）。引用那份规格请用**章节名**，不要写行号——行号会随一次无关的排版改动变成假的，而那次改动不会让任何门翻红
+- 新增一枚能力/动作时，**八份 README 的能力表必须同时改**（`tests/docs.reference_counts.test.cjs` 按行序列逐格比对，少一行、多一行、换了顺序都会点名）
 
 ---
 

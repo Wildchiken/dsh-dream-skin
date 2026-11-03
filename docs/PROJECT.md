@@ -73,6 +73,7 @@ dsh-dream-skin/
 │  ├─ PROJECT.md           # 本文（项目说明）
 │  ├─ desktop-support.md   # 桌面端兼容与支持矩阵（锚点清单 / 安全边界 / 已验证清单）
 │  ├─ design-philosophy.md # 设计哲学（品牌差异化宣言）
+│  ├─ settings-theme-ui.md  # 设置页版式规格（分区顺序 / 响应式档 / 按钮词汇表，as-ships）
 │  ├─ themes-spec.md       # 主题包 / 令牌契约
 │  ├─ publishing-to-npm.md # npm / GitHub 发布指引
 │  ├─ i18n/                # 多语言 README（en/ja/ko/es/fr/de/ru，主 README 只读中文版）

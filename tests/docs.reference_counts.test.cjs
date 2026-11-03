@@ -189,3 +189,64 @@ test("mutation: a README left on another language's nav text reddens by name", (
 	// and not a check that cannot pass.
 	assert.deepEqual(navLabelProblems(values, read), [], 'control: the unmutated tree must pass');
 });
+
+/**
+ * The 「能力 / What you can do」 table, read as the SEQUENCE of its row emojis.
+ *
+ * WHY. Two drifts this round were both invisible to every existing gate: the Chinese
+ * README advertised 低功耗模式 while none of the seven translations did (a row that
+ * shipped in one language only), and the new 恢复出厂设置 row went into the Chinese
+ * table first and had to be chased into the other seven by hand. The count gates here
+ * watch section names and pane lists; nobody watched the feature list itself. A reader
+ * who picks the German README should not get a strictly smaller picture of the plugin.
+ */
+function capabilityRows(text) {
+	return text.split('\n').filter((l) => /^\| \p{So}/u.test(l)).map((l) => l.match(/^\| (\p{So}+)/u)[1]);
+}
+
+const DOC_PATHS = ['README.md'].concat(I18N.map((lang) => `docs/i18n/README.${lang}.md`));
+
+function capabilityProblems(readDoc) {
+	const zh = capabilityRows(readDoc('README.md'));
+	assert.ok(zh.length >= 18, `the Chinese capability table should have at least 18 rows, found ${zh.length} — a collapsed table is not parity`);
+	const problems = [];
+	for (const rel of DOC_PATHS.slice(1)) {
+		const rows = capabilityRows(readDoc(rel));
+		if (rows.length !== zh.length) {
+			problems.push(`${rel}: ${rows.length} capability rows vs the Chinese README's ${zh.length}`);
+			continue;
+		}
+		for (let i = 0; i < zh.length; i += 1) {
+			if (zh[i] !== rows[i]) problems.push(`${rel}: row ${i + 1} is ${rows[i]} where the Chinese README has ${zh[i]}`);
+		}
+	}
+	return problems;
+}
+
+test('reference counts: all eight READMEs advertise the same capability table', () => {
+	assert.deepEqual(capabilityProblems(read), [],
+		`the translations advertise a different feature list from the Chinese README:\n  ${capabilityProblems(read).join('\n  ')}`);
+});
+
+test('mutation: a capability row shipped in one language only reddens by name', () => {
+	const enPath = 'docs/i18n/README.en.md';
+	const withoutRow = read(enPath).split('\n').filter((l) => !/^\| \p{So} \*\*Restore factory settings/u.test(l)).join('\n');
+	assert.notEqual(withoutRow, read(enPath), 'the mutation has to remove a row');
+	const problems = capabilityProblems((rel) => (rel === enPath ? withoutRow : read(rel)));
+	assert.ok(problems.some((line) => line.includes('README.en.md')),
+		`the gate must name the short document, got: ${JSON.stringify(problems)}`);
+	// Two rows swapped is a different failure than a missing one, and must also be caught.
+	const lines = read(enPath).split('\n');
+	const LOW_POWER = '\u{1FAAB}';
+	const atLowPower = lines.findIndex((l) => l.startsWith(`| ${LOW_POWER} `));
+	assert.ok(atLowPower > 0, 'the swap leg relies on the low-power row having a row above it');
+	const swapped = [...lines];
+	const tmp = swapped[atLowPower];
+	swapped[atLowPower] = swapped[atLowPower - 1];
+	swapped[atLowPower - 1] = tmp;
+	const swappedDoc = swapped.join('\n');
+	const swapProblems = capabilityProblems((rel) => (rel === enPath ? swappedDoc : read(rel)));
+	assert.ok(swapProblems.some((line) => /row \d+ is/.test(line)),
+		`a re-ordered table must be named by row, got: ${JSON.stringify(swapProblems)}`);
+	assert.deepEqual(capabilityProblems(read), [], 'control: the unmutated tree must pass');
+});

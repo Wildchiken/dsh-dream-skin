@@ -745,7 +745,7 @@ test('the folder controls show for the folder source only, explain each failure 
 	assert.ok(hasText(seen, 'bg2.rotationList'), 'links source: the list box is back');
 	assert.equal(find(seen, (n) => n.type === 'input' && n.props.type === 'text'), undefined, 'links source: no path box');
 	seen = render(h, nodes, 'dream-skin-wallpaper-advanced', state({ folder: '', folderCount: null }), props);
-	assert.ok(hasText(seen, 'bg2.rotationNow'), '轮播设置 keeps 切换到下一张 even before a folder is saved — settings-theme-ui.md line 61 puts it in the group, not behind a count');
+	assert.ok(hasText(seen, 'bg2.rotationNow'), '轮播设置 keeps 切换到下一张 even before a folder is saved — it belongs to the rotation group itself, not behind a count — and this case is the thing that pins that, not a line number in a design note nobody ever committed');
 	assert.ok(hasText(seen, 'bg2.pathEmpty'), 'no folder yet reads as an empty list, not as a blank panel');
 	assert.ok(hasText(seen, 'bg2.folderAdd'), 'and the control that fixes it survives the empty state — the branch is not a dead end');
 	seen = render(h, nodes, 'dream-skin-wallpaper-advanced', { ...state({}), kind: 'gradient' }, props);
@@ -769,7 +769,7 @@ test('the order chips are the design\'s two, and both pool sources read the same
 	h.factory(makeRequire({ nodes })).apply(makeApplyContext(h));
 	await flush();
 	assert.equal(CODE.indexOf('bg2.rotationByFolder'), -1,
-		'the third order label is gone from the bundle — settings-theme-ui.md line 58 draws 按顺序轮播 / 随机顺序 and nothing else');
+		'the third order label is gone from the bundle — the order row is 按顺序轮播 / 随机顺序 and nothing else; this case is its authority (a line number in an uncommitted design note is not one)');
 	const calls = [];
 	const props = {
 		setRotation() {}, setRotationList() {}, setRotationSource() {}, setRotationFolder() {}, setRotationMinutes() {}, rotateNow() {},
