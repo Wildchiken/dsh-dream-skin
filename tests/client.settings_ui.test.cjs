@@ -185,15 +185,16 @@ test('the default panel carries one control family per group, and only the glass
 	// A factory-fresh profile FOLLOWS the wallpaper (SIDEBAR_DEFAULTS.link, trunk 10.28.0) and the
 	// sidebar gate mounts its slider only while the gate is OPEN, so the DEFAULT panel carries four
 	// glass sliders; the all-gates-open panel asserted at the end of this case is the eight-slider one.
-	assert.equal(types.filter((type) => type === 'range').length, 7, 'seven sliders: the four the open gates own plus the three framing rows of 固定图片');
+	// #136: a fresh profile is 固定图片 with nothing chosen, so its three framing rows wait for a picture.
+	assert.equal(types.filter((type) => type === 'range').length, 4, 'four sliders: the ones the open gates own — 固定图片 has no picture to frame yet');
 	// W7a: five switches — the three 「单独设置…」 gates (sidebar / composer / popup), the
 	// low-power pin and the advanced row's auto-dim.
-	assert.equal(types.filter((type) => type === 'checkbox').length, 5, 'five switches: three 「单独设置」 gates, low power, auto-dim');
+	assert.equal(types.filter((type) => type === 'checkbox').length, 4, 'four switches: three 「单独设置」 gates and low power — auto-dim waits for a picture');
 	assert.equal(types.filter((type) => type === 'file').length, 2, 'two file pickers: the local wallpaper and the theme-pack import');
 	assert.equal(types.filter((type) => type === 'color').length, 1, 'one system colour picker (the accent)');
 	// W7a: the accent's hex entry is the panel's only TYPED control, so the total is 13 + 1.
 	assert.equal(types.filter((type) => type === 'text').length, 1, 'one hex box: the only place a colour can be typed');
-	assert.equal(types.length, 16, 'the panel total moved — a control was added or dropped');
+	assert.equal(types.length, 12, 'the panel total moved — a control was added or dropped');
 
 	// Which group owns which family is the part a regrouping round actually moves, so it is named.
 	// W7a: every 「单独设置」 gate sits DIRECTLY ABOVE the slider it owns (that slider is unmounted
@@ -201,8 +202,8 @@ test('the default panel carries one control family per group, and only the glass
 	assert.deepEqual(inputTypes(page.renderRow('dream-skin-glass')),
 		['range', 'range', 'checkbox', 'checkbox', 'range', 'checkbox', 'range', 'checkbox'],
 		'default: the sidebar gate is CLOSED, so the slider it owns is not mounted and two switches sit side by side');
-	assert.deepEqual(inputTypes(page.renderRow(ADV)), ['file', 'range', 'range', 'range', 'checkbox'],
-		'固定图片 offers the local picker, the three framing rows and its auto-dim switch — 设计稿 44 mounts 位置与缩放 with the form, picture or not');
+	assert.deepEqual(inputTypes(page.renderRow(ADV)), ['file'],
+		'固定图片 with nothing chosen offers the local picker only — the rows that act on a picture come with one (#136)');
 	for (const id of ['dream-skin', 'dream-skin-accent', 'dream-skin-wallpaper', 'dream-skin-packs']) {
 		assert.deepEqual(rangeInputs(page.renderRow(id)), [], id + ' must stay slider-free on a default panel');
 	}
@@ -213,9 +214,9 @@ test('the default panel carries one control family per group, and only the glass
 	assert.deepEqual(inputTypes(released.renderRow('dream-skin-glass')),
 		['range', 'range', 'checkbox', 'range', 'checkbox', 'range', 'checkbox', 'range', 'checkbox'],
 		'all gates open: the glass group carries five sliders, each under its own switch');
-	assert.equal(inputTypes(released.renderSection()).filter((type) => type === 'range').length, 8,
-		'and the all-gates-open panel is the eight-slider one (five glass plus three framing)');
-	assert.equal(inputTypes(released.renderSection()).length, 17, 'seventeen controls, one per gate open');
+	assert.equal(inputTypes(released.renderSection()).filter((type) => type === 'range').length, 5,
+		'and the all-gates-open panel is the five-slider one (five glass; framing waits for a picture)');
+	assert.equal(inputTypes(released.renderSection()).length, 13, 'thirteen controls, one per gate open');
 });
 
 // ---------------------------------------------------------------------------
@@ -309,30 +310,115 @@ test('gradient kind: the preset grid replaces the link box, and the fill selecto
 	assert.deepEqual(rangeInputs(row), [], 'no framing sliders without a picture');
 });
 
-test('image kind: the fill selector and the framing group are mounted with the form', () => {
+/** The four rows #136 ties to a stored picture under 固定图片, by what each one prints. */
+const pictureRowFacts = (row) => ({
+	fill: textOf(row).includes('bg2.fill'),
+	frame: rangeInputs(row).map((node) => firstText([sliderRow(node).children[0]])).join(',') === 'bg2.frameX,bg2.frameY,bg2.frameZoom',
+	autodim: checkboxLabels(row).includes('bg2.autodim'),
+	clear: textOf(row).includes('bg2.remove')
+});
+const ALL_ROWS = { fill: true, frame: true, autodim: true, clear: true };
+const NO_ROWS = { fill: false, frame: false, autodim: false, clear: false };
+
+test('#136: 固定图片 with nothing chosen shows the source only; a picked picture brings the four rows back', () => {
+	// 设计稿 line 44 ("位置与缩放 is mounted with the form, picture or not") is retired: under 固定图片 with
+	// nothing stored, 填充方式 / 位置与缩放 / 自动弱化 act on nothing and 清除壁纸 has nothing to clear.
 	const page = buildSettingsPage({});
-	page.setState(ADV, { kind: 'image', hasImage: false });
+	page.setState(ADV, { kind: 'image', hasImage: false, url: null, gradient: null });
 	const withoutPicture = page.renderRow(ADV);
-	assert.ok(textOf(withoutPicture).includes('bg2.fill'), 'the local-image tab offers the fill selector');
-	assert.deepEqual(rangeInputs(withoutPicture).map((node) => firstText([sliderRow(node).children[0]])),
-		['bg2.frameX', 'bg2.frameY', 'bg2.frameZoom'],
-		'设计稿 44: 位置与缩放 belongs to the FORM, so the three rows are there before a picture is picked');
+	assert.deepEqual(pictureRowFacts(withoutPicture), NO_ROWS, 'no picture: the four rows wait');
+	assert.ok(textOf(withoutPicture).includes('bg2.source') && inputTypes(withoutPicture).includes('file'),
+		'图片来源 and the picker that fills it are still there');
 
 	page.setState(ADV, { hasImage: true });
-	assert.deepEqual(rangeInputs(page.renderRow(ADV)).map((node) => node.props.value),
-		rangeInputs(withoutPicture).map((node) => node.props.value),
-		'and picking a picture changes no framing value: the group was already mounted');
+	assert.deepEqual(pictureRowFacts(page.renderRow(ADV)), ALL_ROWS, 'a stored local picture brings all four back');
+});
+
+/**
+ * Stored framing (取景) for a profile on 本地图片 with no local picture but a link already stored —
+ * the state where the rows are hidden although a framed picture is one source switch away.
+ */
+const FRAMED_LINK_SEED = {
+	'dsh-dream-skin:wallpaper-kind': 'image',
+	'dsh-dream-skin:wallpaper-url': 'https://example.com/w.jpg',
+	'dsh-dream-skin:wallpaper-pos-x': '20',
+	'dsh-dream-skin:wallpaper-pos-y': '-40',
+	'dsh-dream-skin:wallpaper-zoom': '150'
+};
+const FRAME_KEYS = ['dsh-dream-skin:wallpaper-pos-x', 'dsh-dream-skin:wallpaper-pos-y', 'dsh-dream-skin:wallpaper-zoom'];
+
+test('#136: hidden framing rows write nothing, and switching to a source that holds a picture brings them back as stored', () => {
+	// Hiding is a VIEW decision: the stored framing keys are neither cleared nor rewritten, so nobody
+	// reads the missing rows as "取景 was reset". Driven through the row's real setKind action, which
+	// re-syncs the store from storage the way the host does.
+	const page = buildSettingsPage({ bare: true, seed: FRAMED_LINK_SEED });
+	const stored = () => FRAME_KEYS.map((key) => page.sandbox.localStorage.getItem(key));
+	assert.deepEqual(rangeInputs(page.renderRow(ADV)), [], 'control: 本地图片 with no local picture shows no framing rows');
+	assert.deepEqual(stored(), ['20', '-40', '150'], 'hidden rows wrote nothing: the stored framing is intact');
+
+	page.actionsOf(ADV).setKind('url');
+	assert.deepEqual(rangeInputs(page.renderRow(ADV)).map((node) => node.props.value), [20, -40, 150],
+		'switching to the link that is already stored brings the rows back on the stored framing, not on defaults');
+	assert.deepEqual(stored(), ['20', '-40', '150'], 'and switching the source rewrote none of it');
+});
+
+test('#136: a NEW picture starts from default framing anyway — framing before a picture was never kept', () => {
+	// The existing rule (resetWallpaperFraming: "a fresh crop should not inherit the previous picture's
+	// offsets") resets framing whenever the picture changes. So the reading of 设计稿 44 as "frame first,
+	// pick later" never held on the real pick path: rows shown with no picture adjusted values that the
+	// pick then reset. Pinned here so the retirement of 设计稿 44 rests on a measured fact.
+	const page = buildSettingsPage({ bare: true, seed: FRAMED_LINK_SEED });
+	page.actionsOf(ADV).setWallpaper('data:image/png;base64,QUJD');
+	assert.deepEqual(FRAME_KEYS.map((key) => page.sandbox.localStorage.getItem(key)), ['0', '0', '100'],
+		'picking a local picture resets the stored framing to centred / 100%');
+	assert.deepEqual(rangeInputs(page.renderRow(ADV)).map((node) => node.props.value), [0, 0, 100],
+		'and the rows it brings back show that default framing');
+});
+
+test('#136: the test is what is STORED, not what loaded — a dead link keeps its rows and 清除壁纸', () => {
+	// A stored link that fails to load paints nothing, yet it is a value: hiding 清除壁纸 there would
+	// leave the user no way to delete it short of a factory reset. hasImage / url are storage reads,
+	// so nothing about loading reaches this decision.
+	const page = buildSettingsPage({});
+	page.setState(ADV, { kind: 'url', url: 'https://unreachable.invalid/missing.jpg', hasImage: false, gradient: null });
+	const row = page.renderRow(ADV);
+	assert.deepEqual(pictureRowFacts(row), ALL_ROWS, 'a stored link (dead or not) keeps all four rows');
+	assert.ok(findOne(row, (node) => node.tag === 'input' && node.props.type === 'url'), 'and its source entry');
+
+	// 清除壁纸 is an action: any stored value keeps it, even one the selected source does not show.
+	page.setState(ADV, { kind: 'image', url: 'https://example.com/w.jpg', hasImage: false });
+	const other = page.renderRow(ADV);
+	assert.deepEqual(pictureRowFacts(other), { fill: false, frame: false, autodim: false, clear: true },
+		'本地图片 chosen with only a link stored: nothing to frame, but there is something to clear');
+});
+
+test('#136: 纯色 / 渐变 / 轮播 each keep their own rows with no picture stored', () => {
+	const solid = buildSettingsPage({});
+	solid.setState(ADV, { kind: 'gradient', gradient: 'linear-gradient(0deg, #0b1120, #0b1120)', url: null, hasImage: false });
+	assert.deepEqual(pictureRowFacts(solid.renderRow(ADV)), { fill: false, frame: false, autodim: true, clear: true },
+		'纯色: never had 填充方式 / 位置与缩放; 自动弱化 and 清除壁纸 stay');
+
+	const gradient = buildSettingsPage({});
+	gradient.setState(ADV, { kind: 'gradient', gradient: 'linear-gradient(135deg, #022c22 0%, #0d9488 100%)', url: null, hasImage: false });
+	assert.deepEqual(pictureRowFacts(gradient.renderRow(ADV)), { fill: false, frame: false, autodim: true, clear: true },
+		'渐变: a gradient IS a background with its own CSS — it is not judged by picture pixels, so nothing extra disappears');
+
+	const rotation = buildSettingsPage({});
+	rotation.setState(ADV, {
+		kind: 'url', url: null, hasImage: false, gradient: null,
+		rotation: { on: true, mode: 'sequential', minutes: 30, source: 'links', urls: ['https://example.com/a.jpg', 'https://example.com/b.jpg'] }
+	});
+	assert.deepEqual(pictureRowFacts(rotation.renderRow(ADV)), ALL_ROWS, '轮播: the pool is the picture source, so all four rows stay');
 });
 test('url kind with nothing stored warns where the control set alone cannot: the empty-value line', () => {
 	// The mis-click guard deliberately writes nothing on an empty apply, so "url kind, no URL" is a state
-	// the user can reach by doing nothing at all. It is answered with one warning line, and the
-	// framing rows stay mounted (设计稿 44): the control is not a reward for filling the box.
+	// the user can reach by doing nothing at all. It is answered with one warning line; the rows that act
+	// on a picture wait for one (#136 retired 设计稿 44's "mounted with the form").
 	const page = buildSettingsPage({});
-	page.setState(ADV, { kind: 'url', url: null });
+	page.setState(ADV, { kind: 'url', url: null, hasImage: false, gradient: null });
 	const row = page.renderRow(ADV);
 	assert.ok(textOf(row).includes('bg2.urlEmpty'), 'the empty state has to say what is missing');
-	assert.deepEqual(rangeInputs(row).map((node) => firstText([sliderRow(node).children[0]])),
-		['bg2.frameX', 'bg2.frameY', 'bg2.frameZoom'], 'the three framing rows are mounted with the form, not with a picture');
+	assert.deepEqual(pictureRowFacts(row), NO_ROWS, 'nothing stored: no fill, framing, auto-dim or clear yet');
 	assert.ok(findOne(row, (node) => node.tag === 'input' && node.props.type === 'url'), 'the box the user has to fill is still there');
 });
 
@@ -1821,13 +1907,17 @@ test('mutation: putting the second clear entry back reddens the single-clear cas
 	const key = 'children: t("bg2.remove")';
 	assert.equal(countOf(CODE, key), 1, 'the single clear entry must name itself exactly once: ' + JSON.stringify(key));
 	const keyAt = CODE.indexOf(key);
-	const tail = 'children: t("bg2.remove")\n\t\t\t\t\t})';
+	// #136: the button is mounted behind `clearRow ? … : null`, so the duplicate goes in AFTER that
+	// conditional, unconditionally — a second entry on every panel that has the first.
+	const close = 'children: t("bg2.remove")\n\t\t\t\t\t})';
+	const tail = close + ' : null';
 	assert.equal(countOf(CODE, tail), 1, 'the button literal that carries it must close exactly once');
 	const start = CODE.lastIndexOf('(0, react_jsx_runtime.jsx)("button", {', keyAt);
 	assert.ok(start !== -1 && start < keyAt, 'the element around that text is a button');
 	const end = CODE.indexOf(tail) + tail.length;
-	const indent = CODE.slice(CODE.lastIndexOf('\n', start) + 1, start);
-	const element = CODE.slice(start, end);
+	const lineStart = CODE.lastIndexOf('\n', start) + 1;
+	const indent = CODE.slice(lineStart, start).match(/^\s*/)[0];
+	const element = CODE.slice(start, CODE.indexOf(tail) + close.length);
 	const mutated = CODE.slice(0, end) + ',\n' + indent + element + CODE.slice(end);
 	assert.notEqual(mutated, CODE, 'mutation ⑯ has to change the bundle');
 
@@ -2709,11 +2799,12 @@ test('mutation: invoking a hook-owning helper inline reddens the hook-ownership 
 	assert.deepEqual(hookOwnershipProblems(control), [],
 		'control: every 背景形式 leaves the row with the same cells');
 
+	// #136: a 固定图片 whose chosen source holds nothing mounts no picture group either, so the forms
+	// that disagree are exactly the three without one — named, so a fourth (or a missing one) reddens.
 	const problems = hookOwnershipProblems(buildSettingsPage({ code: mutated }));
-	assert.equal(problems.length, 1,
-		'mutation expected: exactly ONE form disagrees — the only one that mounts no picture group\n' + problems.join('\n'));
-	assert.ok(problems[0].indexOf('渐变色:') === 0,
-		'mutation expected: 渐变色 is the odd one out, got ' + problems.join(' | '));
+	assert.deepEqual(problems.map((problem) => problem.slice(0, problem.indexOf(':'))),
+		['固定图片（本地图，还没选图）', '固定图片（图片链接，框里还是空的）', '渐变色'],
+		'mutation expected: exactly the forms that mount no picture group disagree\n' + problems.join('\n'));
 
 	// And a picture form really does render three MORE cells on the row itself, which is the crash.
 	const broken = buildSettingsPage({ code: mutated });
