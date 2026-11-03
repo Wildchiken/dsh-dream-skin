@@ -4,7 +4,7 @@
     "repo": "dsh-dream-skin",
     "package": "dsh-dream-skin",
     "release": "2026-08-15",
-    "generatedAt": "2026-11-02T10:59:04.030Z"
+    "generatedAt": "2026-11-03T10:48:19.702Z"
   },
   "series": [
     {
@@ -386,6 +386,26 @@
       "date": "2026-10-29",
       "stars": 294,
       "downloads": 90676
+    },
+    {
+      "date": "2026-10-30",
+      "stars": 296,
+      "downloads": 92778
+    },
+    {
+      "date": "2026-10-31",
+      "stars": 298,
+      "downloads": 94460
+    },
+    {
+      "date": "2026-11-01",
+      "stars": 299,
+      "downloads": 96213
+    },
+    {
+      "date": "2026-11-02",
+      "stars": 301,
+      "downloads": 97996
     }
   ]
 }
