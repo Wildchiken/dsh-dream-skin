@@ -34,8 +34,9 @@ const {
 } = require('./fixtures/settings-render.cjs');
 
 /**
- * The wallpaper sliders are only on screen while a wallpaper is (they act on nothing otherwise), so
- * the pages here carry a tiny local picture unless a case asks for a bare profile (`bare: true`).
+ * 壁纸能见度 is only on screen while a wallpaper is (it acts on nothing otherwise), so the pages here
+ * carry a tiny local picture unless a case asks for a bare profile (`bare: true`). A bare page is
+ * also how a case reaches the cleared-wallpaper state, which this default would otherwise hide.
  * A local picture keeps the default form (固定图片 → 本地图片), so every other row is unchanged.
  */
 const TINY_WALLPAPER = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
@@ -2346,15 +2347,41 @@ test('the per-surface fold: closed on a fresh page, and it owns the sidebar gate
 		'opening the gate stops following the wallpaper — the key keeps its REVERSE meaning, no new key');
 });
 
-test('without a wallpaper the two wallpaper sliders are replaced by one line that says why', () => {
+test('without a wallpaper only 壁纸能见度 is replaced by one line that says why', () => {
 	const bare = buildSettingsPage({ bare: true, seed: GATES_OPEN_SEED });
 	const row = bare.renderRow('dream-skin-glass');
 	assert.deepEqual(controls(row).filter((control) => control.type === 'range').map((control) => control.label),
-		['background.sidebarOpacity', 'composer.opacity', 'modal.title'],
-		'no picture behind the page: 壁纸能见度 / 壁纸模糊度 would drag and change nothing, so they are gone');
+		['background.blur', 'background.sidebarOpacity', 'composer.opacity', 'modal.title'],
+		'no picture behind the page: 壁纸能见度 would drag and change nothing, so it is gone — 壁纸模糊度 stays (case below)');
 	assert.ok(textOf(row).includes('glass.noWallpaper'), 'and the row says where to pick one');
 	const washed = buildSettingsPage({ seed: GATES_OPEN_SEED }).renderRow('dream-skin-glass');
-	assert.ok(!textOf(washed).includes('glass.noWallpaper'), 'with a wallpaper the line is gone and the sliders are back');
+	assert.ok(!textOf(washed).includes('glass.noWallpaper'), 'with a wallpaper the line is gone and the slider is back');
+});
+
+/**
+ * The invariant #135's review asked to pin, more general than "which control belongs to which row":
+ * hiding a control must never take the LAST handle away from a channel that still applies. The blur key
+ * also drives the glass surfaces' --dsh-dream-skin-glass-blur (applyMaterialBlur), wallpaper or not, and
+ * 壁纸模糊度 is the only slider on the page that writes it. The default fixture carries a wallpaper, so
+ * it cannot see this — the case boots a profile whose wallpaper was cleared.
+ */
+const CLEARED_WALLPAPER_SEED = {
+	'dsh-dream-skin:wallpaper-kind': '',
+	'dsh-dream-skin:wallpaper': '',
+	'dsh-dream-skin:wallpaper-url': '',
+	'dsh-dream-skin:wallpaper-gradient': '',
+	'dsh-dream-skin:wallpaper-blur': '14'
+};
+test('a cleared wallpaper keeps the last handle on glass blur, and dragging it moves the glass variable', () => {
+	const page = buildSettingsPage({ bare: true, seed: CLEARED_WALLPAPER_SEED });
+	const glassBlur = () => page.sandbox.documentElement.style.vars['--dsh-dream-skin-glass-blur'];
+	assert.equal(glassBlur(), '14px', 'control: with no wallpaper the channel is still published');
+	const section = page.renderSection();
+	assert.ok(textOf(page.renderRow('dream-skin-glass')).includes('glass.noWallpaper'), 'control: this is the no-wallpaper page');
+	const handles = controls(section).filter((control) => control.type === 'range' && control.label === 'background.blur');
+	assert.equal(handles.length, 1, 'the page keeps exactly one handle on the blur key while it still applies');
+	slide(handles[0].node, 30);
+	assert.equal(glassBlur(), '30px', 'dragging that handle reaches the glass surfaces, not only the stored key');
 });
 
 test('w7a: the four import/export entries live in the zone above the library, and 随机换一个 asks twice', () => {
