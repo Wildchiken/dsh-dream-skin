@@ -6,6 +6,14 @@
 
 # dsh-dream-skin 🔮
 
+[![npm](https://img.shields.io/npm/v/dsh-dream-skin.svg?style=for-the-badge&logo=npm&logoColor=white&label=dsh-dream-skin&color=cb3837)](https://www.npmjs.com/package/dsh-dream-skin)
+[![downloads / month](https://img.shields.io/npm/dm/dsh-dream-skin.svg?style=for-the-badge&label=installs%2Fmo&color=0a6aa1)](https://www.npmjs.com/package/dsh-dream-skin)
+[![CI](https://img.shields.io/github/actions/workflow/status/RevolutionLA/dsh-dream-skin/ci.yml?branch=main&style=for-the-badge&label=CI&color=2fa37a)](https://github.com/RevolutionLA/dsh-dream-skin/actions/workflows/ci.yml)
+![DSH hosts: Web | Desktop](https://img.shields.io/badge/DSH_hosts-Web%20%7C%20Desktop-6f5bd0?style=for-the-badge)
+![8 original themes](https://img.shields.io/badge/8%20original-themes-f08a5a?style=for-the-badge)
+![8 languages](https://img.shields.io/badge/8-languages-2fa37a?style=for-the-badge)
+[![license MIT](https://img.shields.io/npm/l/dsh-dream-skin.svg?style=for-the-badge&label=MIT&color=888)](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/LICENSE)
+
 **Dale a DeepSeek Harness una apariencia sobria, clara y con textura.**
 
 Skinning nativo · wallpaper · color de acento · theme packs compartibles — una implementación elegante construida
@@ -167,6 +175,9 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 
 ## 🔬 Presupuesto del compositor (issue #110)
 
+<details>
+<summary>⌄ Detalles</summary>
+
 El desenfoque no es solo "se ve más pesado": **cada panel esmerilado es una composición fuera de pantalla**, y una segunda ventana la duplica. Así que esto tiene números:
 
 ```sh
@@ -184,7 +195,12 @@ Medido en la mitad de navegador que se publica: **6 paneles `backdrop-filter`** 
 
 **Un informe de rendimiento útil incluye**: ① cómo se siente con bajo consumo activado y desactivado; ② la sección Compositing de `chrome://gpu`; ③ cuántas ventanas y pantallas usas. En el escritorio del mantenedor no hay un M4 — la mitad estática la medimos nosotros, la de ejecución necesita tus números.
 
+</details>
+
 ## 🧩 Qué tipo de plugin es este
+
+<details>
+<summary>⌄ Detalles</summary>
 
 **Un `dsh-plugin` estándar de doble cara «todo es un plugin» — se carga y se usa exactamente igual que el paquete oficial `ui-theme`.**
 
@@ -208,6 +224,8 @@ En otras palabras: no estás instalando un script marginal — es un plugin de s
 plugins de DSH.
 
 ---
+
+</details>
 
 ## ⚡ Inicio rápido (3 pasos)
 
@@ -239,6 +257,11 @@ dsh plugin --profile web add dsh-dream-skin
 > (el número se consulta en el momento con `npm view dsh-dream-skin version`). El escritorio va aparte: su perfil lo gestiona
 > **en exclusiva la aplicación Electron**, y la CLI lo rechaza de forma dura — el camino que sí funciona está en [docs/desktop-support.md](../desktop-support.md).
 
+<details>
+<summary>▸ Opción B: Desde GitHub (fijado a un commit verificado)</summary>
+
+</details>
+
 ### Opción B: Desde GitHub (fijado a un commit verificado)
 
 ```sh
@@ -247,6 +270,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 
 > Fijar el commit de un release significa que los nuevos cambios en `main` nunca alterarán silenciosamente tu copia
 > instalada.
+
+<details>
+<summary>▸ Opción C: Desde un tarball de Release (sin conexión / sin git)</summary>
+
+</details>
 
 ### Opción C: Desde un tarball de Release (sin conexión / sin git)
 
@@ -257,6 +285,11 @@ no se ejecuta ningún script prepare al instalar), y luego:
 ```sh
 dsh plugin --profile web add ./dsh-dream-skin-<version>.tgz
 ```
+
+<details>
+<summary>▸ Opción D: Clona e instala desde la ruta local (desarrollo)</summary>
+
+</details>
 
 ### Opción D: Clona e instala desde la ruta local (desarrollo)
 
@@ -284,6 +317,9 @@ y **Theme Packs**.
 > Si tu profile ya usa el workspace, no tendrás que repetirlo.
 
 ## 🔄 Actualizar / Desinstalar
+
+<details>
+<summary>⌄ Detalles</summary>
 
 **Actualiza a la última versión** (cuando se instaló desde el release de npm):
 
@@ -317,6 +353,8 @@ dsh web   # restaura el aspecto oficial
 
 ---
 
+</details>
+
 ## 🧩 Compatibilidad
 
 | Elemento | Valor |
@@ -330,9 +368,6 @@ dsh web   # restaura el aspecto oficial
 
 ---
 
-
-<details>
-<summary><b>Cómo funciona / Persistencia / Desarrollar y ampliar temas (clic para expandir)</b></summary>
 ## ⚙️ Cómo funciona
 
 El sistema de themes de DSH se basa en tokens: el web shell incluye tokens de diseño `--dsw-*`, y `ThemeRuntime` permite
@@ -374,6 +409,9 @@ del ThemePresenter de ui-layout.
 
 ## 💼 Notas sobre la persistencia
 
+<details>
+<summary>⌄ Detalles</summary>
+
 - La skin y el wallpaper se guardan en **tres niveles**: caché en memoria (primer fotograma correcto), `localStorage` del navegador (prefijo `dsh-dream-skin:`) y **archivo en el host** `$DSH_HOME/dream-skin.json`, leído/escrito mediante el `/dream-skin/api` loopback del propio plugin.
 - El nivel de archivo es lo que hace que **desktop** resista: DSH Desktop recibe un puerto nuevo en cada arranque, así que el origin cambia y con solo `localStorage` se olvidaría todo. El archivo del host sobrevive a cambios de puerto y reinicios.
 - ¿Por qué no en los ajustes del Host? El cable de ajustes del Host solo expone un conjunto de namespaces en lista
@@ -382,6 +420,8 @@ del ThemePresenter de ui-layout.
   nivel local del proceso. `localStorage` respeta ese límite y sobrevive a las recargas.
 
 ---
+
+</details>
 
 ## 🛠️ Desarrollo / cómo extender los themes
 
@@ -405,9 +445,10 @@ entidades de la tabla de módulos: seeds de plataforma (`react`, `react/jsx-runt
   packs).
 - **Repintar**: consulta los tokens `--dsw-alias-*` (contrato completo en [`docs/themes-spec.md`](../../docs/themes-spec.md)).
 
-
-</details>
 ## 📌 Hoja de ruta
+
+<details>
+<summary>⌄ Detalles</summary>
 
 > **Esta tabla solo lista lo que NO está hecho.** Lo ya entregado vive en la sección Funciones de arriba y en [CHANGELOG.md](../../CHANGELOG.md) — mantener el mismo inventario en dos lugares siempre se desalinea, y este proyecto ya se desalineó una vez. Esta tabla traduce la hoja de ruta del `README.md` en chino, que sigue siendo la fuente autorizada.
 > Cada entrada lleva tres cosas: **motivo** (de un issue real o de datos medidos, nunca de una demanda imaginada), **tamaño** (S ≈ una noche, M ≈ una versión funcional, L ≈ requiere diseño antes del código), **criterio de aceptación** (una comprobación que **puede fallar**, no «terminado cuando yo lo diga»). Cuando algo se entrega, se borra de esta tabla. La sección «No haremos» importa tanto como la lista de pendientes: le ahorra a un contribuyente una ronda en vacío.
@@ -450,6 +491,8 @@ entidades de la tabla de módulos: seeds de plataforma (`react`, `react/jsx-runt
 
 ---
 
+</details>
+
 ## 🤝 Contribuciones
 
 ¡Issues y PRs bienvenidos! Por favor, lee la [Guía de contribución](../../CONTRIBUTING.md) y sigue el
@@ -470,11 +513,16 @@ que el proyecto se descubra y se mantenga. ¿Quieres contribuir con themes / un 
 
 ## 🙏 Agradecimientos
 
+<details>
+<summary>⌄ Detalles</summary>
+
 - Referencia de arquitectura y API: el paquete de cliente
   [ui-theme](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/client/ui-theme) oficial de DeepSeek Harness.
 - Homenaje conceptual: [Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin).
 
 ---
+
+</details>
 
 ## 📈 Curva de crecimiento
 

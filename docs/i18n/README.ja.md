@@ -6,6 +6,14 @@
 
 # dsh-dream-skin 🔮
 
+[![npm](https://img.shields.io/npm/v/dsh-dream-skin.svg?style=for-the-badge&logo=npm&logoColor=white&label=dsh-dream-skin&color=cb3837)](https://www.npmjs.com/package/dsh-dream-skin)
+[![downloads / month](https://img.shields.io/npm/dm/dsh-dream-skin.svg?style=for-the-badge&label=installs%2Fmo&color=0a6aa1)](https://www.npmjs.com/package/dsh-dream-skin)
+[![CI](https://img.shields.io/github/actions/workflow/status/RevolutionLA/dsh-dream-skin/ci.yml?branch=main&style=for-the-badge&label=CI&color=2fa37a)](https://github.com/RevolutionLA/dsh-dream-skin/actions/workflows/ci.yml)
+![DSH hosts: Web | Desktop](https://img.shields.io/badge/DSH_hosts-Web%20%7C%20Desktop-6f5bd0?style=for-the-badge)
+![8 original themes](https://img.shields.io/badge/8%20original-themes-f08a5a?style=for-the-badge)
+![8 languages](https://img.shields.io/badge/8-languages-2fa37a?style=for-the-badge)
+[![license MIT](https://img.shields.io/npm/l/dsh-dream-skin.svg?style=for-the-badge&label=MIT&color=888)](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/LICENSE)
+
 **DeepSeek Harness に、落ち着いて澄んだ、質感のある「顔」を。**
 
 ネイティブ・スキニング · 壁紙 · アクセントカラー · 共有可能なテーマパック — DSH 公式の `--dsw-*` トークンシステムだけで構築した、エレガントな実装です。一度インストールすれば、ずっと使い続けられます。
@@ -154,6 +162,9 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 
 ## 🔬 コンポジタ予算（issue #110）
 
+<details>
+<summary>⌄ この節を読む</summary>
+
 ぼかしは「重く見える」だけではありません。**すりガラスの面はそれぞれ 1 回のオフスクリーン合成**で、ウィンドウを 2 枚開けば 2 倍になります。だからここは数字で語ります:
 
 ```sh
@@ -171,7 +182,12 @@ npm run compositor:audit        # 箇所ごとに: 行番号 / ぼかし半径 /
 
 **有用な性能報告に含めてほしいもの**: ① 低電力のオン/オフそれぞれの体感、② `chrome://gpu` の Compositing の欄、③ 同時に開いているウィンドウ数と画面数。メンテナの手元に M4 はありません — 静的な半分はこちらで測れますが、実行時の半分はそちらの数字が必要です。
 
+</details>
+
 ## 🧩 これはどんなプラグインか
+
+<details>
+<summary>⌄ この節を読む</summary>
 
 **標準的な両面構成（dual-face）の「すべてがプラグイン」`dsh-plugin` です — 公式の `ui-theme` パッケージとまったく同じように読み込まれ、使用されます。**
 
@@ -191,6 +207,8 @@ DeepSeek Harness のモットーは *everything is a plugin*（すべてがプ�
 言い換えれば：あなたは無名のスクリプトをインストールしているのではありません — これは DSH 公式のプラグインシステムの中の、標準的なスキンプラグインです。
 
 ---
+
+</details>
 
 ## ⚡ クイックスタート（3ステップ）
 
@@ -217,6 +235,11 @@ dsh plugin --profile web add dsh-dream-skin
 
 > **リリース後24時間以内はバージョン番号を明示してください**：`dsh plugin --profile web add dsh-dream-skin@<最新版>`（番号はその場で `npm view dsh-dream-skin version` が教えてくれます）。デスクトップ版は別枠です：あのプロファイルは **Electron アプリが排他的に管理**し、CLI はそれを明確に拒否します——通る道は [docs/desktop-support.md](../desktop-support.md) に書いてあります。
 
+<details>
+<summary>▸ オプションB：GitHub から（検証済みコミットに固定）</summary>
+
+</details>
+
 ### オプションB：GitHub から（検証済みコミットに固定）
 
 ```sh
@@ -225,6 +248,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 
 > リリースのコミットに固定しておけば、`main` の新しい変更がインストール済みのコピーを静かに変えてしまうことはありません。
 
+<details>
+<summary>▸ オプションC：Release の tarball から（オフライン / git なし）</summary>
+
+</details>
+
 ### オプションC：Release の tarball から（オフライン / git なし）
 
 [Releases](https://github.com/RevolutionLA/dsh-dream-skin/releases) ページから `dsh-dream-skin-<version>.tgz` をダウンロードします（ビルド済みの `lib/client.js` が同梱されているため、インストール時に prepare スクリプトは実行されません）。次に：
@@ -232,6 +260,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 ```sh
 dsh plugin --profile web add ./dsh-dream-skin-<version>.tgz
 ```
+
+<details>
+<summary>▸ オプションD：クローンしてローカルパスからインストール（開発用）</summary>
+
+</details>
 
 ### オプションD：クローンしてローカルパスからインストール（開発用）
 
@@ -255,6 +288,9 @@ dsh --profile web --dump-config | grep -A2 dream-skin   # a dream-skin loader en
 > 素の `add` には `-w`（ワークスペース）フラグが必要です。すべてのプロファイルに `pnpm-workspace.yaml` が同梱されており、pnpm はプロファイルディレクトリをワークスペースルートとみなすため、素の add は `ERR_PNPM_ADDING_TO_ROOT` で失敗します。プロファイルがすでにワークスペースを使用している場合は、繰り返す必要はありません。
 
 ## 🔄 アップデート / アンインストール
+
+<details>
+<summary>⌄ この節を読む</summary>
 
 **最新版にアップデート**（npm リリースからインストールした場合）：
 
@@ -283,6 +319,8 @@ dsh web   # restores the official appearance
 
 ---
 
+</details>
+
 ## 🧩 互換性
 
 | 項目 | 値 |
@@ -295,7 +333,6 @@ dsh web   # restores the official appearance
 > DSH をアップグレードするときは、`package.json` の peerDependencies もそれに合わせて更新してください。
 
 ---
-
 
 <details>
 <summary><b>仕組み / 永続化 / テーマの開発・拡張（クリックで開く）</b></summary>
@@ -335,11 +372,16 @@ DSH のテーマシステムはトークンベースです：Web シェルは `-
 
 ## 💼 永続化のメモ
 
+<details>
+<summary>⌄ この節を読む</summary>
+
 - スキンと壁紙は**3層**で保持します：メモリ内キャッシュ（初回フレームの正確性）、ブラウザの `localStorage`（キーは `dsh-dream-skin:` 接頭辞）、そして**ホスト側ファイル** `$DSH_HOME/dream-skin.json`（本プラグイン独自のループバック `/dream-skin/api` で読み書き）。
 - デスクトップ版ではこのファイル層が決定的です：DSH Desktop は起動のたびに OS がポートを割り直すため origin が変わり、`localStorage` だけでは状態を忘れます。ポート変更・再起動をまたぐ正式な状態はホスト側ファイルです。
 - なぜ Host 設定にしないのか？ Host 設定の配線は、ブラウザクライアントに許可リスト化された名前空間のみを公開するため（`dsh-host-apiproxy` の `WEB_SETTINGS_NAMESPACES`）、サードパーティの名前空間は `settings-not-exposed` を返します。製品自体もリモートブラウザの設定をプロセスローカルに保持します。`localStorage` はその境界に一致し、リロード後も保持されます。
 
 ---
+
+</details>
 
 ## 🛠️ 開発 / テーマの拡張
 
@@ -352,9 +394,11 @@ DSH のテーマシステムはトークンベースです：Web シェルは `-
 - **検証**：`npm test`（ファクトリーの評価、`apply()`、パックのインポート / 永続化をカバーする VM スモークテスト）。
 - **再ペイント**：`--dsw-alias-*` トークンを参照してください（完全な契約は [`docs/themes-spec.md`](../../docs/themes-spec.md)）。
 
-
 </details>
 ## 📌 ロードマップ
+
+<details>
+<summary>⌄ この節を読む</summary>
 
 > **この表は未完了の項目だけを載せています。** 提供済みの機能は上の「機能」セクションと [CHANGELOG.md](../../CHANGELOG.md) にあります。同じ内容を2箇所に置くと必ずズレが生じ、実際このプロジェクトでも一度ズレました。本表は中国語版 `README.md` の Roadmap を翻訳したもので、正（ソース）は中国語版です。
 > 各項目には必ず3つの要素を添えます：**動機**（実際の issue か計測データから。空想の需要は書かない）、**規模**（S ≈ 一晩、M ≈ ファンクションリリース1回分、L ≈ コードを書く前に設計が必要）、**受け入れ判定**（**失敗しうる**チェック。「できた」と宣言すれば終わり、は不可）。完了した項目はこの表から削除します。「やらない」欄も ToDo と同じくらい重要です — 貢献者に空振りをさせないためです。
@@ -397,6 +441,8 @@ DSH のテーマシステムはトークンベースです：Web シェルは `-
 
 ---
 
+</details>
+
 ## 🤝 コントリビューション
 
 Issue と PR は大歓迎です！[コントリビューションガイド](../../CONTRIBUTING.md) と [行動規範](../../CODE_OF_CONDUCT.md) をお読みください。
@@ -415,10 +461,15 @@ Issue と PR は大歓迎です！[コントリビューションガイド](../.
 
 ## 🙏 謝辞
 
+<details>
+<summary>⌄ この節を読む</summary>
+
 - アーキテクチャ & API リファレンス：公式 DeepSeek Harness の [ui-theme](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/client/ui-theme) クライアントパッケージ。
 - コンセプトのオマージュ：[Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin)。
 
 ---
+
+</details>
 
 ## 📈 成長カーブ
 

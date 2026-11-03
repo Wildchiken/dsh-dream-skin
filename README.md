@@ -5,6 +5,15 @@
 <div align="center">
 
 # dsh-dream-skin 🔮
+
+[![npm](https://img.shields.io/npm/v/dsh-dream-skin.svg?style=for-the-badge&logo=npm&logoColor=white&label=dsh-dream-skin&color=cb3837)](https://www.npmjs.com/package/dsh-dream-skin)
+[![downloads / month](https://img.shields.io/npm/dm/dsh-dream-skin.svg?style=for-the-badge&label=installs%2Fmo&color=0a6aa1)](https://www.npmjs.com/package/dsh-dream-skin)
+[![CI](https://img.shields.io/github/actions/workflow/status/RevolutionLA/dsh-dream-skin/ci.yml?branch=main&style=for-the-badge&label=CI&color=2fa37a)](https://github.com/RevolutionLA/dsh-dream-skin/actions/workflows/ci.yml)
+![DSH hosts: Web | Desktop](https://img.shields.io/badge/DSH_hosts-Web%20%7C%20Desktop-6f5bd0?style=for-the-badge)
+![8 original themes](https://img.shields.io/badge/8%20original-themes-f08a5a?style=for-the-badge)
+![8 languages](https://img.shields.io/badge/8-languages-2fa37a?style=for-the-badge)
+[![license MIT](https://img.shields.io/npm/l/dsh-dream-skin.svg?style=for-the-badge&label=MIT&color=888)](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/LICENSE)
+
 [![DSH Insights health](https://dsh-insights.com/badge/RevolutionLA/dsh-dream-skin.svg)](https://dsh-insights.com/p/RevolutionLA/dsh-dream-skin/)
 
 **为 DeepSeek Harness 换上一张克制、清透、有质感的「脸」。**
@@ -112,11 +121,7 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 
 > 🚀 **现已发布到 npm！** 装好 DSH 后，一条命令即可安装，无需 clone。
 
-> **致敬 [Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin)。** 但实现路径不同：Codex 是往桌面客户端渲染进程
-> 注入 CSS（CDP），而 DSH 本身是 **token 驱动的 Web GUI**，官方就提供了「第三方插件注册主题」的能力——所以本插件是
 > **纯原生接入**，无注入、不改二进制、不因客户端更新失效。
->
-> **不是官方产品。** 仅供美化你的 DeepSeek Harness 工作区。
 
 ---
 
@@ -164,6 +169,9 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 
 ## 🔬 合成器预算（issue #110）
 
+<details>
+<summary>⌄ 展开本节</summary>
+
 模糊不是"看着更重"——**每一块磨砂面都是一次离屏合成**，两块窗口同开就是两倍。所以这一项有数可查：
 
 ```sh
@@ -181,7 +189,12 @@ npm run compositor:audit        # 逐处：行号 / 模糊半径 / 所在选择�
 
 **报性能 issue 时最有用的三样**：① 开 / 关低功耗各一次的实际感受；② `chrome://gpu` 里 Compositing 那一段；③ 同时开了几个窗口、几块屏。维护者手上没有 M4 机器——静态那一半我们能自己量，动态那一半只能靠你那边。
 
+</details>
+
 ## 🧩 它是什么形式的插件
+
+<details>
+<summary>⌄ 展开本节</summary>
 
 **它是 DeepSeek Harness 的标准「双面插件」（`dsh-plugin`）——加载和用法与官方 `ui-theme` 完全一致。**
 
@@ -208,6 +221,8 @@ DeepSeek Harness 的口号是「一切皆插件」：模型、工具、沙箱、
 也就是说：**你装的不是一个旁门左道的脚本，而是 DSH 官方插件体系里的标准皮肤插件。**
 
 ---
+
+</details>
 
 ## ⚡ 快速开始（3 步）
 
@@ -243,6 +258,11 @@ dsh plugin --profile web add dsh-dream-skin
 > （在 `%USERPROFILE%\.dsh\profiles\` 下看目录名）；**桌面 profile 由 Electron 应用独占管理，CLI 会硬拒**，
 > 走 `docs/desktop-support.md` 里那条走得通的路。
 
+<details>
+<summary>▸ 方式二：从 GitHub 安装（固定到已验证的提交）</summary>
+
+</details>
+
 ### 方式二：从 GitHub 安装（固定到已验证的提交）
 
 ```sh
@@ -251,6 +271,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40位commit>'
 
 > 固定到 release 对应的 commit，之后 `main` 的新改动不会静默改变已安装代码。
 
+<details>
+<summary>▸ 方式三：从 Release tarball 安装（离线 / 不便走 git 的环境）</summary>
+
+</details>
+
 ### 方式三：从 Release tarball 安装（离线 / 不便走 git 的环境）
 
 从本仓库 [Releases](https://github.com/RevolutionLA/dsh-dream-skin/releases) 下载 `dsh-dream-skin-<版本>.tgz`（内含构建好的 `lib/client.js`，安装时无需执行任何 prepare 脚本），然后：
@@ -258,6 +283,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40位commit>'
 ```sh
 dsh plugin --profile web add ./dsh-dream-skin-<版本>.tgz
 ```
+
+<details>
+<summary>▸ 方式四：克隆后从本地路径安装（开发迭代）</summary>
+
+</details>
 
 ### 方式四：克隆后从本地路径安装（开发迭代）
 
@@ -282,6 +312,9 @@ dsh --profile web --dump-config | grep -A2 dream-skin   # 应出现 dream-skin l
 > `ERR_PNPM_ADDING_TO_ROOT`。若已加过 `-w`，后续用现有 workspace 即无需重复。
 
 ## 🔄 更新 / 卸载
+
+<details>
+<summary>⌄ 展开本节</summary>
 
 **更新到最新版**（装的是 npm 正式包时）：
 
@@ -322,6 +355,8 @@ dsh web   # 重启后恢复官方外观
 
 ---
 
+</details>
+
 ## 🧩 兼容性
 
 | 项 | 值 |
@@ -335,55 +370,23 @@ dsh web   # 重启后恢复官方外观
 
 > **第三方目录（DSH-Store）现状**：`AI-Scarlett/DSH-Store#1411` 曾把本插件标为 catalog blocked。其中「`lib/client.js` 超过其审核面单文件上限」一条，已由对方 2026-10-15 的追评收回，原文与正文 sha256 存档在 [`docs/evidence/dsh-store-1411-followup-2026-10-15.md`](./docs/evidence/dsh-store-1411-followup-2026-10-15.md)；其追评留下的「扫描器证明不了 `require` 的有限调用集」由 10.16.0 处理（全文见 [docs/release-notes.md](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/docs/release-notes.md)）。**本仓库不承诺收录状态会变绿**——是否放行取决于对方的审查流程。
 
-<details>
-<summary><b>📜 逐版本更新记录（11.4.0 → 9.9.0）</b></summary>
+## 📜 最近做了什么
 
-**版本 11.4.0（2026-11-04）**：**设置页多一枚「恢复出厂设置」，而它的重点全在作用域上。** 「出厂」最省事的写法是把本插件前缀下写过的键全删掉——这一版明确不这么干：那 29 枚存储键里有一批装的是**用户内容**（导入的主题包、收藏、壁纸文件夹路径、轮播链接），删掉不可恢复。于是键必须恰好落进四个桶之一——**写回**出厂值 / **删键**（"从没设过"本身就是默认：取景归位、强调色 `system`、低功耗「自动跟随系统」）/**逐字段**复位（轮播的开关与间隔回出厂，`urls` 留着）/**不动**（每枚带一句能核对的理由），并由一条从 bundle 文本现场枚举键名的门盯着：**下一版加新设置却不进任何桶，它会点名红，而且只能靠改这张表满足它**。前缀不等于所有权也钉住了：本机真状态文件里那枚 `dsh-dream-skin:material-memory` 不是任何一版我们写的，复位不碰它。交互复用本页已有的两段式（第一次点只 arm，标签改成承诺语并染成 error 色，旁边给取消；不加自动撤回定时器，那会多一枚需要卸载的页面级把手），并把「保留导入内容」写进**按钮自己的标签**（八语）而不是一条常驻小字。复位走开机同一条 `restorePersistedState(ctx)` 重画页面，再把 7 枚行 store 逐个重新 sync——少一行就是页面和自己打架，这条有在改过的 bundle 上实跑的变异腿。时序也测了：桌面壳答复迟到时，已按下的复位不会被那份陈旧 map 盖掉（用例先证明夹具真能投递那份 map）。回归门 **759** 条（740→759，+19 全带变异腿），质量审计 **229/229**（217 调色 + 12 工艺），合成器预算一项没涨。**边界**：`lib/client.js` **610,182 B**，天花板按数字抬到 **600 KiB**、余量 **4,218 B**——11.3.0 写过「下一个功能之前必须先瘦身，不再抬档」，这次是摊开数字后作的决定，**瘦身作为带数字的欠账留着**；armed 标签变长后的窄屏排布**没有活页目视**；提示面文案在测试里走恒等 translator，钉的是"发了哪一条"，七份非中文措辞没有母语者看过；**复位不撤回**，按下去只能重设回来（内容不丢）。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@11.4.0`。
+**版本 11.4.0（2026-11-04）**：**设置页多一枚「恢复出厂设置」，重点全在作用域上。** 它把**设置**改回出厂值——滑杆、开关、皮肤、强调色、材质、壁纸数值与取景；**导入的主题包、收藏、壁纸文件夹路径与轮播列表一律不动**（那是你带进来的内容，不是"默认"该覆盖的东西），低功耗回到「自动跟随系统」。做法是把本插件的 29 枚存储键分进四个桶（写回 / 删键 / 逐字段复位 / 不许动，每枚带理由），门从 bundle 文本现场枚举键名要求**恰好归一桶**——下一版加设置却不进桶，它会点名红。按下是两段式确认，标签自己就说明保留什么。回归门 **759** 条（740→759，+19 全带变异腿），质量审计 **229/229**（217 调色 + 12 工艺），合成器预算一项没涨。**边界**：`lib/client.js` **610,182 B**、天花板 600 KiB（本轮为这枚按钮抬的档，数字与理由写在门注释里，**真瘦身仍是带数字的欠账**）、余量 **4,218 B**；**没有活页目视**——armed 标签变长后的窄屏排布只有渲染级证据；复位**不撤回**。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@11.4.0`。
 
-**版本 11.3.0（2026-11-03）**：**把 11.2.0 之后欠的四件事做完。** ① 宿主快照对 `0.2.1-rc.5` 重取，顺带查出一条**让发版闸门失明**的 bug：`host:preflight` 读 `verdict.peers`，而装机版 `dsh-app-boot` 的拒绝对象字段是 `requirements` ⇒ 注册表上每个宿主版本（含 `0.3.0-rc.1`、`0.9.0`）都被打印成 "loads"；修好后同一张表报 `candidates 40 | in window 35`、exit 0，且**认不出的形状现在直接停止运行**。`shell.bottom` 注册方 0→3 属预言到期，三条命中实测各不相同（渲染调用 / 契约表 / 唯一的真注册者 = 实验性 inspector 的 DevTools 面板，两个 shipped profile 都不加载它），决定改为 `out-of-scope` 并让它在门输出里可见。同一轮重取还踢出并新增了两样东西：`--dsw-specific-bubble-highlight` 在 rc.5 测得 1 个消费者（实验性 inspector 拿它画高亮），于是被「每枚白名单条目必须仍测得 0 consumers」这条门自己踢出白名单；登记表多一列 `rawMentions`（无边界子串扫描），把评审那句「37 vs 30」的手抄钉子换成一条恒等式 `rawMentions = mentions + Σ(更长 token)`，315 枚被遮蔽 token 全成立、换宿主也不用再改数字。共存夹具那条硬编码「恰好 3 枚作用域」同样被换掉——同机 `skin-center` 升到 0.4.13 只声明 2 枚，我们没有动过那一侧，红的是常量。② 「模糊填充」在低功耗下同样不生效，现在也说出来了（复用 `background.blurSuppressed`，高级行 store 为此多一枚 `performance` 字段并写明理由）。③ 「发现」页签量出来**不该覆盖**——`dsh-client-ui-plugin-market` 不读 layer token，画的是 hover/code/骨架三类语义色；于是把页面根的覆盖集闭起来，多一枚就红。④ 设置分节名改成 `label: () => sectionNavLabel()`（宿主原样渲染 slot label，第一方分节都是函数式），新增 `settings.nav` × 8 语言、导航图标钩子改 8 枚候选、**词典↔回落↔钩子三方一致性门**，11 份文档回到各自语言的说法并加门盯住。回归门 **740** 条（728→740，+12 全带变异腿），质量审计 **229/229**（217 调色 + 12 工艺），合成器预算一项没涨。**边界**：`lib/client.js` **600,708 B**、天花板 592 KiB、余量只剩 **5,500 B（0.9%）**——下一个功能之前必须先瘦身，不再抬档；导航图标 8 枚候选与「发现」页签的观感都**未在活页复核**；`out-of-scope` 依赖"没有 profile 加载 inspector"这一实测事实，它若被装上，那条带会不会在水洗下变透尚无读数。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@11.3.0`。
+| 版本 | 日期 | 一句话 |
+|---|---|---|
+| **11.3.0** | 2026-11-03 | 宿主快照重取 0.2.1-rc.5，顺带修掉一条把每个宿主版本都读成"可装载"的发版闸门 |
+| **11.2.0** | 2026-11-02 | 插件管理页按报告者的诊断重做（我上一版是错的）；轮播文件夹改走宿主自己的目录选择器 |
+| **11.1.1** | 2026-11-01 | 「壁纸模糊度」在低功耗下不出效果？现在它会说出来 |
+| **11.1.0** | 2026-11-01 | 设置页从一条扁平长栏重做成四个分区，8 个滑杆共用一套控件 |
+| **10.30.0** | 2026-10-30 | 采纳 @ppy-web：8 个滑杆统一成同一套自绘 Range |
+| **10.29.0** | 2026-10-29 | 采纳 @ppy-web：拖壁纸滑杆时设置面板让出画面，所见即所得 |
+| **10.28.0** | 2026-10-28 | 出厂外观换成维护者本机那套参数——新装第一眼就是它 |
 
-**版本 11.2.0（2026-11-02）**：**#130 按报告者的诊断重做（我 10.30.1 那版是错的）+ 采纳 @JularDepick 的 PR #133（轮播文件夹走宿主自己的目录选择器）。** #130 错在三处：① 我把 `data-plugin-*` 四个容器塞进**弹窗玻璃规则** ⇒ 插件页填充跟着「弹窗不透明度」走，语义不对；② 那四个锚点在官方 CSS 里**只有布局不画背景**，真正上色的是读 `--dsw-alias-bg-layer-1/2/3` 的哈希类；③ 注册表面板是 `createPortal` 挂到 `body` 的（`[data-install-registry]`），10.30.1 从头到尾没碰到它。新实现把三个 layer token 在**两个根**上重定义，权重与画布 wash **同一个源**（含自动弱化 45% 上限），原色快照放 `html[wash]` 以免自定义属性成环。门也跟着改：`tests/client.plugin_page.test.cjs` 3→6（原门把错的契约钉住了），5 组变异腿。#133 走 `ctx.get("uiWorkspace").pickDirectory()`（宿主产物实测签名 `Promise<string|null>`），能力缺失/取消/失败三种出口分开，手输回退，四类拒绝各一句，路径表取代 chip，11 新键 × 8 语言，7 条用例（2 变异腿）。回归门 **728** 条（718→728），质量审计 **229/229**（217 调色 + 12 工艺），`backdrop-filter` 声明数没涨。**边界**：#130 的**像素表现仍无活页目视**（报告者也这么声明），合进主干是为了给验证一个靶子；`lib/client.js` 597,829 B、天花板 592 KiB、余量只剩 **8,379 B（1.4%）**——连续两版各抬一档，下次先量或先瘦身；本机另有 7 条宿主/浏览器耦合的门因全局宿主今晚被升到 `0.2.1-rc.5` 而红（在不含本次合并的提交上复跑证实与代码无关），登记表/判定表重取是下一轮的活。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@11.2.0`。
-
-**版本 11.1.1（2026-11-01）**：**修一条用户实测报的 bug——选了「固定图片」后拖「壁纸模糊度」滑杆，画面完全不动。** 定位清楚：不是 11.1.0 的回归，是 10.21.1 起低功耗模式按 issue #110 的设计把壁纸层的 `filter: blur()` 整个摘掉了；这台机器 Windows「透明度效果」= 关（注册表 `EnableTransparency=0`）、Chromium 实测 `prefers-reduced-transparency: reduce` 为 true、状态文件里没有显式的 `performance` 键 ⇒ 一直在**自动低功耗**里，而滑杆照写值、渲染层拒绝应用，行上没有任何说明——正是本仓库自己声明的不变式（#55「有反馈、无效果」）漏了这条路。修法：该行走 11.1.0 新加的 `Slider#note` 通道显示「低功耗模式下不生效」（8 语言），值仍可拖、关掉低功耗立刻生效。新增 2 条用例（显式钉住 / 自动跟随系统两种形态 + 断言邻居「壁纸能见度」不该喊 + 一条摘掉 note 的变异腿）。回归门 **718** 条（716→718；本版相关门 104/104 全绿。本机另有 4 条按设计翻红，起因是我启动桌面壳时它把**全局**宿主升到 `0.2.1-rc.3`，冻结的宿主登记表/判定表需要重取——归属在干净 worktree 上实测过，与本版代码无关，详见 CHANGELOG 第四节），质量审计 **229/229**（217 调色 + 12 工艺），合成器预算不变。**边界**：同类还有一处没修——填充方式「模糊填充」的渗色层同样被低功耗摘掉，chip 组没有 note 通道，另开一版；要真的看到模糊仍需手动关掉低功耗（本次没改自动策略，因为 #110 的 GPU 代价是真的）。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@11.1.1`。
-
-**版本 11.1.0（2026-11-01）**：**采纳 @JularDepick 的 PR #132——设置页从一条扁平长栏重做成四个分区（主题与配色 / 玻璃效果 / 背景与壁纸 / 导入与导出），8 个滑杆共用一套 `Range`，窄窗口（≤680px）把行式重排，另加提示面、色井草稿与三个行级原语。** 这正是我们在 #131 要求拆分后回来的那一半：滑杆本体与 10.30.0 合入的 #128 逐字节相同（实测 `function Range(` 起 66 行 diff 为 0），改的只有 `Slider` 把画滑轨的职责交出去；#131 夹带的文件夹选择器脚手架已由作者自己删掉。新增 `tests/client.settings_ui.test.cjs`（**70 条，其中 25 条变异腿**）+ `tests/fixtures/settings-render.cjs`——本仓库第一次把设置整节渲染成可遍历的树来测（此前所有 UI 用例都把 `jsx` 桩成 `() => 0`）。文案：`裁剪填满`→`裁剪填充`、`Cover`→`Crop to fill`，注册给宿主的设置分节名从 `Theme / 外观` 改成中文-only 的 `个性化皮肤`（宿主原样渲染 slot label），11 份文档 57 行"去设置哪一节"跟着改成真话。回归门 **716/716**（646→716），质量审计 **229/229**（217 调色 + 12 工艺），合成器预算一项没涨（6 块面板 / 8 条声明 / 40 渐变 / 2 个 rAF / 2 处行内模糊）。**边界**：`lib/client.js` 539,026 → **580,314 B**，天花板按 32 KiB 一档抬到 576 KiB，余量只剩 **9,510 B（1.6%）**；新用例是渲染级不是浏览器级（fixture 自己写明没有 React 协调器，点击后才出现的控件与定时器行为测不到）；窄屏档与整页外观**未做活页目视**；README 的 `docs/screenshots/settings.png` 仍是重构前的扁平版式。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@11.1.0`。
-
-**版本 10.31.0（2026-10-31）**：**修 #131 评审顺带发现的三处 README 参考数字。** 设置行 **5→7**（`settings.dreamSkin.item` 实际注册 7 处）；合成器面板仍是 **6 块**，但枚举补齐第 6 块「`/` 命令面板」，并写清「另有 2 条 `none` 低功耗守卫，审计合计 8 条声明」；自动弱化文案改为「壁纸不透明度最高 45%」（与 10.30.1 的 UI 一致）。新增 `tests/docs.reference_counts.test.cjs`（3 条）把行数与面板/声明数钉在 bundle 和审计上。回归门 **646/646**（643→646），质量审计 **229/229**（217 调色 + 12 工艺）。**边界**：填充方式在 main 上仍是「裁剪填满」，与 UI 一致；#131 分支把它改成「裁剪填充」，合并那条时再同步。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.31.0`。
-
-**版本 10.30.1（2026-10-30）**：**修 #129 / #130 两条反馈。** #129 是标签误导：自动弱化的代码方向正确（滑杆是透明度，`Math.min(opacity, 0.45)` 把壁纸不透明度封顶在 45%），旧文案「聚焦任务时」与实际「始终生效」不符，8 种语言已改成「壁纸不透明度最高 45%」；不要改成 `Math.max`，那会让淡壁纸反而变浓。#130 给宿主新的插件管理页补上表面：官方 `@deepseek-ai/dsh-client-ui-plugin-manager@0.2.1-rc.5` 的 `data-plugin-group` / `-item-detail` / `-detail` / `-rows` 加入同一条弹窗玻璃规则（跟随「弹窗透明度」，不新增模糊声明），页面根在壁纸激活时透明。回归门 **643/643**（640→643：新文件 `tests/client.plugin_page.test.cjs` +3），质量审计 **229/229**（217 调色 + 12 工艺）。**边界**：#130 的视觉未在 0.2.1-rc.5 活页目视（本机 0.2.0-rc.1 没有该页），规则按官方包 DOM 编写，请报告者回填。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.30.1`。
-
-**版本 10.30.0（2026-10-30）**：**采纳外部贡献者 @ppy-web 的 PR #128 —— 8 个设置滑杆统一成同一套自绘 Range（透明原生 `input[type=range]` + 自绘轨道/填充/拇指）。** 保留 `type=range`、min/max/step、键盘方向键/Home/End、`aria-valuetext`、`prefers-reduced-motion` 与 focus-visible 轮廓；轨道点击按位置跳转，拇指拖拽不跳动，预览仍只由指针触发。我们补了 6 条组件级回归测试（`tests/client.slider.test.cjs`）。回归门 **640/640**（10.29.0 为 634，+6），质量审计 **229/229**（217 调色 + 12 工艺）。**边界**：测试是组件级不是浏览器级；`touch-action:none` 会让触屏在滑杆区域起手的纵向滚动被吞掉；没有 forced-colors 兜底；bundle 538,272 B，距 544 KiB 预算余量 18,784 B。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.30.0`。
-
-**版本 10.29.0（2026-10-29）**：**采纳外部贡献者 @ppy-web 的实时预览（PR #126）—— 拖「壁纸透明度 / 壁纸模糊」时，设置面板让出画面。** 调壁纸的时候，设置弹窗和遮罩正好压在对话框上，想确认"这张图会不会影响文字可读性"只能反复开关设置；他的做法是拖动这两个滑杆期间把面板和遮罩藏起来、只把**正在拖的那一行**做成一块浮起的芯片留在画面上，松手/取消/切窗口/`Escape` 都恢复。实现用的是自有属性标记三层节点（`root` / `path` / `row`），**原生滑杆自始至终没被移动或重新挂载**（那会打断正在进行的拖动）；遮罩是弹窗的**兄弟节点**（本机宿主 `0.2.0-rc.1` 的设置页是 `div[role="presentation"]` 里并排放 `mask` 与 `role="dialog"`），所以隐藏范围向上爬到那层包装——只藏弹窗会留下一层压暗的罩子。我复核后去掉了一处：**预览只由指针触发**，不再由方向键触发（给含焦点的子树加 `visibility: hidden` 会让里面获得焦点的元素失焦，键盘用户会"按一下闪一下、再也调不动"）。PR 里第二半（自制滑块外观）这一版**没有采纳**：它只作用于这两行，同一面板另外 6 个滑杆仍是原生控件，一个面板两套样式是设计语言的倒退——已把"要换就 8 行一起换、并去掉与气泡重复的常驻数值"写回 PR 邀请他再来。回归门 **634/634**（10.28.1 为 631，+3 是这条的守卫），质量审计 **229/229**（217 调色 + 12 工艺）。更新请写确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.29.0`。
-
-**版本 10.28.1（2026-10-28）**：**修 #124 —— 聊天输入框里打 `/` 弹出的命令菜单没有自己的背景。** 量了两条渠道的宿主字节：命令菜单（`dsh-client-ui-input-trigger` 的 `MenuView`）的类只声明布局，**没有任何 background / backdrop-filter**，而它渲染进的槽位 `[data-composer-overlay]` 也是 `height:0; position:absolute`——宿主用不透明主题时被输入框挡住，我们的输入框是玻璃，聊天文字就直接透上来了。所以现在由插件给这个面**上色**：`[data-composer-overlay] > *` 用我们自己的变量（跟着「弹窗透明度」滑杆走），模糊跟同一个玻璃旋钮；低功耗下模糊被全局关掉，这条通道也随之抬到低功耗地板，不会变成"既平又透"。**旧宿主（0.2.0-rc.1）不盖这个属性 ⇒ 规则在那条线上是空转，不是回归**（新属性在 0.2.1-rc.3 才有）。回归门 **631/631**（10.28.0 为 628，+3 是这条的守卫），质量审计 **229/229**（217 调色 + 12 工艺）。合成器预算随之 **6 → 7 块面板**（真多了一次离屏合成，理由写在预算表里）。更新请写确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.28.1`。
-
-**版本 10.28.0（2026-10-28）**：**出厂外观换成维护者自己那套参数 —— 新装用户第一次打开看到的就是它。** 壁纸透明度 60%（= `wallpaper-opacity 0.4`，滑杆显示的是 `1 − opacity`）、壁纸模糊 5px、侧边栏 60% + 开启「跟随壁纸」、输入框 60%、毛玻璃——与生成器里的星云默认值逐项对齐。**弹窗保持 0.92 不降到 50%**：一是 `modalOpacity` 的域下限 0.8 来自 issue #67「低于 0.8 的弹窗不再遮住身后页面」，二是这一项在有壁纸时本来就会被抬到 0.92（设置里那句「已到可读性地板」说的就是这件事），发 0.5 与发 0.92 在当前外观上像素等价、只对没有壁纸的用户生效。**壁纸图像不随包发**（那是维护者的私人照片，出厂仍用内置光晕壁纸）。**已有用户一个键都不会被改写**（出厂种子只在键缺席时写入）。其余 7 套皮肤在皮肤选择器里仍用各自调好的数值。回归门 **628/628**（10.27.1 为 627），质量审计 **229/229**（217 调色 + 12 工艺）。更新请写确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.28.0`。
-
-**版本 10.27.1（2026-10-27）**：**给 #110 一个能复算的静态坐标——并把提出这个想法的评审里三处未经实测的前提纠正过来。** 新脚本 `scripts/compositor-audit.cjs` 逐处列出 `backdrop-filter`、模糊半径、渐变层与 rAF 循环（带行号，注释不计），新门 `tests/compositor_budget.test.cjs` 把这些数字钉在声明的天花板上（6 块面板 / 静态半径 ≤40px / 40 处渐变 / 2 个 rAF / 2 处受低功耗守卫的行内模糊）。评审引用的 "40 处 backdrop-filter、31 处 blur()" 是把注释也算进去的计数（实测：6 条标准声明 + 6 条 `-webkit-` 孪生；17 处 `blur(`）；它写的"低功耗只降透明度、不减 blur"**方向是反的**——低功耗关掉的正是页面上全部 `backdrop-filter`。回归门 **627/627**（10.27.0 为 620），质量审计 **229/229**（217 调色 + 12 工艺）。本版**不改一个像素**：新增的是审计、门与 8 份 README 的「合成器预算」一节。更新请写确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.27.1`。
-
-**版本 10.27.0**：**发布包瘦身——随包文档撤出 npm：25→14 个文件、解包 1.11→0.59 MiB（-47%）、压缩包 412→196 KiB（-53%），同时把 README 在 npm 页面上的相对链接死链改成 GitHub 绝对 URL。** 回归门 **620/620**（617→620：新文件 `tests/package.links.test.cjs` +3，钉「随包文档里的相对链接必须指向随包文件或 npm 总是发布的文件」），质量审计 **229/229**（217 调色 + 12 工艺）。完整文档仍在仓库 `docs/`；npm 包只带运行时、README、主题包规范与 Store 存证。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.27.0`。
-
-**版本 10.26.1（2026-10-26）**：**本地文件夹图源现在往下读三层子文件夹，并按「目录名字」轮换——一个文件夹播完再进下一个。** 回归门 **617/617**（610→617：`tests/host.folder.test.cjs` +4、`tests/client.smoke.test.cjs` +2、`tests/client.storage.test.cjs` +1），质量审计 **229/229**（217 调色 + 12 工艺）。列表与取图共用同一条路径段规则；每一级目录都 `lstat` 确认是真目录，软链目录两侧都拒；**Windows 的目录联接（junction）我在本机实测也被跳过**（读数的边界写在 CHANGELOG）。**已知边界**：客户端链接上限 700 字符，编码后超长的名字不参与轮换（有专门用例钉住）。发版用确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.26.1`。
-
-**版本 10.26.0（2026-10-26）**：回归门 **610/610**（609→610）：三笔已合入主干的功能一次发出（本地文件夹图源、竖图平铺、壁纸取景）+ 宿主侧不变式「列表返回的每个名字都必须可服务」。全文见 [CHANGELOG.md](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/CHANGELOG.md) 的 10.26.0 条。
-
-**版本 10.23.0（2026-10-23）**：回归门 **571/571**（569→571）；低功耗三态（`performance` 缺键 = 自动跟随系统「减少透明度」）。全文见 [docs/release-notes.md](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/docs/release-notes.md) 的 10.23.0 条。
-
-**版本 10.22.0（2026-10-22）**：**修一个我在 10.21.1 写出来的缺陷——低功耗模式关掉了磨砂，却没动菜单底色 46% 的 alpha，结果菜单比正常时更透（#115）。** 菜单本来靠模糊承担可读性，磨砂一没，同一块 46% 就成了能读穿背后聊天的「保鲜膜」。#116（@aurora-zl）只在低功耗开着时给 `--dsw-menu-surface-fill` 发一条 `max(滑杆, 0.92)` 的覆盖，并保留皮肤自己的菜单色相；开关关着一行都不发，磨砂玻璃原样保留；拨开关当帧重发，不残留。新增 1 条用例（两个配色方案都 ≥0.92、激活方案色相不变、正常模式完全不碰该通道、拨开关能加能撤）与 1 次反向破坏（把门控改成 `if (false)` ⇒ 红）；恢复后 157/157 绿。回归门 **569/569**（568→569），质量审计 **229/229**。**边界**：本版只给菜单这一条通道加了下限，composer / 侧栏等其他玻璃面在低功耗下仍会失去模糊；判据是计算值，真机观感以 #115 的回执为准。更新请写确切版本号：`dsh plugin --profile web add dsh-dream-skin@10.22.0`。
-
-留在 README 的只有三条口径：
-
-- **当前版本**：以 [CHANGELOG.md](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/CHANGELOG.md) 顶部条目为准，`package.json` 与 release tag 强制一致（由回归门守着）。
-- **本版读数**：回归门 / 质量审计的通过数写在各版 CHANGELOG 条目里，不在 README 维护第二份数字。
-- **历史为什么这么写**：每条都带当时的实测证据与「反向破坏后是否翻红」的记录，读它是为了判断某条边界今天是否仍然成立。
-
-</details>
+> 更完整的逐版本记录（含当时的实测读数、反向破坏验证与未验证边界）在 **[CHANGELOG.md](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/CHANGELOG.md)**；11.3.0 一路回到 9.9.0 的归档在 **[docs/release-notes.md](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/docs/release-notes.md)**。首页不留第二份历史。
 
 ---
-
-<details>
-<summary><b>⚙️ 工作原理 / 💼 持久化说明 / 🛠️ 开发、扩展主题（点开查看）</b></summary>
 
 ## ⚙️ 工作原理
 
@@ -425,6 +428,9 @@ ThemePresenter 所有，宿主 `dispose()` 会把它擦掉，于是"属性缺席
 
 ## 💼 持久化说明
 
+<details>
+<summary>⌄ 展开本节</summary>
+
 - **三层**：内存缓存（保证首帧正确）→ 浏览器 `localStorage`（键前缀 `dsh-dream-skin:`，同 origin 快速恢复）→
   **宿主文件** `$DSH_HOME/dream-skin.json`（经本插件自建的回环 `/dream-skin/api` 读写，见 `lib/index.js` 之
   `statePath()` / `readState()` / `writeState()`）。
@@ -436,6 +442,8 @@ ThemePresenter 所有，宿主 `dispose()` 会把它擦掉，于是"属性缺席
   所以既拿到了文件持久化，也没有碰任何非官方通道。
 
 ---
+
+</details>
 
 ## 🛠️ 开发 / 扩展主题
 
@@ -454,13 +462,14 @@ bundle（`@deepseek-ai/dsh-client-runtime/client`、…）。
 - **跑校验**：`npm test`（VM 冒烟测试，覆盖 factory 求值、`apply` 挂载、主题包导入/持久化）。
 - **换配色**：参考 `--dsw-alias-*` 令牌（完整契约见 [`docs/themes-spec.md`](./docs/themes-spec.md)）。
 
-</details>
-
 ## 工程案例
 
 - [拒绝测试全绿，为什么 `IMG_2340.JPG` 还是打不开？](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/docs/case-study-listed-not-served.md)——从一次合并前拦截，看两个接口如何发生契约漂移，以及怎样用“列表中的每个名字都必须可服务”这条不变式防止复发。
 
 ## 📌 Roadmap
+
+<details>
+<summary>⌄ 展开本节</summary>
 
 > **这张表只列未完成项。** 已交付能力见上文「功能一览」与 [CHANGELOG](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/CHANGELOG.md)，不在两处留存量——双写必然漂移，本项目已经漂过一次。
 > 每条必须带三样东西：**动机**（来自真实 issue 或实测数据，不写想象中的需求）、**规模**（S ≈ 一个晚上，M ≈ 一个功能版，L ≈ 需要先设计）、
@@ -504,6 +513,8 @@ bundle（`@deepseek-ai/dsh-client-runtime/client`、…）。
 
 ---
 
+</details>
+
 ## 🤝 贡献
 
 欢迎提交 Issue 与 PR！请先阅读 [贡献指南](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/CONTRIBUTING.md)，并遵循 [Code of Conduct](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/CODE_OF_CONDUCT.md)。
@@ -523,19 +534,29 @@ bundle（`@deepseek-ai/dsh-client-runtime/client`、…）。
 
 ## 🙏 致谢
 
+<details>
+<summary>⌄ 展开本节</summary>
+
 - 架构与 API 参考：DeepSeek Harness 官方
   [ui-theme](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/client/ui-theme) 客户端包。
 - 概念致敬：[Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin)。
 
 ---
 
+</details>
+
 ## 🧰 同作者的其他项目
+
+<details>
+<summary>⌄ 展开本节</summary>
 
 - **[adversarial-review](https://github.com/RevolutionLA/adversarial-review)** —— 三方对抗式代码评审 Agent Skill。蓝军（敌意审查）→ 第三方（独立审计）→ 中立裁定，给 AI coding agent 的结构化对抗评审闭环。**写插件、发版前把关时特别有用。**
 - **[AscendMate](https://github.com/RevolutionLA/AscendMate)** —— 昇腾智算服务器的环境搭建、模型微调、推理部署、算子开发手册。
 - **[ascend-assistant](https://github.com/RevolutionLA/ascend-assistant)** —— 昇腾服务器助手 Agent Skill，与 AscendMate 深度联动。
 
 ---
+
+</details>
 
 ## 📈 成长曲线
 

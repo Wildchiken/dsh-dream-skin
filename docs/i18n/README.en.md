@@ -6,6 +6,14 @@
 
 # dsh-dream-skin 🔮
 
+[![npm](https://img.shields.io/npm/v/dsh-dream-skin.svg?style=for-the-badge&logo=npm&logoColor=white&label=dsh-dream-skin&color=cb3837)](https://www.npmjs.com/package/dsh-dream-skin)
+[![downloads / month](https://img.shields.io/npm/dm/dsh-dream-skin.svg?style=for-the-badge&label=installs%2Fmo&color=0a6aa1)](https://www.npmjs.com/package/dsh-dream-skin)
+[![CI](https://img.shields.io/github/actions/workflow/status/RevolutionLA/dsh-dream-skin/ci.yml?branch=main&style=for-the-badge&label=CI&color=2fa37a)](https://github.com/RevolutionLA/dsh-dream-skin/actions/workflows/ci.yml)
+![DSH hosts: Web | Desktop](https://img.shields.io/badge/DSH_hosts-Web%20%7C%20Desktop-6f5bd0?style=for-the-badge)
+![8 original themes](https://img.shields.io/badge/8%20original-themes-f08a5a?style=for-the-badge)
+![8 languages](https://img.shields.io/badge/8-languages-2fa37a?style=for-the-badge)
+[![license MIT](https://img.shields.io/npm/l/dsh-dream-skin.svg?style=for-the-badge&label=MIT&color=888)](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/LICENSE)
+
 **Give DeepSeek Harness a face that's restrained, clear and textured.**
 
 Native skinning · wallpaper · accent color · shareable theme packs — an elegant implementation built entirely on DSH's
@@ -165,6 +173,9 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 
 ## 🔬 Compositor budget (issue #110)
 
+<details>
+<summary>⌄ Details</summary>
+
 Blur is not just "looking heavier" — **every frosted pane is a separate offscreen composite**, and a second window doubles it. So this one has numbers:
 
 ```sh
@@ -182,7 +193,12 @@ Measured in the shipped browser half: **6 `backdrop-filter` panes** (the host's 
 
 **A useful performance report contains**: ① how it feels with low power on vs off; ② the Compositing section of `chrome://gpu`; ③ how many windows and displays you run. There is no M4 Mac on the maintainer's desk — the static half we measure ourselves, the runtime half needs your numbers.
 
+</details>
+
 ## 🧩 What kind of plugin is this
+
+<details>
+<summary>⌄ Details</summary>
 
 **A standard dual-face "everything-is-a-plugin" `dsh-plugin` — loaded and used exactly like the official `ui-theme` package.**
 
@@ -206,6 +222,8 @@ In other words: you are not installing a fringe script — this is a standard sk
 system.
 
 ---
+
+</details>
 
 ## ⚡ Quick start (3 steps)
 
@@ -237,6 +255,11 @@ dsh plugin --profile web add dsh-dream-skin
 > (look the number up on the spot with `npm view dsh-dream-skin version`). The desktop is a separate case: its profile is managed
 > **exclusively by the Electron app** and the CLI hard-rejects it — the path that actually works is in [docs/desktop-support.md](../desktop-support.md).
 
+<details>
+<summary>▸ Option B: From GitHub (pinned to a verified commit)</summary>
+
+</details>
+
 ### Option B: From GitHub (pinned to a verified commit)
 
 ```sh
@@ -244,6 +267,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 ```
 
 > Pinning to the commit of a release means new `main` changes never silently alter your installed copy.
+
+<details>
+<summary>▸ Option C: From a Release tarball (offline / no git)</summary>
+
+</details>
 
 ### Option C: From a Release tarball (offline / no git)
 
@@ -253,6 +281,11 @@ page (it ships the built `lib/client.js`, so no prepare script runs on install),
 ```sh
 dsh plugin --profile web add ./dsh-dream-skin-<version>.tgz
 ```
+
+<details>
+<summary>▸ Option D: Clone and install from the local path (development)</summary>
+
+</details>
 
 ### Option D: Clone and install from the local path (development)
 
@@ -279,6 +312,9 @@ Open **Settings → Theme / Appearance** to see the **Skins**, **Accent**, **Wal
 > uses the workspace, you won't need to repeat it.
 
 ## 🔄 Update / Uninstall
+
+<details>
+<summary>⌄ Details</summary>
 
 **Update to the latest** (when installed from the npm release):
 
@@ -311,6 +347,8 @@ dsh web   # restores the official appearance
 
 ---
 
+</details>
+
 ## 🧩 Compatibility
 
 | Item | Value |
@@ -324,9 +362,6 @@ dsh web   # restores the official appearance
 
 ---
 
-
-<details>
-<summary><b>How it works / Persistence notes / Developing, extending themes (click to expand)</b></summary>
 ## ⚙️ How it works
 
 DSH's theme system is token-based: the web shell ships `--dsw-*` design tokens, and `ThemeRuntime` lets third-party
@@ -367,6 +402,9 @@ ui-layout's ThemePresenter.
 
 ## 💼 Persistence notes
 
+<details>
+<summary>⌄ Details</summary>
+
 - Skin & wallpaper live in **three layers**: an in-memory cache (correct first frame), browser `localStorage` (keys prefixed `dsh-dream-skin:`), and a **host-side file** `$DSH_HOME/dream-skin.json`, read/written over this plugin's own loopback `/dream-skin/api`.
 - The file layer is what makes **desktop** survive: DSH Desktop gets a new OS-assigned port on every launch, so the browser origin changes and `localStorage` alone would forget everything. The host file is the authoritative state across port changes and restarts.
 - Why not Host settings? The Host settings wire only exposes an allowlisted set of namespaces to browser clients
@@ -375,6 +413,8 @@ ui-layout's ThemePresenter.
   survives reloads.
 
 ---
+
+</details>
 
 ## 🛠️ Development / extending themes
 
@@ -395,9 +435,10 @@ seeds (`react`, `react/jsx-runtime`, …) and registered client bundles (`@deeps
 - **Validate**: `npm test` (VM smoke tests covering factory eval, `apply()`, and pack import/persistence).
 - **Repaint**: reference the `--dsw-alias-*` tokens (full contract in [`docs/themes-spec.md`](../../docs/themes-spec.md)).
 
-
-</details>
 ## 📌 Roadmap
+
+<details>
+<summary>⌄ Details</summary>
 
 > **This table lists unfinished work only.** Anything already shipped lives in the Features section above and in [CHANGELOG.md](../../CHANGELOG.md) — keeping it in two places always drifts, and this project has already drifted once. This table translates the Roadmap of the Chinese `README.md`, which stays the source of truth.
 > Every entry carries three things: **why** (from a real issue or measured data, never imagined demand), **size** (S ≈ one evening, M ≈ one feature release, L ≈ needs design before code), **acceptance check** (a check that **can fail** — not "done when I say it is"). Once an item ships, it is deleted from this table. The "won't do" section matters as much as the to-do list: it saves a contributor one wasted round.
@@ -440,6 +481,8 @@ seeds (`react`, `react/jsx-runtime`, …) and registered client bundles (`@deeps
 
 ---
 
+</details>
+
 ## 🤝 Contributing
 
 Issues and PRs welcome! Please read the [Contributing Guide](../../CONTRIBUTING.md) and follow the
@@ -460,19 +503,29 @@ Found a security issue? Don't open a public issue — see the [Security Policy](
 
 ## 🙏 Acknowledgments
 
+<details>
+<summary>⌄ Details</summary>
+
 - Architecture & API reference: the official DeepSeek Harness
   [ui-theme](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/client/ui-theme) client package.
 - Concept homage: [Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin).
 
 ---
 
+</details>
+
 ## 🧰 More from the same author
+
+<details>
+<summary>⌄ Details</summary>
 
 - **[adversarial-review](https://github.com/RevolutionLA/adversarial-review)** — Tri-role adversarial code review skill for AI coding agents: Blue Team (hostile audit) → Third Party (independent audit) → neutral adjudication. **Especially useful before writing a plugin or cutting a release.**
 - **[AscendMate](https://github.com/RevolutionLA/AscendMate)** — Handbook for Ascend NPU servers: environment setup, fine-tuning, inference deployment, operator development.
 - **[ascend-assistant](https://github.com/RevolutionLA/ascend-assistant)** — Agent Skill for operating and troubleshooting Ascend servers.
 
 ---
+
+</details>
 
 ## 📈 Growth chart
 

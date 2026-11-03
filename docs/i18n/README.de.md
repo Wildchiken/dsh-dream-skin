@@ -6,6 +6,14 @@
 
 # dsh-dream-skin 🔮
 
+[![npm](https://img.shields.io/npm/v/dsh-dream-skin.svg?style=for-the-badge&logo=npm&logoColor=white&label=dsh-dream-skin&color=cb3837)](https://www.npmjs.com/package/dsh-dream-skin)
+[![downloads / month](https://img.shields.io/npm/dm/dsh-dream-skin.svg?style=for-the-badge&label=installs%2Fmo&color=0a6aa1)](https://www.npmjs.com/package/dsh-dream-skin)
+[![CI](https://img.shields.io/github/actions/workflow/status/RevolutionLA/dsh-dream-skin/ci.yml?branch=main&style=for-the-badge&label=CI&color=2fa37a)](https://github.com/RevolutionLA/dsh-dream-skin/actions/workflows/ci.yml)
+![DSH hosts: Web | Desktop](https://img.shields.io/badge/DSH_hosts-Web%20%7C%20Desktop-6f5bd0?style=for-the-badge)
+![8 original themes](https://img.shields.io/badge/8%20original-themes-f08a5a?style=for-the-badge)
+![8 languages](https://img.shields.io/badge/8-languages-2fa37a?style=for-the-badge)
+[![license MIT](https://img.shields.io/npm/l/dsh-dream-skin.svg?style=for-the-badge&label=MIT&color=888)](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/LICENSE)
+
 **Verleihe DeepSeek Harness ein Gesicht, das zurückhaltend, klar und strukturiert ist.**
 
 Natives Skin-System · Wallpaper · Akzentfarbe · teilbare Theme-Packs — eine elegante Implementierung, die vollständig auf DSHs
@@ -160,6 +168,9 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 
 ## 🔬 Compositor-Budget (Issue #110)
 
+<details>
+<summary>⌄ Details</summary>
+
 Unschärfe ist nicht nur "sieht schwerer aus" — **jede Milchglas-Fläche ist ein eigener Offscreen-Durchgang**, und ein zweites Fenster verdoppelt das. Deshalb gibt es hier Zahlen:
 
 ```sh
@@ -177,7 +188,12 @@ Gemessen in der ausgelieferten Browser-Hälfte: **6 `backdrop-filter`-Flächen**
 
 **Ein nützlicher Performance-Bericht enthält**: ① das Gefühl mit ein-/ausgeschaltetem Energiesparmodus; ② den Abschnitt Compositing in `chrome://gpu`; ③ Fenster- und Displayanzahl. Auf dem Schreibtisch des Maintainers steht kein M4-Mac — die statische Hälfte messen wir, für die Laufzeit-Hälfte brauchen wir deine Zahlen.
 
+</details>
+
 ## 🧩 Was für ein Plugin ist das
+
+<details>
+<summary>⌄ Details</summary>
 
 **Ein standardmäßiges Dual-Face-„Everything-is-a-Plugin"-`dsh-plugin` — wird genau wie das offizielle Paket `ui-theme` geladen und verwendet.**
 
@@ -200,6 +216,8 @@ Mit anderen Worten: Du installierst kein obskures Skript — dies ist ein Standa
 von DSH.
 
 ---
+
+</details>
 
 ## ⚡ Schnellstart (3 Schritte)
 
@@ -231,6 +249,11 @@ dsh plugin --profile web add dsh-dream-skin
 > (die Nummer nennt `npm view dsh-dream-skin version` sofort). Auch für den Desktop gilt eine eigene Regel: sein Profil wird **ausschließlich von der
 > Electron-Anwendung** verwaltet, die CLI weist es hart zurück — der gangbare Weg steht in [docs/desktop-support.md](../desktop-support.md).
 
+<details>
+<summary>▸ Option B: Von GitHub (auf einen verifizierten Commit gepinnt)</summary>
+
+</details>
+
 ### Option B: Von GitHub (auf einen verifizierten Commit gepinnt)
 
 ```sh
@@ -238,6 +261,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 ```
 
 > Auf den Commit eines Releases zu pinnen bedeutet, dass neue Änderungen auf `main` deine installierte Kopie nie stillschweigend verändern.
+
+<details>
+<summary>▸ Option C: Vom Release-Tarball (offline / ohne git)</summary>
+
+</details>
 
 ### Option C: Vom Release-Tarball (offline / ohne git)
 
@@ -247,6 +275,11 @@ herunter (sie enthält das gebaute `lib/client.js`, sodass beim Installieren kei
 ```sh
 dsh plugin --profile web add ./dsh-dream-skin-<version>.tgz
 ```
+
+<details>
+<summary>▸ Option D: Klonen und vom lokalen Pfad installieren (Entwicklung)</summary>
+
+</details>
 
 ### Option D: Klonen und vom lokalen Pfad installieren (Entwicklung)
 
@@ -273,6 +306,9 @@ dsh --profile web --dump-config | grep -A2 dream-skin   # a dream-skin loader en
 > den Workspace bereits nutzt, musst du es nicht wiederholen.
 
 ## 🔄 Update / Deinstallation
+
+<details>
+<summary>⌄ Details</summary>
 
 **Auf die neueste Version aktualisieren** (wenn aus dem npm-Release installiert):
 
@@ -305,6 +341,8 @@ dsh web   # restores the official appearance
 
 ---
 
+</details>
+
 ## 🧩 Kompatibilität
 
 | Punkt | Wert |
@@ -317,7 +355,6 @@ dsh web   # restores the official appearance
 > Beim Aktualisieren von DSH die peerDependencies in `package.json` entsprechend erhöhen.
 
 ---
-
 
 <details>
 <summary><b>Funktionsweise / Persistenz / Themes entwickeln & erweitern (zum Aufklappen)</b></summary>
@@ -362,6 +399,9 @@ ui-layout als Inline-Custom-Properties auf `<body>` angewendet.
 
 ## 💼 Hinweise zur Speicherung
 
+<details>
+<summary>⌄ Details</summary>
+
 - Skin & Wallpaper liegen in **drei Ebenen**: Speicher-Cache (korrekter Erstrahmen), Browser-`localStorage` (Präfix `dsh-dream-skin:`) und **Host-Datei** `$DSH_HOME/dream-skin.json`, gelesen/geschrieben über das eigene Loopback-`/dream-skin/api` des Plugins.
 - Die Datei-Ebene macht **Desktop** robust: DSH Desktop erhält bei jedem Start einen neu vom OS zugewiesenen Port, die Origin wechselt also — mit nur `localStorage` wäre alles vergessen. Die Host-Datei überlebt Portwechsel und Neustarts.
 - Warum nicht Host-Einstellungen? Die Host-Einstellungsleitung legt Browser-Clients nur einen Allowlist-Satz von Namespaces offen
@@ -370,6 +410,8 @@ ui-layout als Inline-Custom-Properties auf `<body>` angewendet.
   übersteht Neuladevorgänge.
 
 ---
+
+</details>
 
 ## 🛠️ Entwicklung / Themes erweitern
 
@@ -391,9 +433,11 @@ Das Client-Bundle ist direkt im `__ModuleLoader__`-Format geschrieben (derselben
 - **Validieren**: `npm test` (VM-Smoke-Tests für Factory-Eval, `apply()` und Pack-Import/Persistenz).
 - **Neu einfärben**: Referenziere die `--dsw-alias-*`-Tokens (vollständiger Vertrag in [`docs/themes-spec.md`](../../docs/themes-spec.md)).
 
-
 </details>
 ## 📌 Roadmap
+
+<details>
+<summary>⌄ Details</summary>
 
 > **Diese Tabelle nennt nur Unfertiges.** Was bereits ausgeliefert ist, steht oben bei „Funktionen" und im [CHANGELOG.md](../../CHANGELOG.md) — denselben Bestand an zwei Orten zu pflegen, driftet zwangsläufig, und dieses Projekt ist schon einmal gedriftet. Diese Tabelle ist die Übersetzung der Roadmap aus dem chinesischen `README.md`; maßgeblich bleibt das chinesische Original.
 > Jeder Eintrag bringt drei Dinge mit: **Motiv** (aus einem echten Issue oder Messdaten, nie aus erdachtem Bedarf), **Größe** (S ≈ ein Abend, M ≈ ein Funktionsrelease, L ≈ erst Entwurf nötig), **Abnahmekriterium** (eine Prüfung, die **scheitern kann** — nicht „fertig, wenn ich es sage"). Erledigtes wird aus dieser Tabelle gelöscht. Der „Nicht geplant"-Abschnitt ist so wichtig wie die Todo-Liste: er erspart Mitwirkenden eine leere Runde.
@@ -436,6 +480,8 @@ Das Client-Bundle ist direkt im `__ModuleLoader__`-Format geschrieben (derselben
 
 ---
 
+</details>
+
 ## 🤝 Mitwirken
 
 Issues und PRs sind willkommen! Bitte lies den [Contributing Guide](../../CONTRIBUTING.md) und folge dem
@@ -456,10 +502,15 @@ Ein Sicherheitsproblem gefunden? Öffne kein öffentliches Issue — siehe die [
 
 ## 🙏 Danksagungen
 
+<details>
+<summary>⌄ Details</summary>
+
 - Architektur- & API-Referenz: das offizielle Client-Paket [ui-theme](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/client/ui-theme) von DeepSeek Harness.
 - Konzept-Hommage: [Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin).
 
 ---
+
+</details>
 
 ## 📈 Wachstumskurve
 

@@ -6,6 +6,14 @@
 
 # dsh-dream-skin 🔮
 
+[![npm](https://img.shields.io/npm/v/dsh-dream-skin.svg?style=for-the-badge&logo=npm&logoColor=white&label=dsh-dream-skin&color=cb3837)](https://www.npmjs.com/package/dsh-dream-skin)
+[![downloads / month](https://img.shields.io/npm/dm/dsh-dream-skin.svg?style=for-the-badge&label=installs%2Fmo&color=0a6aa1)](https://www.npmjs.com/package/dsh-dream-skin)
+[![CI](https://img.shields.io/github/actions/workflow/status/RevolutionLA/dsh-dream-skin/ci.yml?branch=main&style=for-the-badge&label=CI&color=2fa37a)](https://github.com/RevolutionLA/dsh-dream-skin/actions/workflows/ci.yml)
+![DSH hosts: Web | Desktop](https://img.shields.io/badge/DSH_hosts-Web%20%7C%20Desktop-6f5bd0?style=for-the-badge)
+![8 original themes](https://img.shields.io/badge/8%20original-themes-f08a5a?style=for-the-badge)
+![8 languages](https://img.shields.io/badge/8-languages-2fa37a?style=for-the-badge)
+[![license MIT](https://img.shields.io/npm/l/dsh-dream-skin.svg?style=for-the-badge&label=MIT&color=888)](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/LICENSE)
+
 **Подарите DeepSeek Harness облик, который будет сдержанным, чистым и текстурным.**
 
 Нативные скины · обои · акцентный цвет · тематические пакеты для обмена — элегантная реализация, полностью
@@ -165,6 +173,9 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 
 ## 🔬 Бюджет композитора (issue #110)
 
+<details>
+<summary>⌄ Читать раздел</summary>
+
 Размытие — это не «выглядит тяжелее»: **каждая матовая панель — отдельный offscreen-проход**, а второе окно удваивает их. Поэтому здесь есть числа:
 
 ```sh
@@ -182,7 +193,12 @@ npm run compositor:audit        # по местам: строка / радиус
 
 **Полезный отчёт о производительности содержит**: ① ощущения с включённым и выключенным режимом; ② раздел Compositing в `chrome://gpu`; ③ число окон и экранов. У мейнтейнера нет Mac на M4 — статическую половину измеряем мы, для runtime-половины нужны ваши числа.
 
+</details>
+
 ## 🧩 Что это за плагин
+
+<details>
+<summary>⌄ Читать раздел</summary>
 
 **Стандартный «двуликий» `dsh-plugin` в духе «всё является плагином» — загружается и используется точно так же, как официальный пакет `ui-theme`.**
 
@@ -205,6 +221,8 @@ Agent Loop — это плагины. `dsh-dream-skin` поставляет ск
 системы плагинов DSH.
 
 ---
+
+</details>
 
 ## ⚡ Быстрый старт (3 шага)
 
@@ -236,6 +254,11 @@ dsh plugin --profile web add dsh-dream-skin
 > (номер прямо на месте даёт `npm view dsh-dream-skin version`). С десктопом — отдельная история: его профиль управляется **исключительно
 > приложением Electron**, а CLI его жёстко отвергает — рабочий путь описан в [docs/desktop-support.md](../desktop-support.md).
 
+<details>
+<summary>▸ Вариант B: Из GitHub (привязан к проверенному коммиту)</summary>
+
+</details>
+
 ### Вариант B: Из GitHub (привязан к проверенному коммиту)
 
 ```sh
@@ -243,6 +266,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 ```
 
 > Привязка к коммиту релиза означает, что новые изменения в `main` никогда незаметно не изменят вашу установленную копию.
+
+<details>
+<summary>▸ Вариант C: Из tarball-архива релиза (офлайн / без git)</summary>
+
+</details>
 
 ### Вариант C: Из tarball-архива релиза (офлайн / без git)
 
@@ -252,6 +280,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 ```sh
 dsh plugin --profile web add ./dsh-dream-skin-<version>.tgz
 ```
+
+<details>
+<summary>▸ Вариант D: Клонировать и установить из локального пути (для разработки)</summary>
+
+</details>
 
 ### Вариант D: Клонировать и установить из локального пути (для разработки)
 
@@ -278,6 +311,9 @@ dsh --profile web --dump-config | grep -A2 dream-skin   # должна появ�
 > профиль уже использует workspace, повторять флаг не нужно.
 
 ## 🔄 Обновление / Удаление
+
+<details>
+<summary>⌄ Читать раздел</summary>
 
 **Обновление до последней версии** (если установлено из npm-релиза):
 
@@ -310,6 +346,8 @@ dsh web   # восстанавливает официальный вид
 
 ---
 
+</details>
+
 ## 🧩 Совместимость
 
 | Элемент | Значение |
@@ -322,7 +360,6 @@ dsh web   # восстанавливает официальный вид
 > При обновлении DSH поднимите peerDependencies в `package.json` соответствующим образом.
 
 ---
-
 
 <details>
 <summary><b>Как это работает / Сохранение состояния / Разработка и расширение тем (нажмите, чтобы раскрыть)</b></summary>
@@ -366,6 +403,9 @@ dsh web   # восстанавливает официальный вид
 
 ## 💼 Заметки о сохранении
 
+<details>
+<summary>⌄ Читать раздел</summary>
+
 - Скин и обои хранятся в **трёх слоях**: кэш в памяти (корректный первый кадр), `localStorage` браузера (префикс `dsh-dream-skin:`) и **файл на стороне хоста** `$DSH_HOME/dream-skin.json`, читаемый и записываемый через собственный loopback-`/dream-skin/api` плагина.
 - Слой файла и спасает **desktop**: DSH Desktop при каждом запуске получает новый порт от ОС, origin меняется, и по одному `localStorage` всё забылось бы. Файл хоста переживает смену порта и перезапуски.
 - Почему не настройки Host? Проводка настроек Host раскрывает браузерным клиентам только список разрешённых
@@ -374,6 +414,8 @@ dsh web   # восстанавливает официальный вид
   соответствует этой границе и переживает перезагрузки.
 
 ---
+
+</details>
 
 ## 🛠️ Разработка / расширение тем
 
@@ -394,9 +436,11 @@ dsh web   # восстанавливает официальный вид
 - **Проверка**: `npm test` (дымовые тесты в VM, покрывающие factory eval, `apply()` и импорт/сохранение пакетов).
 - **Перекраска**: используйте токены `--dsw-alias-*` (полный контракт в [`docs/themes-spec.md`](../../docs/themes-spec.md)).
 
-
 </details>
 ## 📌 Дорожная карта
+
+<details>
+<summary>⌄ Читать раздел</summary>
 
 > **В этой таблице только незавершённое.** Уже сделанное — в разделе «Возможности» выше и в [CHANGELOG.md](../../CHANGELOG.md): держать один и тот же перечень в двух местах — неминуемо разъехаться, и этот проект уже разъезжался один раз. Эта таблица переводит дорожную карту китайского `README.md`, который остаётся источником истины.
 > У каждой записи обязательны три вещи: **мотив** (из реального issue или из замеров, никогда из выдуманной потребности), **размер** (S ≈ один вечер, M ≈ одна функциональная версия, L ≈ сначала проектирование), **критерий приёмки** (проверка, которая **может провалиться**, а не «готово, когда я так сказал»). Сделанное из таблицы удаляется. Раздел «Не делаем» важен не меньше списка задач: он экономит контрибьютору один холостой заход.
@@ -439,6 +483,8 @@ dsh web   # восстанавливает официальный вид
 
 ---
 
+</details>
+
 ## 🤝 Вклад в проект
 
 Приветствуются Issues и PR! Пожалуйста, прочитайте [Руководство по вкладу](../../CONTRIBUTING.md) и следуйте
@@ -460,11 +506,16 @@ dsh web   # восстанавливает официальный вид
 
 ## 🙏 Благодарности
 
+<details>
+<summary>⌄ Читать раздел</summary>
+
 - Справочник по архитектуре и API: официальный клиентский пакет DeepSeek Harness
   [ui-theme](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/client/ui-theme).
 - Концептуальная дань: [Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin).
 
 ---
+
+</details>
 
 ## 📈 Кривая роста
 

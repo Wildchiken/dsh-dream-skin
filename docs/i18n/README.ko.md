@@ -6,6 +6,14 @@
 
 # dsh-dream-skin 🔮
 
+[![npm](https://img.shields.io/npm/v/dsh-dream-skin.svg?style=for-the-badge&logo=npm&logoColor=white&label=dsh-dream-skin&color=cb3837)](https://www.npmjs.com/package/dsh-dream-skin)
+[![downloads / month](https://img.shields.io/npm/dm/dsh-dream-skin.svg?style=for-the-badge&label=installs%2Fmo&color=0a6aa1)](https://www.npmjs.com/package/dsh-dream-skin)
+[![CI](https://img.shields.io/github/actions/workflow/status/RevolutionLA/dsh-dream-skin/ci.yml?branch=main&style=for-the-badge&label=CI&color=2fa37a)](https://github.com/RevolutionLA/dsh-dream-skin/actions/workflows/ci.yml)
+![DSH hosts: Web | Desktop](https://img.shields.io/badge/DSH_hosts-Web%20%7C%20Desktop-6f5bd0?style=for-the-badge)
+![8 original themes](https://img.shields.io/badge/8%20original-themes-f08a5a?style=for-the-badge)
+![8 languages](https://img.shields.io/badge/8-languages-2fa37a?style=for-the-badge)
+[![license MIT](https://img.shields.io/npm/l/dsh-dream-skin.svg?style=for-the-badge&label=MIT&color=888)](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/LICENSE)
+
 **DeepSeek Harness에 절제되고 맑고 질감 있는 얼굴을 입혀드립니다.**
 
 네이티브 스키닝 · wallpaper · accent color · 공유 가능한 theme pack — 전적으로 DSH 공식 `--dsw-*` token 시스템 위에
@@ -165,6 +173,9 @@ dsh plugin --profile web add dsh-dream-skin && dsh web
 
 ## 🔬 컴포지터 예산 (issue #110)
 
+<details>
+<summary>⌄ 이 섹션 보기</summary>
+
 블러는 "더 무거워 보인다"가 아닙니다. **반투명 패널 하나가 곧 오프스크린 합성 한 번**이고, 창을 두 개 띄우면 두 배가 됩니다. 그래서 여기에는 숫자가 있습니다:
 
 ```sh
@@ -182,7 +193,12 @@ npm run compositor:audit        # 지점별: 줄 번호 / 블러 반경 / 선택
 
 **쓸모 있는 성능 보고에 담아 주세요**: ① 저전력 켜고/끈 느낌, ② `chrome://gpu`의 Compositing 항목, ③ 동시에 띄운 창 수와 화면 수. 관리자 책상에는 M4가 없습니다 — 정적인 절반은 저희가 재지만, 런타임 절반은 당신의 숫자가 필요합니다.
 
+</details>
+
 ## 🧩 어떤 종류의 플러그인인가요
+
+<details>
+<summary>⌄ 이 섹션 보기</summary>
 
 **표준 dual-face "everything-is-a-plugin" `dsh-plugin` — 공식 `ui-theme` 패키지와 똑같이 로드되고 사용됩니다.**
 
@@ -204,6 +220,8 @@ DeepSeek Harness의 모토는 *everything is a plugin*입니다: models, tools, 
 즉, 변두리 스크립트를 설치하는 것이 아닙니다 — DSH 공식 플러그인 시스템 안의 표준 skin 플러그인입니다.
 
 ---
+
+</details>
 
 ## ⚡ 빠른 시작 (3단계)
 
@@ -235,6 +253,11 @@ dsh plugin --profile web add dsh-dream-skin
 > (번호는 `npm view dsh-dream-skin version`이 그 자리에서 알려줍니다). 데스크톱판은 따로 생각합니다: 그 프로필은
 > **Electron 앱만이 관리**하며 CLI는 단호하게 거부합니다 — 실제로 통하는 길은 [docs/desktop-support.md](../desktop-support.md)에 적혀 있습니다.
 
+<details>
+<summary>▸ 옵션 B: GitHub에서 (검증된 commit에 고정)</summary>
+
+</details>
+
 ### 옵션 B: GitHub에서 (검증된 commit에 고정)
 
 ```sh
@@ -242,6 +265,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 ```
 
 > 릴리스의 commit에 고정하면 `main`의 새로운 변경 사항이 설치된 복사본을 조용히 바꾸지 않습니다.
+
+<details>
+<summary>▸ 옵션 C: Release tarball에서 (오프라인 / git 없음)</summary>
+
+</details>
 
 ### 옵션 C: Release tarball에서 (오프라인 / git 없음)
 
@@ -251,6 +279,11 @@ dsh plugin --profile web add 'github:RevolutionLA/dsh-dream-skin#<40-char-commit
 ```sh
 dsh plugin --profile web add ./dsh-dream-skin-<version>.tgz
 ```
+
+<details>
+<summary>▸ 옵션 D: 클론 후 로컬 경로에서 설치 (개발용)</summary>
+
+</details>
 
 ### 옵션 D: 클론 후 로컬 경로에서 설치 (개발용)
 
@@ -277,6 +310,9 @@ dsh --profile web --dump-config | grep -A2 dream-skin   # a dream-skin loader en
 > profile이 이미 workspace를 사용 중이라면 다시 추가할 필요가 없습니다.
 
 ## 🔄 업데이트 / 제거
+
+<details>
+<summary>⌄ 이 섹션 보기</summary>
 
 **최신 버전으로 업데이트** (npm 릴리스에서 설치한 경우):
 
@@ -309,6 +345,8 @@ dsh web   # restores the official appearance
 
 ---
 
+</details>
+
 ## 🧩 호환성
 
 | 항목 | 값 |
@@ -321,7 +359,6 @@ dsh web   # restores the official appearance
 > DSH를 업그레이드할 때 `package.json`의 peerDependencies도 그에 맞게 올려주세요.
 
 ---
-
 
 <details>
 <summary><b>작동 방식 / 지속성 / 테마 개발·확장 (클릭하여 펼치기)</b></summary>
@@ -366,6 +403,9 @@ skin이 밝은 쪽 상수를 집어 갔습니다. alias-token 오버라이드는
 
 ## 💼 저장(persistence) 참고 사항
 
+<details>
+<summary>⌄ 이 섹션 보기</summary>
+
 - 스킨과 벽지는 **세 층**으로 저장됩니다: 메모리 캐시(첫 프레임 정확성), 브라우저 `localStorage`(키 접두사 `dsh-dream-skin:`), 그리고 **호스트 파일** `$DSH_HOME/dream-skin.json`(이 플러그인 자체의 루프백 `/dream-skin/api`로 읽기/쓰기).
 - 데스크톱에서 이 파일 층이 결정적입니다: DSH Desktop은 실행마다 OS가 새 포트를 할당해 origin이 바뀌므로 `localStorage`만 있으면 상태를 모두 잃습니다. 포트 변경·재시작을 넘어서는 정식 상태는 호스트 파일입니다.
 - 왜 Host 설정을 사용하지 않나요? Host 설정 채널은 브라우저 클라이언트에 허용 목록(allowlist)에 있는 네임스페이스만
@@ -374,6 +414,8 @@ skin이 밝은 쪽 상수를 집어 갔습니다. alias-token 오버라이드는
   `localStorage`는 그 경계와 일치하며 새로고침 후에도 유지됩니다.
 
 ---
+
+</details>
 
 ## 🛠️ 개발 / 테마 확장
 
@@ -395,9 +437,11 @@ skin이 밝은 쪽 상수를 집어 갔습니다. alias-token 오버라이드는
 - **검증**: `npm test` (factory eval, `apply()`, pack import/저장을 포함한 VM smoke 테스트).
 - **리페인트**: `--dsw-alias-*` tokens를 참조하세요 (전체 계약은 [`docs/themes-spec.md`](../../docs/themes-spec.md)에).
 
-
 </details>
 ## 📌 로드맵
+
+<details>
+<summary>⌄ 이 섹션 보기</summary>
 
 > **이 표는 끝내지 않은 항목만 담습니다.** 이미 제공한 기능은 위의「주요 기능」절과 [CHANGELOG.md](../../CHANGELOG.md)에 있습니다. 같은 내용을 두 곳에 두면 반드시 어긋나고, 이 프로젝트도 실제로 한 번 어긋났습니다. 이 표는 중국어판 `README.md`의 Roadmap을 번역한 것이며, 원본인 중국어판이 기준입니다.
 > 각 항목은 세 가지를 반드시 함께 적습니다: **동기**(실제 issue 또는 실측 데이터. 상상한 수요는 적지 않음), **규모**(S ≈ 하룻밤, M ≈ 기능 릴리스 한 번, L ≈ 코드 전에 설계가 필요), **검수 기준**(**실패할 수 있는** 검사. "했다"는 말만으로 끝나지 않음). 항목이 끝나면 이 표에서 지웁니다. 「하지 않는 일」란은 할 일 목록만큼 중요합니다 — 기여자가 헛도는 한 바퀴를 막아 주기 때문입니다.
@@ -440,6 +484,8 @@ skin이 밝은 쪽 상수를 집어 갔습니다. alias-token 오버라이드는
 
 ---
 
+</details>
+
 ## 🤝 기여하기
 
 Issues와 PR을 환영합니다! [기여 가이드](../../CONTRIBUTING.md)를 읽고 [행동 강령](../../CODE_OF_CONDUCT.md)을
@@ -460,11 +506,16 @@ Issues와 PR을 환영합니다! [기여 가이드](../../CONTRIBUTING.md)를 �
 
 ## 🙏 감사의 말
 
+<details>
+<summary>⌄ 이 섹션 보기</summary>
+
 - 아키텍처 & API 참고: 공식 DeepSeek Harness
   [ui-theme](https://github.com/deepseek-ai/deepseek-harness/tree/master/packages/client/ui-theme) 클라이언트 패키지.
 - 컨셉 오마주: [Codex-Dream-Skin](https://github.com/Fei-Away/Codex-Dream-Skin).
 
 ---
+
+</details>
 
 ## 📈 성장 곡선
 

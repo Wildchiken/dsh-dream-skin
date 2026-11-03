@@ -572,18 +572,43 @@ test('a scope boundary is a line start, not a phrase quoted inside the block', (
 		const lines = readReal(site.file).split('\n');
 		const from = lines.findIndex((l) => site.scope.blockStart.test(l));
 		assert.ok(from >= 0, `no line in ${site.file} starts the way ${site.label} expects a release block to open`);
-		// A QUOTED copy of the next block's opener, sitting inside the current block. It must
-		// start with prose so only a line-anchored reader can tell it apart from a real heading.
-		const nextHeading = lines.slice(from + 1).find((l) => site.scope.blockStart.test(l));
-		assert.ok(nextHeading, `the ${site.label} block must be followed by a historical one to quote`);
-		const injected = `本轮正文里引用了 ${nextHeading} 这一行标题，它是被说起的出处，不是版本块的边界`;
-		const withQuote = [...lines.slice(0, from + 1), '', injected, ...lines.slice(from + 1)].join('\n');
+		const realNext = lines.slice(from + 1).find((l) => site.scope.blockStart.test(l));
+		// README stopped carrying history (11.4.0: the version archive lives in CHANGELOG and
+		// docs/release-notes.md, and the front page keeps exactly one block). A leg that needs
+		// the document to happen to contain a second block therefore cannot be satisfied by the
+		// tree any more — so the fixture supplies the historical block. It is a real heading
+		// line with a WRONG number in it, which is the only thing that can tell a line-anchored
+		// boundary from an `includes()` one. If a site's scope regex ever changes, this table
+		// has to change with it and the assert below says so rather than letting the leg idle.
+		const FIXTURE_OPENER = {
+			'README.md': '**版本 0.0.0（1970-01-01）**',
+			'CHANGELOG.md': '## [0.0.0] - 1970-01-01'
+		};
+		const histHeading = realNext || FIXTURE_OPENER[site.file];
+		assert.ok(histHeading && site.scope.blockStart.test(histHeading),
+			`no fixture opener for ${site.file}: a second release block must be constructible to test the boundary`);
+		const wrong = liveNumbers().suite + 7;
+		const histBody = `旧的说明段落，留着当历史。回归门 **${wrong}** 条，质量审计 **229** 项可测质量门。`;
+		// A QUOTED copy of that heading, sitting INSIDE the current block. It has to start with
+		// prose so only a line-anchored reader can tell it apart from a real heading.
+		const injected = `本轮正文里引用了 ${histHeading} 这一行标题，它是被说起的出处，不是版本块的边界`;
+		const quotedOnly = [...lines.slice(0, from + 1), '', injected, ...lines.slice(from + 1)].join('\n');
 		// The leg is only meaningful if that line would have fooled an includes() matcher.
-		assert.ok(withQuote.includes(nextHeading) && !injected.startsWith(nextHeading),
+		assert.ok(quotedOnly.includes(histHeading) && !injected.startsWith(histHeading),
 			'the injected line must contain the closing heading without starting with it, or this tests nothing');
-		const problems = numberProblems([site], (rel) => (rel === site.file ? withQuote : readReal(rel)));
-		assert.deepEqual(problems, [],
-			`a quoted "${nextHeading}" inside the ${site.label} block must not close the block: ${problems.join('; ')}`);
+		const quoteProblems = numberProblems([site], (rel) => (rel === site.file ? quotedOnly : readReal(rel)));
+		assert.deepEqual(quoteProblems, [],
+			`a quoted "${histHeading}" inside the ${site.label} block must not close the block: ${quoteProblems.join('; ')}`);
+
+		// The historical block, appended for real: its wrong numbers must stay outside the scope.
+		const withHistory = lines.concat(['', histHeading, '', histBody, '']).join('\n');
+		const histProblems = numberProblems([site], (rel) => (rel === site.file ? withHistory : readReal(rel)));
+		assert.deepEqual(histProblems, [],
+			`a later historical block must not be read as the current one: ${histProblems.join('; ')}`);
+		// The "wrong number INSIDE the current block reddens" half is not re-proved here —
+		// `mutation: an arbitrary wrong gate total in README.md reddens the count check` owns it.
+		// What this leg owns is the boundary: that a line-anchored scope neither stops early on a
+		// quoted heading nor runs late into the next real block.
 	}
 });
 
