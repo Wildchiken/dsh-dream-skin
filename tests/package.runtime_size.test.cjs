@@ -74,7 +74,14 @@ const BUDGETS = [
 	// `textAlign` line that was out of scope and went back out. 614,386 B used, 14 B of headroom:
 	// the ceiling is now FULL to within a line of comment, so the slimming round is a PRECONDITION
 	// for the next change to this file, not a note in a list.
-	{ rel: 'lib/client.js', ceiling: 600 * 1024, reason: 'browser half; one combo-served file by host design' },
+	// 600 -> 608 KiB on purpose, 11.4.1, decided by the maintainer rather than forced by a merge:
+	// PR #135 (fold the per-surface opacity, keep the blur handle) costs 1,821 B, and the question
+	// asked was "does this make the project better", not "does it fit". So the ceiling goes back to
+	// what it was declared to be — a number watched for the combo-served download, not a veto on
+	// good work. 616,207 B used, 6,385 B headroom. The slimming round stays in the debt list, but it
+	// is no longer a precondition: do not read this line as permission to be careless with bytes, and
+	// do not use a full ceiling to reject a contribution either.
+	{ rel: 'lib/client.js', ceiling: 608 * 1024, reason: 'browser half; one combo-served file by host design' },
 	{ rel: 'lib/index.js', ceiling: 40 * 1024, reason: 'host half' }
 ];
 

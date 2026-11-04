@@ -58,6 +58,14 @@
 
 现存两处：`随机换一个`（`packs.surprise` / `…Armed` / `…Cancel`）与 `恢复出厂设置`（`packs.reset` / `…Armed` / `…Cancel`）。**后者的作用域说明写在未 arm 的标签里**（八语各自带"保留导入内容"这层意思），因为一段常驻小字要么在按下之前不在眼前，要么多花 1.6 KB——选了让按钮自己说清楚。
 
+### §4.1 折叠（11.4.1，PR #135）与"最后一个把手"规矩
+
+页面上多了一枚 `Fold`：`<button type="button" aria-expanded>` + `data-dream-skin-fold` 标记，默认收起，开合**只是视图状态、不存储**。三条纪律值得写下来，因为它们对以后每一次"这一行太长了收一收"都成立：
+
+1. **它是元素，不是函数调用。** `Fold` 自己持有 `useState`，所以必须以 `<Fold>` 的形式挂载，让 hook 归属检查（W7b）能对上号；`NoteLine` / `CheckRow` 那类**无 hook 的纯函数**才允许当函数调用展开（文件里就这么写的："A plain function: expanded during the caller's render pass"）。折叠收起时子树**卸载**，所以滑杆自己的状态不跨开合存活——这一点是选择"不持久化开合"的同族代价。
+2. **`isTitleLine` 要排除 `data-dream-skin-fold`。** 折叠行是块内的一行，不是分区标题；不排除它，八语结构与导航那一族门会把它当成标题去核对。
+3. **收起一个控件，不许让一个仍然生效的通道失去最后一个控件。** 这条是被评审抓出来之后才写进规格的：`background.blur`（壁纸模糊度）看起来属于壁纸，实际 `applyMaterialBlur()` 会把同一枚键 `dsh-dream-skin:wallpaper-blur` 派生成全页玻璃表面的 `--dsh-dream-skin-glass-blur`，**与有没有壁纸无关**，而它是整页唯一把手。所以没壁纸时只收起 `background.opacity`（真的只作用在壁纸层），模糊留在原位。判据不是"这根滑杆属于哪一区"，而是"这条通道还生效吗、它还剩几个把手"——`tests/client.settings_ui.test.cjs` 里那条以清空壁纸 profile 启动的用例钉的就是这两问。
+
 ## §5 导入与导出分区，逐行（as-ships，2026-11-04）
 
 1. `ZoneHeading(zone.packs)`；
