@@ -15,6 +15,7 @@
 [![license MIT](https://img.shields.io/npm/l/dsh-dream-skin.svg?style=for-the-badge&label=MIT&color=888)](https://github.com/RevolutionLA/dsh-dream-skin/blob/main/LICENSE)
 
 [![DSH Insights health](https://dsh-insights.com/badge/RevolutionLA/dsh-dream-skin.svg)](https://dsh-insights.com/p/RevolutionLA/dsh-dream-skin/)
+[![Verified on HOL](https://hol.org/registry/plugins/RevolutionLA%2Fdsh-dream-skin?metric=trust&style=for-the-badge)](https://hol.org/registry/plugins/RevolutionLA%2Fdsh-dream-skin)
 
 **为 DeepSeek Harness 换上一张克制、清透、有质感的「脸」。**
 
