@@ -286,6 +286,7 @@ function controls(nodes) {
  * @param opts.t     translator override; defaults to the identity, so cases assert on KEYS
  * @param opts.hookInitials  `{ 'Component#index': value }` — pin a `useState` cell, so a case can
  *                    render "the card that is focused" without a click
+ * @param opts.foldsClosed  render every `Fold` closed, as a fresh page opens it (default: open)
  * @param opts.matchMedia  `(query) => boolean` — the engine's answer per media query, which is how a
  *                    case renders the wide and the compact tier of the SAME component
  * @param opts.noMatchMedia  delete `window.matchMedia` outright: a DOM that cannot answer a query
@@ -297,7 +298,10 @@ function buildSettingsPage(opts) {
 	const hookCalls = [];
 	const effects = [];
 	const hookKeys = [];
-	const render = { initials: options.hookInitials || null, calls: hookCalls, effects, hookKeys };
+	// Every `Fold` renders OPEN unless a case asks for the shipped closed state (`foldsClosed`): the
+	// cases below assert on the controls a fold owns, and a closed fold would hide all of them.
+	const initials = Object.assign(options.foldsClosed === true ? {} : { 'Fold#0': true }, options.hookInitials || {});
+	const render = { initials, calls: hookCalls, effects, hookKeys };
 	const created = [];
 	const registrations = [];
 	const dictionaries = [];
