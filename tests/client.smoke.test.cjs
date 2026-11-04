@@ -3553,7 +3553,10 @@ test('issue #100: the slider says so when the floor is holding it (marker wired,
 	const branch = [src.slice(at, at + 1200)];
 	assert.match(branch[0], /format:\s*\(v\)\s*=>\s*`\$\{v\}%`/, 'the value cell prints the bare percentage again');
 	assert.doesNotMatch(branch[0], /% · /, 'and no longer glues the marker onto it');
-	assert.match(branch[0], /note:\s*washActive/, 'the marker is a note gated on the wash state, like the floor itself');
+	// The wash state reaches the row through its store (`wash`, synced from the washActive mirror on
+	// every flip): a module read here would leave the marker stale while the dialog stays open.
+	assert.match(branch[0], /note:\s*wash\s*&&/, 'the marker is a note gated on the wash state, like the floor itself');
+	assert.match(src, /const wash = useStore\(\(s\) => s\.wash\);/, 'and the row reads that state from its store');
 	assert.match(branch[0], /DIALOG_ALPHA_FLOOR/, 'and on the floor constant — not on a literal 0.92');
 	assert.match(branch[0], /modal\.floorMark/, 'and it prints the translated marker');
 	assert.match(branch[0], /: null/, 'with no note at all while nothing is holding the slider');

@@ -2384,6 +2384,35 @@ test('a cleared wallpaper keeps the last handle on glass blur, and dragging it m
 	assert.equal(glassBlur(), '30px', 'dragging that handle reaches the glass surfaces, not only the stored key');
 });
 
+/**
+ * Found on a live 11.4.1 page: with the settings dialog OPEN, picking a background left the glass row
+ * on 「选好壁纸后…」 with no 壁纸能见度, and clearing it left the slider up, until the dialog was reopened.
+ * The flip hook did re-sync the glass store, but the row selected no field the flip changes, so nothing
+ * re-rendered. The case drives the row's REAL actions (no setState) and re-reads the same store.
+ */
+const glassRanges = (page) => controls(page.renderRow('dream-skin-glass'))
+	.filter((control) => control.type === 'range' && control.label.startsWith('background.')).map((control) => control.label);
+test('a wallpaper picked or cleared while the dialog is open re-renders the glass row at once', () => {
+	const page = buildSettingsPage({ bare: true, seed: CLEARED_WALLPAPER_SEED });
+	assert.deepEqual(glassRanges(page), ['background.blur'], 'control: no wallpaper, so only the blur handle');
+	assert.equal(page.stateOf('dream-skin-glass').wash, false, 'control: the store says no wash');
+
+	page.actionsOf(ADV).setGradient('linear-gradient(135deg, #022c22 0%, #0d9488 100%)');
+	assert.equal(page.stateOf('dream-skin-glass').wash, true, 'the wash flip reached the glass store');
+	assert.deepEqual(glassRanges(page), ['background.opacity', 'background.blur'], 'picked: 壁纸能见度 is back without a reopen');
+	assert.ok(!textOf(page.renderRow('dream-skin-glass')).includes('glass.noWallpaper'), 'and the "pick a wallpaper" line is gone');
+	// This fixture re-runs the component on every render, so a row reading the module mirror would look
+	// right here and still be stale in React. Pin the SOURCE: with the store held at "no wash" while a
+	// wash is on screen, the row must follow the store.
+	page.setState('dream-skin-glass', { wash: false });
+	assert.deepEqual(glassRanges(page), ['background.blur'], 'the row reads the wash from its store, not from the module mirror');
+	page.setState('dream-skin-glass', { wash: true });
+
+	page.actionsOf(ADV).clearAll();
+	assert.equal(page.stateOf('dream-skin-glass').wash, false, 'clearing flips it back');
+	assert.deepEqual(glassRanges(page), ['background.blur'], 'cleared: 壁纸能见度 goes and the blur handle stays');
+});
+
 test('w7a: the four import/export entries live in the zone above the library, and 随机换一个 asks twice', () => {
 	const page = buildSettingsPage({});
 	page.setState('dream-skin-packs', { ids: ['pack-a'], names: { 'pack-a': 'Pack A' }, active: 'abyss' });
